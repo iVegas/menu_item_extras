@@ -1,0 +1,5 @@
+name: VTF Menus Update
+type: module
+description: Adds custom fields to the menu items
+package: Custom
+core: 8.x

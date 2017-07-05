@@ -1,0 +1,18 @@
+<?php
+
+/**
+ * Implements hook_install().
+ */
+function menu_item_extras_install() {
+  $definition = \Drupal::service('entity_field.manager')->getFieldStorageDefinitions('menu_link_content')['copy'];
+  \Drupal::service('field_storage_definition.listener')->onFieldStorageDefinitionCreate($definition);
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+/*function menu_item_extras_uninstall() {
+  $definition = \Drupal::service('entity.last_installed_schema.repository')->getLastInstalledFieldStorageDefinitions('menu_link_content')['copy'];
+  \Drupal::service('field_storage_definition.listener')->onFieldStorageDefinitionDelete($definition);
+}*/
+

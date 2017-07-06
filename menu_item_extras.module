@@ -39,18 +39,28 @@ function menu_item_extras_preprocess_menu(&$variables) {
 }
 
 function _menu_item_extras_process_items(&$items) {
+  // Process each item and add body field.
   foreach ($items as &$item) {
+    $item['body'] = '';
     if (isset($item['original_link']) && $item['original_link'] instanceof MenuLinkContent) {
+      // Get Menu Lint content entity id.
       $entity_id = $item['original_link']->getMetaData()['entity_id'];
-      $field_body = \Drupal::entityTypeManager()
+      /** @var \Drupal\menu_link_content\Entity\MenuLinkContent $menu_item */
+      $menu_item = \Drupal::entityTypeManager()
         ->getStorage('menu_link_content')
-        ->load($entity_id)
-        ->get('body');
-
-      $item['body'] = ['#markup' => $field_body->value];
-      if ($item['below']) {
-        _menu_item_extras_process_items($item['below']);
+        ->load($entity_id);
+      if (!$menu_item->get('body')->isEmpty()) {
+        $field_body = $menu_item->get('body')->getValue();
+        $item['body'] = [
+          '#type' => 'processed_text',
+          '#text' => $field_body[0]['value'],
+          '#format' => $field_body[0]['format'],
+        ];
       }
+    }
+    // Process subitems.
+    if ($item['below']) {
+      _menu_item_extras_process_items($item['below']);
     }
   }
 }

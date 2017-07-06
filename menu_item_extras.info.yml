@@ -1,5 +1,8 @@
-name: VTF Menus Update
+name: 'Menu Item Extras'
 type: module
-description: Adds custom fields to the menu items
-package: Custom
+description: 'Adds custom fields to the menu items.'
+package: Menu
+version: 1.0
 core: 8.x
+dependencies:
+  - menu_link_content

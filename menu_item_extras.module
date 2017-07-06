@@ -1,8 +1,13 @@
 <?php
+
+/**
+ * @file
+ * Adds body field to the menu item.
+ */
+
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\menu_link_content\Plugin\Menu\MenuLinkContent;
-
 
 /**
  * Implements hook_entity_base_field_info().
@@ -10,9 +15,9 @@ use Drupal\menu_link_content\Plugin\Menu\MenuLinkContent;
 function menu_item_extras_entity_base_field_info(EntityTypeInterface $entity_type) {
   $fields = [];
 
-  if ($entity_type->id() == 'menu_link_content') {
+  if ($entity_type->id() === 'menu_link_content') {
 
-    $fields['copy'] = BaseFieldDefinition::create('text_long')
+    $fields['body'] = BaseFieldDefinition::create('text_long')
       ->setLabel(t('Body'))
       ->setDescription(t('Add description block to menu item.'))
       ->setTranslatable(TRUE)
@@ -26,6 +31,9 @@ function menu_item_extras_entity_base_field_info(EntityTypeInterface $entity_typ
   return $fields;
 }
 
+/**
+ * Implements hook_preprocess_menu().
+ */
 function menu_item_extras_preprocess_menu(&$variables) {
   _menu_item_extras_process_items($variables['items']);
 }
@@ -34,12 +42,12 @@ function _menu_item_extras_process_items(&$items) {
   foreach ($items as &$item) {
     if (isset($item['original_link']) && $item['original_link'] instanceof MenuLinkContent) {
       $entity_id = $item['original_link']->getMetaData()['entity_id'];
-      $field_copy = \Drupal::entityTypeManager()
+      $field_body = \Drupal::entityTypeManager()
         ->getStorage('menu_link_content')
         ->load($entity_id)
-        ->get('copy');
+        ->get('body');
 
-      $item['copy'] = ['#markup' => $field_copy->value];
+      $item['body'] = ['#markup' => $field_body->value];
       if ($item['below']) {
         _menu_item_extras_process_items($item['below']);
       }

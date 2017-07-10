@@ -1,0 +1,10 @@
+menu_item_extras.config_page:
+  parent: system.admin_structure
+  route_name: menu_item_extras.settings_page
+  title: 'Menu Item Extras'
+
+
+
+
+
+

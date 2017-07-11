@@ -7,7 +7,7 @@ use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
 
 /**
- * Class megaMenuSettingsForm.
+ * Class MenuItemExtrasSettingsForm.
  *
  * @package Drupal\menu_item_extras\Form
  */

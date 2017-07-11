@@ -3,7 +3,7 @@ menu_item_extras.settings:
   mapping:
     allowed_menus:
       type: sequence
-      label: 'Allowed menus for MegaMenu functionality'
+      label: 'Allowed menus for Expanded functionality'
       sequence:
         type: string
         label: 'Menu ID'

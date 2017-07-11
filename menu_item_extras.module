@@ -5,7 +5,6 @@ use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\menu_link_content\Plugin\Menu\MenuLinkContent;
 
-
 /**
  * Implements hook_help().
  */
@@ -20,7 +19,6 @@ function menu_item_extras_help($route_name, RouteMatchInterface $route_match) {
   }
 }
 
-
 /**
  * Implements hook_theme().
  */
@@ -33,13 +31,12 @@ function menu_item_extras_theme() {
   return $theme;
 }
 
-
 /**
  * Implements hook_preprocess_HOOK().
  */
 function menu_item_extras_preprocess_block(&$variables) {
   // Menus are built with #theme 'menu__MENU_NAME' form the the MenuLinkTree
-  // class. We need to build menus supported by simple mega menu with the
+  // class. We need to build menus supported by menu_item_extras with the
   // default #theme menu, to be able to add suggestions in the good order.
   if (isset($variables['content']['#menu_name'])) {
     $menu_name = $variables['content']['#menu_name'];
@@ -52,7 +49,6 @@ function menu_item_extras_preprocess_block(&$variables) {
     }
   }
 }
-
 
 /**
  * Implements hook_theme_suggestions_HOOK_alter().
@@ -79,7 +75,6 @@ function menu_item_extras_theme_suggestions_menu_alter(array &$suggestions, arra
   return $suggestions;
 }
 
-
 /**
  * Implements hook_entity_base_field_info().
  */
@@ -102,7 +97,6 @@ function menu_item_extras_entity_base_field_info(EntityTypeInterface $entity_typ
   return $fields;
 }
 
-
 function menu_item_extras_preprocess_menu(&$variables) {
   _menu_item_extras_process_items($variables['items']);
 }
@@ -123,4 +117,3 @@ function _menu_item_extras_process_items(&$items) {
     }
   }
 }
-

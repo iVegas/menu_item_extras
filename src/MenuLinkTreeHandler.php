@@ -57,6 +57,7 @@ class MenuLinkTreeHandler {
    */
   public function getMenuLinkItemContent(MenuLinkInterface $link) {
     $content = [];
+    /** @var \Drupal\menu_link_content\Entity\MenuLinkContent $menu_item */
     $menu_item = $this->getMenuLinkItemEntity($link);
     if ($menu_item && $menu_item->hasField('body') && !$menu_item->get('body')->isEmpty()) {
       $field_body = $menu_item->get('body')->getValue();

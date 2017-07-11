@@ -5,4 +5,6 @@ package: Menu
 version: 1.0
 core: 8.x
 dependencies:
+  - text
+  - ckeditor
   - menu_link_content

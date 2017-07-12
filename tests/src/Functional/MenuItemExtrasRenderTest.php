@@ -40,9 +40,9 @@ class MenuItemExtrasRenderTest extends BrowserTestBase {
   }
 
   /**
-   * Test menu item render.
+   * Test multilevel menu item render.
    */
-  public function testMultilevelItem() {
+  public function testMultilevelItems() {
     $assert = $this->assertSession();
     $menuLink1 = MenuLinkContent::create([
       'title'       => 'Extras Link 1',

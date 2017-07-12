@@ -5,4 +5,6 @@ package: Menu
 core: 8.x
 configure: menu_item_extras.settings_page
 dependencies:
+  - text
+  - ckeditor
   - menu_link_content

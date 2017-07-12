@@ -45,9 +45,15 @@
       %}
       <li{{ item.attributes.addClass(classes) }}>
         {{ link(item.title, item.url) }}
-        {% if item.below or item.copy|render and item.is_expanded %}
+        {% if item.below or item.content|render and item.is_expanded %}
           <div class="menu-level js-menu-level">
-            {{ item.copy }}
+
+            {% if item.content|render %}
+            <div class="menu-item--content-extras">
+              {{ item.content }}
+            </div>
+            {% endif %}
+
             {{ menus.menu_links(item.below, attributes, menu_level + 1) }}
           </div>
         {% endif %}

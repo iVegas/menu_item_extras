@@ -1,9 +1,9 @@
-name: 'Menu Item Extras'
+name: Menu Item Extras
 type: module
-description: 'Adds custom fields to the menu items.'
+description: Provide an additional custom fields which can be used on Menu link
 package: Menu
-version: 1.0
 core: 8.x
+configure: menu_item_extras.settings_page
 dependencies:
   - text
   - ckeditor

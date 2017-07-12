@@ -17,7 +17,7 @@ class MenuItemExtrasRenderTest extends BrowserTestBase {
   public static $modules = ['menu_item_extras'];
 
   /**
-   * Test UI CRUD functionality.
+   * Test menu item render.
    */
   public function testUiMenuItemExtrasCrud() {
     $assert = $this->assertSession();

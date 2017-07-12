@@ -29,7 +29,7 @@ class MenuItemExtrasUiCrudTest extends BrowserTestBase {
       'title[0][value]' => 'Extras Link',
       'link[0][uri]' => 'https://example.com',
       'enabled[value]' => '1',
-      'description[0][value]' => 'Test',
+      'description[0][value]' => 'Test Description',
       'body[0][value]' => '___ Menu Item Extras Field Value ___',
       'expanded[value]' => '0',
       'menu_parent' => 'main:',

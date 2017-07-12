@@ -19,7 +19,7 @@ class MenuItemExtrasUninstallTest extends BrowserTestBase {
   public static $modules = ['menu_item_extras'];
 
   /**
-   * Tests Menu uninstall.
+   * Tests module uninstall.
    */
   public function testMenuItemExtrasUninstall() {
     \Drupal::service('module_installer')->uninstall(['menu_item_extras']);

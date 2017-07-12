@@ -38,7 +38,7 @@ class MenuLinkTreeHandler {
    */
   protected function getMenuLinkItemEntity(MenuLinkInterface $link) {
     $metadata = $link->getMetaData();
-    if (!empty($metadata)) {
+    if (!empty($metadata['entity_id'])) {
       $entity_id = $metadata['entity_id'];
       /** @var \Drupal\menu_link_content\Entity\MenuLinkContent $menu_item */
       $menu_item = $this->entityTypeManager

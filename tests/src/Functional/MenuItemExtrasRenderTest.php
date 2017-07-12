@@ -44,39 +44,43 @@ class MenuItemExtrasRenderTest extends BrowserTestBase {
    */
   public function testMultilevelItems() {
     $assert = $this->assertSession();
-    $menuLink1 = MenuLinkContent::create([
+    $menu = \Drupal::entityTypeManager()
+      ->getStorage('menu')
+      ->load('main');
+    $this->assertNotEmpty($menu, 'Main menu exists');
+    $link1 = MenuLinkContent::create([
       'title'       => 'Extras Link 1',
       'link'        => 'https://example.com',
       'enabled'     => TRUE,
       'description' => 'Test Description',
       'expanded'    => TRUE,
-      'menu_parent' => 'main:',
+      'menu_parent' => "{$menu->id()}:",
       'weight'      => -10,
       'body'        => '___ Menu Item Extras Field Value Level 1 ___',
     ]);
-    $menuLink1->save();
-    $menuLink2 = MenuLinkContent::create([
+    $link1->save();
+    $link2 = MenuLinkContent::create([
       'title'       => 'Extras Link 2',
       'link'        => 'https://example.com',
       'enabled'     => TRUE,
       'description' => 'Test Description',
       'expanded'    => TRUE,
-      'menu_parent' => 'main:menu_link_content:' . $menuLink1->uuid(),
+      'menu_parent' => "{$menu->id()}:{$link1->getPluginId()}:{$link1->uuid()}",
       'weight'      => -10,
       'body'        => '___ Menu Item Extras Field Value Level 2 ___',
     ]);
-    $menuLink2->save();
-    $menuLink3 = MenuLinkContent::create([
+    $link2->save();
+    $link3 = MenuLinkContent::create([
       'title'       => 'Extras Link 3',
       'link'        => 'https://example.com',
       'enabled'     => TRUE,
       'description' => 'Test Description',
       'expanded'    => TRUE,
-      'menu_parent' => 'main:menu_link_content:' . $menuLink2->uuid(),
+      'menu_parent' => "{$menu->id()}:{$link2->getPluginId()}:{$link2->uuid()}",
       'weight'      => -10,
       'body'        => '___ Menu Item Extras Field Value Level 3 ___',
     ]);
-    $menuLink3->save();
+    $link3->save();
     $this->drupalGet('<front>');
     $assert->statusCodeEquals(200);
 
@@ -87,9 +91,9 @@ class MenuItemExtrasRenderTest extends BrowserTestBase {
     $assert->pageTextContains('___ Menu Item Extras Field Value Level 2 ___');
     $assert->pageTextContains('___ Menu Item Extras Field Value Level 3 ___');
 
-    $menuLink1->delete();
-    $menuLink2->delete();
-    $menuLink3->delete();
+    $link1->delete();
+    $link2->delete();
+    $link3->delete();
   }
 
 }

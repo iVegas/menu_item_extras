@@ -37,13 +37,16 @@ class MenuLinkTreeHandler {
    *   Menu Link Content entity.
    */
   protected function getMenuLinkItemEntity(MenuLinkInterface $link) {
-    $entity_id = $link->getMetaData()['entity_id'];
-    /** @var \Drupal\menu_link_content\Entity\MenuLinkContent $menu_item */
-    $menu_item = $this->entityTypeManager
-      ->getStorage('menu_link_content')
-      ->load($entity_id);
+    $metadata = $link->getMetaData();
+    if (!empty($metadata)) {
+      $entity_id = ['entity_id'];
+      /** @var \Drupal\menu_link_content\Entity\MenuLinkContent $menu_item */
+      $menu_item = $this->entityTypeManager
+        ->getStorage('menu_link_content')
+        ->load($entity_id);
 
-    return $menu_item;
+      return $menu_item;
+    }
   }
 
   /**

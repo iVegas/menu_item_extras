@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @file
  * Adds body field to the menu item.
@@ -7,7 +8,6 @@
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
-use Drupal\menu_link_content\Plugin\Menu\MenuLinkContent;
 
 /**
  * Implements hook_help().
@@ -16,10 +16,20 @@ function menu_item_extras_help($route_name, RouteMatchInterface $route_match) {
   switch ($route_name) {
     // Main module help for the menu_item_extras module.
     case 'help.page.menu_item_extras':
-      $output = '';
-      $output .= '<h3>' . t('About') . '</h3>';
-      $output .= '<p>' . t('Provide an additional custom fields which can be used on Menu link') . '</p>';
-      return $output;
+      $output = [
+        '#type' => 'container',
+        'title' => [
+          '#type' => 'html_tag',
+          '#tag' => 'h3',
+          '#value' => t('About'),
+        ],
+        'description' => [
+          '#type' => 'html_tag',
+          '#tag' => 'p',
+          '#value' => t('Provide an additional custom fields which can be used on Menu link'),
+        ],
+      ];
+      return render($output);
   }
 }
 
@@ -48,7 +58,7 @@ function menu_item_extras_preprocess_block(&$variables) {
       ->get('menu_item_extras.settings')
       ->get('allowed_menus');
 
-    if (in_array($menu_name, $allowed_menus)) {
+    if (!empty($allowed_menus) && in_array($menu_name, $allowed_menus)) {
       $variables['content']['#theme'] = 'menu';
     }
   }
@@ -66,10 +76,10 @@ function menu_item_extras_theme_suggestions_menu_alter(array &$suggestions, arra
   $menu_name = $variables['menu_name'];
   $menu_name_sanitized = strtr($menu_name, '-', '_');
 
-  if (in_array($menu_name, $allowed_menus)) {
+  if (!empty($allowed_menus) && in_array($menu_name, $allowed_menus)) {
     $suggestions = [];
 
-    // Default suggestion
+    // Default suggestion.
     $suggestions[] = 'menu__' . $menu_name_sanitized;
     // Custom suggestions.
     $suggestions[] = $suggestion_prefix;

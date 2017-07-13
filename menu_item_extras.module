@@ -139,7 +139,7 @@ function menu_item_extras_form_alter(&$form, FormStateInterface $form_state, $fo
       '#type' => 'checkbox',
       '#title' => 'Add extras',
       '#weight' => 3,
-      '#description' => t('Add extra fields for the menu items.'),
+      '#description' => t("Add extra fields for the menu items. <em class='color-warning'>If you'll disable this, all extra data will be removed.</em>"),
       '#default_value' => $default_value,
     ];
 
@@ -149,6 +149,19 @@ function menu_item_extras_form_alter(&$form, FormStateInterface $form_state, $fo
     }
     // Add our submit.
     $form['actions']['submit']['#submit'][] = 'menu_item_extras_menu_submit';
+  }
+  
+  // Hide our field for menus that doesn't marked as checked for extras.
+  if ($form_id == 'menu_link_content_menu_link_content_form') {
+    $allowed_menus = (array) \Drupal::configFactory()
+            ->get('menu_item_extras.settings')
+            ->get('allowed_menus');
+    $menu_name = $form_state->getFormObject()->getEntity()->getMenuName();
+    if (!in_array($menu_name, $allowed_menus)) {
+      if (isset($form['body'])) {
+        unset($form['body']);
+      }
+    }
   }
 }
 
@@ -179,7 +192,18 @@ function menu_item_extras_menu_submit(array &$form, FormStateInterface $form_sta
       $allowed_menus = array_diff($allowed_menus, [$menu_name]);
       $extras_settings->set('allowed_menus', $allowed_menus);
       $extras_settings->save(TRUE);
-      // TODO remove values from the extras fields.
+      $query = \Drupal::entityQuery('menu_link_content')
+          ->condition('menu_name', $menu_name);
+      $results = $query->execute();
+      // TODO remove think about batch.
+      if ($results) {
+        $controller = \Drupal::entityTypeManager()->getStorage('menu_link_content');
+        $entities = $controller->loadMultiple($results);
+        foreach($entities as $entity){
+          $entity->set('body', NULL);
+          $entity->save();
+        }
+      }
     }
   }
 }

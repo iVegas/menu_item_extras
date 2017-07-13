@@ -1,7 +1,0 @@
-menu_item_extras.settings_page:
-  path: '/admin/config/content/menu_item_extras'
-  defaults:
-    _form: '\Drupal\menu_item_extras\Form\MenuItemExtrasSettingsForm'
-    _title: 'Menu Item Extras Settings'
-  requirements:
-    _permission: 'menu_item_extras settings page access'

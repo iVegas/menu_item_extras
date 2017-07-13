@@ -7,6 +7,7 @@
 
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 
 /**
@@ -117,4 +118,92 @@ function menu_item_extras_entity_base_field_info(EntityTypeInterface $entity_typ
 function menu_item_extras_preprocess_menu(&$variables) {
   \Drupal::service('menu_item_extras.menu_link_tree_handler')
     ->processMenuLinkTree($variables['items']);
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function menu_item_extras_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  // Add extras settings for the menu edit/add form.
+  if ($form_id === 'menu_edit_form' || $form_id === 'menu_add_form') {
+    $default_value = FALSE;
+    $allowed_menus = (array) \Drupal::configFactory()
+      ->get('menu_item_extras.settings')
+      ->get('allowed_menus');
+    if ($form_id === 'menu_edit_form') {
+      $entity = $form_state->getFormObject()->getEntity();
+      $default_value = in_array($entity->id(), $allowed_menus);
+    }
+
+    $form['add_extras'] = [
+      '#type' => 'checkbox',
+      '#title' => 'Add extras',
+      '#weight' => 3,
+      '#description' => t("Add extra fields for the menu items. <em class='color-warning'>If you'll disable this, all extra data will be removed.</em>"),
+      '#default_value' => $default_value,
+    ];
+
+    // Move links table to the bottom.
+    if (isset($form['links'])) {
+      $form['links']['#weight'] = 10;
+    }
+    // Add our submit.
+    $form['actions']['submit']['#submit'][] = 'menu_item_extras_menu_submit';
+  }
+  
+  // Hide our field for menus that doesn't marked as checked for extras.
+  if ($form_id == 'menu_link_content_menu_link_content_form') {
+    $allowed_menus = (array) \Drupal::configFactory()
+            ->get('menu_item_extras.settings')
+            ->get('allowed_menus');
+    $menu_name = $form_state->getFormObject()->getEntity()->getMenuName();
+    if (!in_array($menu_name, $allowed_menus)) {
+      if (isset($form['body'])) {
+        unset($form['body']);
+      }
+    }
+  }
+}
+
+/**
+ * Save extras settings for menus.
+ *
+ * @param array $form
+ *   Menu edit/add from.
+ * @param \Drupal\Core\Form\FormStateInterface $form_state
+ *   Form sate.
+ */
+function menu_item_extras_menu_submit(array &$form, FormStateInterface $form_state) {
+  $add_extras = $form_state->getValue('add_extras');
+  $extras_settings = \Drupal::configFactory()
+    ->getEditable('menu_item_extras.settings');
+  $allowed_menus = (array) $extras_settings->get('allowed_menus');
+  $menu_name = $form_state->getValue('id');
+  if ($add_extras) {
+    // If not enabled, enable extras for this menu.
+    if (!in_array($menu_name, $allowed_menus)) {
+      $allowed_menus[] = $menu_name;
+      $extras_settings->set('allowed_menus', $allowed_menus);
+      $extras_settings->save(TRUE);
+    }
+  }
+  else {
+    if (in_array($menu_name, $allowed_menus)) {
+      $allowed_menus = array_diff($allowed_menus, [$menu_name]);
+      $extras_settings->set('allowed_menus', $allowed_menus);
+      $extras_settings->save(TRUE);
+      $query = \Drupal::entityQuery('menu_link_content')
+          ->condition('menu_name', $menu_name);
+      $results = $query->execute();
+      // TODO remove think about batch.
+      if ($results) {
+        $controller = \Drupal::entityTypeManager()->getStorage('menu_link_content');
+        $entities = $controller->loadMultiple($results);
+        foreach($entities as $entity){
+          $entity->set('body', NULL);
+          $entity->save();
+        }
+      }
+    }
+  }
 }

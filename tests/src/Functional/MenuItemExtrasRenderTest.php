@@ -50,7 +50,7 @@ class MenuItemExtrasRenderTest extends BrowserTestBase {
   protected function setUp() {
     parent::setUp();
     // Add a new custom menu.
-    $menu_name = 'test_menu';
+    $menu_name = 'testmenu';
     $label = $this->randomMachineName(16);
     $this->menu = Menu::create([
       'id'          => $menu_name,

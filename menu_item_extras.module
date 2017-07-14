@@ -154,14 +154,10 @@ function menu_item_extras_form_alter(array &$form, FormStateInterface $form_stat
   // Hide our field for menus that doesn't marked as checked for extras.
   if ($form_id == 'menu_link_content_menu_link_content_form') {
     $allowed_menus = (array) \Drupal::configFactory()
-            ->get('menu_item_extras.settings')
-            ->get('allowed_menus');
+      ->get('menu_item_extras.settings')
+      ->get('allowed_menus');
     $menu_name = $form_state->getFormObject()->getEntity()->getMenuName();
-    if (!in_array($menu_name, $allowed_menus)) {
-      if (isset($form['body'])) {
-        unset($form['body']);
-      }
-    }
+    $form['body']['#access'] = in_array($menu_name, $allowed_menus);
   }
 }
 

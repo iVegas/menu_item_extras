@@ -4,6 +4,7 @@ description: Provide an additional custom fields which can be used on Menu link
 package: Menu
 core: 8.x
 dependencies:
-  - text
-  - ckeditor
-  - menu_link_content
+  - drupal:block
+  - drupal:text
+  - drupal:ckeditor
+  - drupal:menu_link_content

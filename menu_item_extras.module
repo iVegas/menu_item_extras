@@ -123,7 +123,7 @@ function menu_item_extras_preprocess_menu(&$variables) {
 /**
  * Implements hook_form_alter().
  */
-function menu_item_extras_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+function menu_item_extras_form_alter(array &$form, FormStateInterface $form_state, $form_id) {
   // Add extras settings for the menu edit/add form.
   if ($form_id === 'menu_edit_form' || $form_id === 'menu_add_form') {
     $default_value = FALSE;
@@ -150,18 +150,14 @@ function menu_item_extras_form_alter(&$form, FormStateInterface $form_state, $fo
     // Add our submit.
     $form['actions']['submit']['#submit'][] = 'menu_item_extras_menu_submit';
   }
-  
+
   // Hide our field for menus that doesn't marked as checked for extras.
   if ($form_id == 'menu_link_content_menu_link_content_form') {
     $allowed_menus = (array) \Drupal::configFactory()
-            ->get('menu_item_extras.settings')
-            ->get('allowed_menus');
+      ->get('menu_item_extras.settings')
+      ->get('allowed_menus');
     $menu_name = $form_state->getFormObject()->getEntity()->getMenuName();
-    if (!in_array($menu_name, $allowed_menus)) {
-      if (isset($form['body'])) {
-        unset($form['body']);
-      }
-    }
+    $form['body']['#access'] = in_array($menu_name, $allowed_menus);
   }
 }
 
@@ -171,7 +167,7 @@ function menu_item_extras_form_alter(&$form, FormStateInterface $form_state, $fo
  * @param array $form
  *   Menu edit/add from.
  * @param \Drupal\Core\Form\FormStateInterface $form_state
- *   Form sate.
+ *   Form state.
  */
 function menu_item_extras_menu_submit(array &$form, FormStateInterface $form_state) {
   $add_extras = $form_state->getValue('add_extras');

@@ -3,6 +3,7 @@
 namespace Drupal\Tests\menu_item_extras\Functional;
 
 use Drupal\Component\Utility\NestedArray;
+use Drupal\Core\Url;
 use Drupal\menu_link_content\Entity\MenuLinkContent;
 use Drupal\system\Entity\Menu;
 use Drupal\Tests\BrowserTestBase;
@@ -12,14 +13,7 @@ use Drupal\Tests\BrowserTestBase;
  *
  * @group menu_item_extras
  */
-class MenuItemExtrasRenderTest extends BrowserTestBase {
-
-  /**
-   * The block under test.
-   *
-   * @var \Drupal\system\Plugin\Block\SystemMenuBlock
-   */
-  protected $block;
+class MenuItemExtrasMenuConfigTest extends BrowserTestBase {
 
   /**
    * The menu for testing.
@@ -40,9 +34,9 @@ class MenuItemExtrasRenderTest extends BrowserTestBase {
    *
    * @var int
    */
-  protected $linksNumber = 3;
+  protected $linksNumber = 1;
 
-  public static $modules = ['menu_item_extras'];
+  public static $modules = ['menu_item_extras', 'menu_ui'];
 
   /**
    * {@inheritdoc}
@@ -57,19 +51,7 @@ class MenuItemExtrasRenderTest extends BrowserTestBase {
       'label'       => $label,
       'description' => $this->randomString(32),
     ]);
-    $this->container->get('config.factory')
-      ->getEditable('menu_item_extras.settings')
-      ->set('allowed_menus', [$menu_name])->save();
     $this->menu->save();
-    // Add block.
-    $this->block = $this->drupalPlaceBlock(
-      'system_menu_block:' . $this->menu->id(),
-      [
-        'region' => 'header',
-        'level'  => 1,
-        'depth'  => $this->linksNumber,
-      ]
-    );
     // Set default configs for menu items.
     $defaults = [
       'title'       => 'Extras Link',
@@ -106,12 +88,29 @@ class MenuItemExtrasRenderTest extends BrowserTestBase {
    * Test multilevel menu item render.
    */
   public function testMultilevelItems() {
+    $user = $this->createUser([], [], TRUE);
+    $this->drupalLogin($user);
     $assert = $this->assertSession();
-    $this->drupalGet('<front>');
-    foreach ($this->links as $link) {
-      $assert->pageTextContains($link['title']);
-      $assert->pageTextContains($link['body']);
-    }
+    $editMenuUrl = Url::fromRoute(
+      'entity.menu.edit_form',
+      ['menu' => $this->menu->id()]
+    );
+    $editLinkUrl = Url::fromRoute(
+      'entity.menu_link_content.edit_form',
+      ['menu_link_content' => $this->links[1]['entity']->id()]
+    );
+    $this->drupalGet($editMenuUrl);
+    $assert->checkboxNotChecked('add_extras');
+    $this->drupalPostForm($editMenuUrl, [
+      'add_extras' => '1',
+    ], 'Save');
+    $assert->checkboxChecked('add_extras');
+    $this->drupalGet($editLinkUrl);
+    $assert->fieldExists('Body');
+    $this->drupalPostForm($editMenuUrl, ['add_extras' => '0'], 'Save');
+    $assert->checkboxNotChecked('add_extras');
+    $this->drupalGet($editLinkUrl);
+    $assert->fieldNotExists('Body');
   }
 
 }

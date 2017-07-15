@@ -10,6 +10,7 @@
  *   - below: The menu item child items.
  *   - title: The menu link title.
  *   - url: The menu link url, instance of \Drupal\Core\Url
+ *   - content: The field item content.
  *   - localized_options: Menu link localized options.
  *   - is_expanded: TRUE if the link has visible children within the current
  *     menu tree.
@@ -44,11 +45,13 @@
         ]
       %}
       <li{{ item.attributes.addClass(classes) }}>
+
         {{ link(item.title, item.url) }}
-        {% if item.below or item.content|render and item.is_expanded %}
+
+        {% if item.below or item.content %}
           <div class="menu-level js-menu-level">
 
-            {% if item.content|render %}
+            {% if item.content %}
             <div class="menu-item--content-extras">
               {{ item.content }}
             </div>

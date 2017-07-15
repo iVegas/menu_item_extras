@@ -57,6 +57,9 @@ class MenuItemExtrasRenderTest extends BrowserTestBase {
       'label'       => $label,
       'description' => $this->randomString(32),
     ]);
+    $this->container->get('config.factory')
+      ->getEditable('menu_item_extras.settings')
+      ->set('allowed_menus', [$menu_name])->save();
     $this->menu->save();
     // Add block.
     $this->block = $this->drupalPlaceBlock(

@@ -28,9 +28,12 @@ This module requires the following modules:
 
 ## Configuration
 
-* You can enable/disable extras per menu, by default we enable extras for the Main Menu.
-When extras is disabled, all data from the fields are removed;
-* We added more suggestions for menus in regions. You could change menu template per region. Like `menu--extras--main--header.html.twig`, `menu--extras--main--footer.html.twig`.
+* You can enable/disable extras per menu, by default we enable extras for
+  the Main Menu.
+  When extras is disabled, all data from the fields are removed;
+* We added more suggestions for menus in regions. You could change menu
+  template per region. Like `menu--extras--main--header.html.twig`, `menu--
+  extras--main--footer.html.twig`.
 
 ## Uninstallation:
 

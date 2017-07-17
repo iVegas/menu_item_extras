@@ -32,15 +32,16 @@ This module requires the following modules:
   the Main Menu.
   When extras is disabled, all data from the fields are removed;
 * We added more suggestions for menus in regions. You could change menu
-  template per region. Like `menu--extras--main--header.html.twig`, `menu--
-  extras--main--footer.html.twig`.
+  template per region. Like `menu--extras--main--header.html.twig`,
+  `menu--extras--main--footer.html.twig`.
 
-## Uninstallation:
+## Uninstalling:
 
 1. Disable extras for all menus otherwise, you will not be able to uninstall it;
-2. Uninstall as a   normal module.
+2. Uninstall as a normal module.
 
 ## FAQ
+
 TBD.
 
 ## Maintainers

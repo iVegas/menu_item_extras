@@ -5,6 +5,7 @@
  * Adds body field to the menu item.
  */
 
+use Drupal\block\Entity\Block;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Form\FormStateInterface;
@@ -62,9 +63,10 @@ function menu_item_extras_preprocess_block(&$variables) {
     if (!empty($allowed_menus) && in_array($menu_name, $allowed_menus)) {
       $variables['content']['#theme'] = 'menu';
 
-      // Pass region name to the suggestions_menu_alter for the region suggestion
+      // Pass region name to the suggestions_menu_alter for
+      // the region suggestion.
       $block_id = $variables['elements']['#id'];
-      $block = \Drupal\block\Entity\Block::load($block_id);
+      $block = Block::load($block_id);
       $variables['content']['#attributes']['data-region'] = $block->getRegion();
     }
   }
@@ -109,10 +111,10 @@ function menu_item_extras_entity_base_field_info(EntityTypeInterface $entity_typ
       ->setLabel(t('Body'))
       ->setDescription(t('Add description block to menu item.'))
       ->setTranslatable(TRUE)
-      ->setDisplayOptions('form', array(
+      ->setDisplayOptions('form', [
         'type' => 'text_textfield',
         'weight' => 0,
-      ))
+      ])
       ->setDisplayConfigurable('form', TRUE);
   }
 
@@ -196,13 +198,13 @@ function menu_item_extras_menu_submit(array &$form, FormStateInterface $form_sta
       $extras_settings->set('allowed_menus', $allowed_menus);
       $extras_settings->save(TRUE);
       $query = \Drupal::entityQuery('menu_link_content')
-          ->condition('menu_name', $menu_name);
+        ->condition('menu_name', $menu_name);
       $results = $query->execute();
       // TODO remove think about batch.
       if ($results) {
         $controller = \Drupal::entityTypeManager()->getStorage('menu_link_content');
         $entities = $controller->loadMultiple($results);
-        foreach($entities as $entity){
+        foreach ($entities as $entity) {
           $entity->set('body', NULL);
           $entity->save();
         }

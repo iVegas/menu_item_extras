@@ -1,8 +1,101 @@
 <?php
-use Drupal\Core\Entity\EntityTypeInterface;
-use Drupal\Core\Field\BaseFieldDefinition;
-use Drupal\menu_link_content\Plugin\Menu\MenuLinkContent;
 
+/**
+ * @file
+ * Adds body field to the menu item.
+ */
+
+use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_help().
+ */
+function menu_item_extras_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    // Main module help for the menu_item_extras module.
+    case 'help.page.menu_item_extras':
+      $output = [
+        '#type' => 'container',
+        'title' => [
+          '#type' => 'html_tag',
+          '#tag' => 'h3',
+          '#value' => t('About'),
+        ],
+        'description' => [
+          '#type' => 'html_tag',
+          '#tag' => 'p',
+          '#value' => t('Provide an additional custom fields which can be used on Menu link'),
+        ],
+      ];
+      return render($output);
+  }
+}
+
+/**
+ * Implements hook_theme().
+ */
+function menu_item_extras_theme() {
+  $theme = [];
+  $theme['menu__extras'] = [
+    'render element' => 'content',
+    'base hook' => 'menu',
+  ];
+  return $theme;
+}
+
+/**
+ * Implements hook_preprocess_block().
+ */
+function menu_item_extras_preprocess_block(&$variables) {
+  // Menus are built with #theme 'menu__MENU_NAME' form the the MenuLinkTree
+  // class. We need to build menus supported by menu_item_extras with the
+  // default #theme menu, to be able to add suggestions in the good order.
+  if (isset($variables['content']['#menu_name'])) {
+    $menu_name = $variables['content']['#menu_name'];
+    $allowed_menus = \Drupal::configFactory()
+      ->get('menu_item_extras.settings')
+      ->get('allowed_menus');
+
+    if (!empty($allowed_menus) && in_array($menu_name, $allowed_menus)) {
+      $variables['content']['#theme'] = 'menu';
+
+      // Pass region name to the suggestions_menu_alter for the region suggestion
+      $block_id = $variables['elements']['#id'];
+      $block = \Drupal\block\Entity\Block::load($block_id);
+      $variables['content']['#attributes']['data-region'] = $block->getRegion();
+    }
+  }
+}
+
+/**
+ * Implements hook_theme_suggestions_HOOK_alter().
+ */
+function menu_item_extras_theme_suggestions_menu_alter(array &$suggestions, array $variables) {
+  $suggestion_prefix = 'menu__extras';
+  $allowed_menus = \Drupal::configFactory()
+    ->get('menu_item_extras.settings')
+    ->get('allowed_menus');
+
+  $menu_name = $variables['menu_name'];
+  $menu_name_sanitized = strtr($menu_name, '-', '_');
+
+  if (!empty($allowed_menus) && in_array($menu_name, $allowed_menus)) {
+    $suggestions = [];
+
+    // Custom suggestions.
+    $suggestions[] = $suggestion_prefix;
+    $suggestions[] = $suggestion_prefix . '__' . $menu_name_sanitized;
+    // Custom suggestions for the parent region.
+    if (isset($variables['attributes']['data-region'])) {
+      $suggestions[] = $suggestion_prefix . '__' . $menu_name_sanitized . '__' . $variables['attributes']['data-region'];
+    }
+  }
+
+  return $suggestions;
+}
 
 /**
  * Implements hook_entity_base_field_info().
@@ -10,9 +103,9 @@ use Drupal\menu_link_content\Plugin\Menu\MenuLinkContent;
 function menu_item_extras_entity_base_field_info(EntityTypeInterface $entity_type) {
   $fields = [];
 
-  if ($entity_type->id() == 'menu_link_content') {
+  if ($entity_type->id() === 'menu_link_content') {
 
-    $fields['copy'] = BaseFieldDefinition::create('text_long')
+    $fields['body'] = BaseFieldDefinition::create('text_long')
       ->setLabel(t('Body'))
       ->setDescription(t('Add description block to menu item.'))
       ->setTranslatable(TRUE)
@@ -26,24 +119,94 @@ function menu_item_extras_entity_base_field_info(EntityTypeInterface $entity_typ
   return $fields;
 }
 
+/**
+ * Implements hook_preprocess_menu().
+ */
 function menu_item_extras_preprocess_menu(&$variables) {
-  _menu_item_extras_process_items($variables['items']);
+  \Drupal::service('menu_item_extras.menu_link_tree_handler')
+    ->processMenuLinkTree($variables['items']);
 }
 
-function _menu_item_extras_process_items(&$items) {
-  foreach ($items as &$item) {
-    if (isset($item['original_link']) && $item['original_link'] instanceof MenuLinkContent) {
-      $entity_id = $item['original_link']->getMetaData()['entity_id'];
-      $field_copy = \Drupal::entityTypeManager()
-        ->getStorage('menu_link_content')
-        ->load($entity_id)
-        ->get('copy');
+/**
+ * Implements hook_form_alter().
+ */
+function menu_item_extras_form_alter(array &$form, FormStateInterface $form_state, $form_id) {
+  // Add extras settings for the menu edit/add form.
+  if ($form_id === 'menu_edit_form' || $form_id === 'menu_add_form') {
+    $default_value = FALSE;
+    $allowed_menus = (array) \Drupal::configFactory()
+      ->get('menu_item_extras.settings')
+      ->get('allowed_menus');
+    if ($form_id === 'menu_edit_form') {
+      $entity = $form_state->getFormObject()->getEntity();
+      $default_value = in_array($entity->id(), $allowed_menus);
+    }
 
-      $item['copy'] = ['#markup' => $field_copy->value];
-      if ($item['below']) {
-        _menu_item_extras_process_items($item['below']);
+    $form['add_extras'] = [
+      '#type' => 'checkbox',
+      '#title' => 'Add extras',
+      '#weight' => 3,
+      '#description' => t("Add extra fields for the menu items. <em class='color-warning'>If you'll disable this, all extra data will be removed.</em>"),
+      '#default_value' => $default_value,
+    ];
+
+    // Move links table to the bottom.
+    if (isset($form['links'])) {
+      $form['links']['#weight'] = 10;
+    }
+    // Add our submit.
+    $form['actions']['submit']['#submit'][] = 'menu_item_extras_menu_submit';
+  }
+
+  // Hide our field for menus that doesn't marked as checked for extras.
+  if ($form_id == 'menu_link_content_menu_link_content_form') {
+    $allowed_menus = (array) \Drupal::configFactory()
+      ->get('menu_item_extras.settings')
+      ->get('allowed_menus');
+    $menu_name = $form_state->getFormObject()->getEntity()->getMenuName();
+    $form['body']['#access'] = in_array($menu_name, $allowed_menus);
+  }
+}
+
+/**
+ * Save extras settings for menus.
+ *
+ * @param array $form
+ *   Menu edit/add from.
+ * @param \Drupal\Core\Form\FormStateInterface $form_state
+ *   Form state.
+ */
+function menu_item_extras_menu_submit(array &$form, FormStateInterface $form_state) {
+  $add_extras = $form_state->getValue('add_extras');
+  $extras_settings = \Drupal::configFactory()
+    ->getEditable('menu_item_extras.settings');
+  $allowed_menus = (array) $extras_settings->get('allowed_menus');
+  $menu_name = $form_state->getValue('id');
+  if ($add_extras) {
+    // If not enabled, enable extras for this menu.
+    if (!in_array($menu_name, $allowed_menus)) {
+      $allowed_menus[] = $menu_name;
+      $extras_settings->set('allowed_menus', $allowed_menus);
+      $extras_settings->save(TRUE);
+    }
+  }
+  else {
+    if (in_array($menu_name, $allowed_menus)) {
+      $allowed_menus = array_diff($allowed_menus, [$menu_name]);
+      $extras_settings->set('allowed_menus', $allowed_menus);
+      $extras_settings->save(TRUE);
+      $query = \Drupal::entityQuery('menu_link_content')
+          ->condition('menu_name', $menu_name);
+      $results = $query->execute();
+      // TODO remove think about batch.
+      if ($results) {
+        $controller = \Drupal::entityTypeManager()->getStorage('menu_link_content');
+        $entities = $controller->loadMultiple($results);
+        foreach($entities as $entity){
+          $entity->set('body', NULL);
+          $entity->save();
+        }
       }
     }
   }
 }
-

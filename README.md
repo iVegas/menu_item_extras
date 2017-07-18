@@ -1,3 +1,6 @@
+[![Build Status](https://travis-ci.org/bogdan-hepting/menu_item_extras.svg?branch=8.x-1.x)](https://travis-ci.org/bogdan-hepting/menu_item_extras)
+[![Build Status](https://travis-ci.org/bogdan-hepting/menu_item_extras.svg?branch=8.x-2.x)](https://travis-ci.org/bogdan-hepting/menu_item_extras)
+
 # CONTENTS OF THIS FILE
   
  * Introduction

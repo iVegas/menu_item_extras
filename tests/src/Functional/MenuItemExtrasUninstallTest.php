@@ -1,8 +1,9 @@
 <?php
 /**
  * @file
- * MenuItemExtrasUninstallTest.php description
+ * MenuItemExtrasUninstallTest.php description.
  */
+
 namespace Drupal\Tests\menu_item_extras\Functional;
 
 use Drupal\Tests\BrowserTestBase;

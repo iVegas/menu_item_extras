@@ -62,9 +62,14 @@ function menu_item_extras_preprocess_block(&$variables) {
     if (!empty($allowed_menus) && in_array($menu_name, $allowed_menus)) {
       $variables['content']['#theme'] = 'menu';
 
-      // Pass region name to the suggestions_menu_alter for the region suggestion
+      // Pass region name to the suggestions_menu_alter for
+      // the region suggestion.
       $block_id = $variables['elements']['#id'];
-      $block = \Drupal\block\Entity\Block::load($block_id);
+      /** @var \Drupal\Core\Config\Entity\ConfigEntityStorageInterface $block_storage */
+      $block_storage = \Drupal::entityTypeManager()
+        ->getStorage('block');
+      /** @var \Drupal\block\BlockInterface $block */
+      $block = $block_storage->load($block_id);
       $variables['content']['#attributes']['data-region'] = $block->getRegion();
     }
   }
@@ -109,10 +114,10 @@ function menu_item_extras_entity_base_field_info(EntityTypeInterface $entity_typ
       ->setLabel(t('Body'))
       ->setDescription(t('Add description block to menu item.'))
       ->setTranslatable(TRUE)
-      ->setDisplayOptions('form', array(
+      ->setDisplayOptions('form', [
         'type' => 'text_textfield',
         'weight' => 0,
-      ))
+      ])
       ->setDisplayConfigurable('form', TRUE);
   }
 
@@ -138,8 +143,10 @@ function menu_item_extras_form_alter(array &$form, FormStateInterface $form_stat
       ->get('menu_item_extras.settings')
       ->get('allowed_menus');
     if ($form_id === 'menu_edit_form') {
-      $entity = $form_state->getFormObject()->getEntity();
-      $default_value = in_array($entity->id(), $allowed_menus);
+      /** @var \Drupal\Core\Entity\EntityFormInterface $menu_form */
+      $menu_form = $form_state->getFormObject();
+      $menu_entity = $menu_form->getEntity();
+      $default_value = in_array($menu_entity->id(), $allowed_menus);
     }
 
     $form['add_extras'] = [
@@ -163,8 +170,11 @@ function menu_item_extras_form_alter(array &$form, FormStateInterface $form_stat
     $allowed_menus = (array) \Drupal::configFactory()
       ->get('menu_item_extras.settings')
       ->get('allowed_menus');
-    $menu_name = $form_state->getFormObject()->getEntity()->getMenuName();
-    $form['body']['#access'] = in_array($menu_name, $allowed_menus);
+    /** @var \Drupal\Core\Entity\ContentEntityFormInterface $menu_link_form */
+    $menu_link_form = $form_state->getFormObject();
+    /** @var \Drupal\menu_link_content\MenuLinkContentInterface $menu_link */
+    $menu_link = $menu_link_form->getEntity();
+    $form['body']['#access'] = in_array($menu_link->getMenuName(), $allowed_menus);
   }
 }
 
@@ -196,13 +206,15 @@ function menu_item_extras_menu_submit(array &$form, FormStateInterface $form_sta
       $extras_settings->set('allowed_menus', $allowed_menus);
       $extras_settings->save(TRUE);
       $query = \Drupal::entityQuery('menu_link_content')
-          ->condition('menu_name', $menu_name);
+        ->condition('menu_name', $menu_name);
       $results = $query->execute();
       // TODO remove think about batch.
       if ($results) {
-        $controller = \Drupal::entityTypeManager()->getStorage('menu_link_content');
+        $controller = \Drupal::entityTypeManager()
+          ->getStorage('menu_link_content');
+        /** @var \Drupal\menu_link_content\MenuLinkContentInterface[] $entities */
         $entities = $controller->loadMultiple($results);
-        foreach($entities as $entity){
+        foreach ($entities as $entity) {
           $entity->set('body', NULL);
           $entity->save();
         }

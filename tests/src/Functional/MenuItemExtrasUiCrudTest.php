@@ -21,11 +21,11 @@ class MenuItemExtrasUiCrudTest extends BrowserTestBase {
   public function testUiMenuItemExtrasCrud() {
     // Preparations.
     $this->drupalLogin($this->rootUser);
-    $createUrl = Url::fromRoute(
+    $create_url = Url::fromRoute(
       'entity.menu.add_link_form',
       ['menu' => 'main']
     );
-    $defaultFormValues = [
+    $default_form_values = [
       'title[0][value]' => 'Extras Link',
       'link[0][uri]' => 'https://example.com',
       'enabled[value]' => '1',
@@ -36,11 +36,11 @@ class MenuItemExtrasUiCrudTest extends BrowserTestBase {
       'weight[0][value]' => '10',
     ];
     $assert = $this->assertSession();
-    $this->drupalGet($createUrl);
+    $this->drupalGet($create_url);
     $assert->statusCodeEquals(200);
 
     // Create menu item.
-    $this->drupalPostForm(NULL, $defaultFormValues, 'Save');
+    $this->drupalPostForm(NULL, $default_form_values, 'Save');
     // Check changes.
     $menu_item_url = Url::fromRoute(
       'entity.menu_link_content.edit_form',
@@ -51,8 +51,8 @@ class MenuItemExtrasUiCrudTest extends BrowserTestBase {
     $assert->fieldValueEquals('body[0][value]', '___ Menu Item Extras Field Value ___');
 
     // Update menu item.
-    $defaultFormValues['body[0][value]'] = '--- Menu Item Extras Field Value ---';
-    $this->drupalPostForm(NULL, $defaultFormValues, 'Save');
+    $default_form_values['body[0][value]'] = '--- Menu Item Extras Field Value ---';
+    $this->drupalPostForm(NULL, $default_form_values, 'Save');
     // Check changes.
     $this->drupalGet($menu_item_url);
     $assert->fieldValueNotEquals('body[0][value]', '___ Menu Item Extras Field Value ___');

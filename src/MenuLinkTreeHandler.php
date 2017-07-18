@@ -1,8 +1,9 @@
 <?php
 /**
  * @file
- * MenuLinkTreeHandler.php description
+ * MenuLinkTreeHandler.php description.
  */
+
 namespace Drupal\menu_item_extras;
 
 use Drupal\Core\Entity\EntityTypeManagerInterface;

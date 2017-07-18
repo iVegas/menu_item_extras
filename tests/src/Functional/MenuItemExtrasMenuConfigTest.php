@@ -1,4 +1,8 @@
 <?php
+/**
+ * @file
+ *
+ */
 
 namespace Drupal\Tests\menu_item_extras\Functional;
 
@@ -91,25 +95,25 @@ class MenuItemExtrasMenuConfigTest extends BrowserTestBase {
     $user = $this->createUser([], [], TRUE);
     $this->drupalLogin($user);
     $assert = $this->assertSession();
-    $editMenuUrl = Url::fromRoute(
+    $edit_menu_url = Url::fromRoute(
       'entity.menu.edit_form',
       ['menu' => $this->menu->id()]
     );
-    $editLinkUrl = Url::fromRoute(
+    $edit_link_url = Url::fromRoute(
       'entity.menu_link_content.edit_form',
       ['menu_link_content' => $this->links[1]['entity']->id()]
     );
-    $this->drupalGet($editMenuUrl);
+    $this->drupalGet($edit_menu_url);
     $assert->checkboxNotChecked('add_extras');
-    $this->drupalPostForm($editMenuUrl, [
+    $this->drupalPostForm($edit_menu_url, [
       'add_extras' => '1',
     ], 'Save');
     $assert->checkboxChecked('add_extras');
-    $this->drupalGet($editLinkUrl);
+    $this->drupalGet($edit_link_url);
     $assert->fieldExists('Body');
-    $this->drupalPostForm($editMenuUrl, ['add_extras' => '0'], 'Save');
+    $this->drupalPostForm($edit_menu_url, ['add_extras' => '0'], 'Save');
     $assert->checkboxNotChecked('add_extras');
-    $this->drupalGet($editLinkUrl);
+    $this->drupalGet($edit_link_url);
     $assert->fieldNotExists('Body');
   }
 

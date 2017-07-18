@@ -1,4 +1,8 @@
 <?php
+/**
+ * @file
+ *
+ */
 
 namespace Drupal\menu_item_extras;
 

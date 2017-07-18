@@ -1,4 +1,8 @@
 <?php
+/**
+ * @file
+ *
+ */
 
 namespace Drupal\Tests\menu_item_extras\Functional;
 

@@ -1,8 +1,4 @@
 <?php
-/**
- * @file
- * MenuLinkTreeHandler.php description.
- */
 
 namespace Drupal\menu_item_extras;
 

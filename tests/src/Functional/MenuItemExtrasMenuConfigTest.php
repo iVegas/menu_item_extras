@@ -1,8 +1,4 @@
 <?php
-/**
- * @file
- * MenuItemExtrasMenuConfigTest.php description.
- */
 
 namespace Drupal\Tests\menu_item_extras\Functional;
 

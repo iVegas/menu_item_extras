@@ -49,79 +49,8 @@ function menu_item_extras_entity_type_build(array &$entity_types) {
 
   /** @var \Drupal\Core\Config\Entity\ConfigEntityTypeInterface $menu */
   $menu = $entity_types['menu'];
+  // Required for ConfigEntityBundleBase abstract class.
   $menu->set('bundle_of', $content_entity);
-}
-
-/**
- * Implements hook_ENTITY_TYPE_insert() for Menu entity type.
- */
-function menu_item_extras_menu_insert(EntityInterface $entity) {
-  /*
-  $display = EntityViewDisplay::load(
-  "menu_link_content.{$entity->id()}.default"
-  );
-
-  if (empty($display)) {
-  EntityViewDisplay::create([
-  'targetEntityType' => 'menu_link_content',
-  'bundle' => $entity->id(),
-  'mode' => 'default',
-  'status' => TRUE,
-  ])->save();
-  }*/
-  $id = "menu_link_content.{$entity->id()}.default";
-  $config = \Drupal::configFactory()->getEditable("core.entity_view_display");
-  $value = $config->get($id);
-  if (empty($value)) {
-    $config->set($id, [
-      'langcode' => 'en',
-      'status' => TRUE,
-      'dependencies' => [
-        'config' => [
-          "system.menu.{$entity->id()}",
-        ],
-        'module' => [
-          'text',
-        ],
-      ],
-      'id' => $id,
-      'targetEntityType' => 'menu_link_content',
-      'bundle' => $entity->id(),
-      'mode' => 'default',
-      'content' => [
-        'title' => [
-          'type' => 'string_textfield',
-          'weight' => -5,
-          'region' => 'content',
-          'settings' => [
-            'size' => 60,
-            'placeholder' => '',
-          ],
-          'third_party_settings' => [],
-        ],
-      ],
-      'hidden' => [],
-    ])->save();
-  }
-}
-
-/**
- * Implements hook_ENTITY_TYPE_delete().
- */
-function menu_item_extras_menu_delete(EntityInterface $entity) {
-  /*
-  $display = EntityViewDisplay::load(
-  "menu_link_content.{$entity->id()}.default"
-  );
-  if (!empty($display)) {
-  $display->delete();
-  }*/
-  $id = "menu_link_content.{$entity->id()}.default";
-  $config = \Drupal::configFactory()->getEditable("core.entity_view_display.{$id}");
-  $value = $config->get();
-  if (!empty($value)) {
-    $config->delete();
-  }
 }
 
 /**

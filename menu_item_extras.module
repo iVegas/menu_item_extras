@@ -7,7 +7,6 @@
 
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Entity\EntityTypeInterface;
-use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 
@@ -40,17 +39,40 @@ function menu_item_extras_help($route_name, RouteMatchInterface $route_match) {
  */
 function menu_item_extras_entity_type_build(array &$entity_types) {
   $content_entity = 'menu_link_content';
-
+  // Set entity type to be bundled.
   /** @var \Drupal\Core\Entity\ContentEntityTypeInterface $mlc */
   $mlc = $entity_types[$content_entity];
-
   $mlc->set('bundle_entity_type', 'menu');
   $mlc->set('field_ui_base_route', 'entity.menu.edit_form');
-
+  // Set entity to be a bundle entity type for previous entity.
   /** @var \Drupal\Core\Config\Entity\ConfigEntityTypeInterface $menu */
   $menu = $entity_types['menu'];
-  // Required for ConfigEntityBundleBase abstract class.
   $menu->set('bundle_of', $content_entity);
+}
+
+/**
+ * Implements hook_entity_base_field_info_alter().
+ *
+ * As mentioned in the description of this hook
+ * the functionality can be changed.
+ *
+ * @TODO: We should follow possible changes.
+ *
+ * @see hook_entity_base_field_info_alter()
+ * @see https://www.drupal.org/node/2346329
+ */
+function menu_item_extras_entity_base_field_info_alter(&$fields, EntityTypeInterface $entity_type) {
+  /** @var \Drupal\Core\Field\BaseFieldDefinition[] $fields */
+  if ($entity_type->id() === 'menu_link_content' && isset($fields['weight'])) {
+    $options = $fields["weight"]->getDisplayOptions('view');
+    // Lets check if field definition is buggy.
+    if ($options['type'] === 'integer') {
+      // Yep, this is single reason why view display can't be set. Let's fix it.
+      $options['type'] = 'number_integer';
+      // @TODO: This should be fixed in the menu_link_content core module.
+      $fields['weight']->setDisplayOptions('view', $options);
+    }
+  }
 }
 
 /**

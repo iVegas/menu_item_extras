@@ -2,6 +2,8 @@
 
 namespace Drupal\menu_item_extras\Service;
 
+use Drupal\Core\Entity\ContentEntityInterface;
+
 /**
  * Interface MenuLinkContentHelperInterface.
  *
@@ -21,5 +23,13 @@ interface MenuLinkContentServiceInterface {
    *   Success or failed result of update.
    */
   public function updateMenuItemsBundle($menu_id, $extras_enabled = TRUE);
+
+  /**
+   * Cleanup all field that added by entity bundle.
+   *
+   * @param \Drupal\Core\Entity\ContentEntityInterface $entity
+   *   Entity for manipulating.
+   */
+  public function cleanupFields(ContentEntityInterface $entity);
 
 }

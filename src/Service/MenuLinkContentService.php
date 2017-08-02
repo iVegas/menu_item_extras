@@ -2,7 +2,9 @@
 
 namespace Drupal\menu_item_extras\Service;
 
+use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Field\BaseFieldDefinition;
 
 /**
  * Class MenuLinkContentHelper.
@@ -39,6 +41,17 @@ class MenuLinkContentService implements MenuLinkContentServiceInterface {
         elseif (!$extras_enabled && $menu_link->bundle() !== 'menu_link_content') {
           $menu_link->set('bundle', 'menu_link_content')->save();
         }
+      }
+    }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function cleanupFields(ContentEntityInterface $entity) {
+    foreach ($entity->getFieldDefinitions() as $field_name => $field_def) {
+      if (!($field_def instanceof BaseFieldDefinition)) {
+        $entity->set($field_name, NULL);
       }
     }
   }

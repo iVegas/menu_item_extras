@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Adds body field to the menu item.
+ * Manage field for the menu items.
  */
 
 use Drupal\Core\Entity\EntityInterface;
@@ -83,14 +83,12 @@ function menu_item_extras_menu_link_content_presave(EntityInterface $entity) {
   $menu_as_type = \Drupal::config('menu_item_extras.settings')->get('menu_as_type');
   /** @var \Drupal\menu_link_content\MenuLinkContentInterface $entity */
   if ($menu_as_type && !empty($entity->original)) {
+    /** @var \Drupal\menu_item_extras\Service\MenuLinkContentServiceInterface $menu_links_helper */
+    $menu_links_helper = \Drupal::service('menu_item_extras.menu_link_content_helper');
     /** @var \Drupal\menu_link_content\MenuLinkContentInterface $original */
     $original = $entity->original;
     if ($original->getMenuName() !== $entity->getMenuName()) {
-      foreach ($entity->getFieldDefinitions() as $field_name => $field_def) {
-        if (!($field_def instanceof BaseFieldDefinition)) {
-          $entity->set($field_name, NULL);
-        }
-      }
+      $menu_links_helper->cleanupFields($entity);
       $entity->set('bundle', $entity->getMenuName());
     }
   }
@@ -165,28 +163,6 @@ function menu_item_extras_theme_suggestions_menu_alter(array &$suggestions, arra
 }
 
 /**
- * Implements hook_entity_base_field_info().
- */
-function menu_item_extras_entity_base_field_info(EntityTypeInterface $entity_type) {
-  $fields = [];
-
-  if ($entity_type->id() === 'menu_link_content') {
-
-    $fields['body'] = BaseFieldDefinition::create('text_long')
-      ->setLabel(t('Body'))
-      ->setDescription(t('Add description block to menu item.'))
-      ->setTranslatable(TRUE)
-      ->setDisplayOptions('form', [
-        'type' => 'text_textfield',
-        'weight' => 0,
-      ])
-      ->setDisplayConfigurable('form', TRUE);
-  }
-
-  return $fields;
-}
-
-/**
  * Implements hook_preprocess_menu().
  */
 function menu_item_extras_preprocess_menu(&$variables) {
@@ -228,15 +204,17 @@ function menu_item_extras_form_alter(array &$form, FormStateInterface $form_stat
   }
 
   // Hide our field for menus that doesn't marked as checked for extras.
-  if ($form_id == 'menu_link_content_menu_link_content_form') {
-    $allowed_menus = (array) \Drupal::configFactory()
-      ->get('menu_item_extras.settings')
-      ->get('allowed_menus');
+  if (FALSE && $form_id == 'menu_link_content_menu_link_content_form') {
+    /*$allowed_menus = (array) \Drupal::configFactory()
+    ->get('menu_item_extras.settings')
+    ->get('allowed_menus');*/
     /** @var \Drupal\Core\Entity\ContentEntityFormInterface $menu_link_form */
-    $menu_link_form = $form_state->getFormObject();
+    /*$menu_link_form = $form_state->getFormObject();*/
     /** @var \Drupal\menu_link_content\MenuLinkContentInterface $menu_link */
-    $menu_link = $menu_link_form->getEntity();
-    $form['body']['#access'] = in_array($menu_link->getMenuName(), $allowed_menus);
+    /*$menu_link = $menu_link_form->getEntity();
+    $form['body']['#access'] = in_array(
+    $menu_link->getMenuName(), $allowed_menus
+    );*/
   }
 }
 
@@ -284,14 +262,13 @@ function menu_item_extras_menu_submit(array &$form, FormStateInterface $form_sta
       ->condition('menu_name', $menu_name);
     $results = $query->execute();
     // TODO remove think about batch.
-    // TODO: Update to work with fields defined by user.
     if ($results) {
       $controller = \Drupal::entityTypeManager()
         ->getStorage('menu_link_content');
       /** @var \Drupal\menu_link_content\MenuLinkContentInterface[] $entities */
       $entities = $controller->loadMultiple($results);
       foreach ($entities as $entity) {
-        $entity->set('body', NULL);
+        $menu_links_helper->cleanupFields($entity);
         $entity->save();
       }
     }

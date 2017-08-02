@@ -9,6 +9,8 @@
  * Implements hook_install().
  */
 function menu_item_extras_install() {
-  $definition = \Drupal::service('entity_field.manager')->getFieldStorageDefinitions('menu_link_content')['body'];
-  \Drupal::service('field_storage_definition.listener')->onFieldStorageDefinitionCreate($definition);
+  $definition = \Drupal::service('entity_field.manager')
+    ->getFieldStorageDefinitions('menu_link_content')['body'];
+  \Drupal::service('field_storage_definition.listener')
+    ->onFieldStorageDefinitionCreate($definition);
 }

@@ -7,3 +7,6 @@ menu_item_extras.settings:
       sequence:
         type: string
         label: 'Menu ID'
+    menu_as_bundle:
+      type: boolean
+      label: 'Use one type per menu or not'

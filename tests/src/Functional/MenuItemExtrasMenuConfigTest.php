@@ -2,10 +2,10 @@
 
 namespace Drupal\Tests\menu_item_extras\Functional;
 
-use Drupal\Component\Utility\NestedArray;
+/*use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Url;
 use Drupal\menu_link_content\Entity\MenuLinkContent;
-use Drupal\system\Entity\Menu;
+use Drupal\system\Entity\Menu;*/
 use Drupal\Tests\BrowserTestBase;
 
 /**
@@ -43,45 +43,48 @@ class MenuItemExtrasMenuConfigTest extends BrowserTestBase {
    */
   protected function setUp() {
     parent::setUp();
+    TRUE;
     // Add a new custom menu.
-    $menu_name = 'testmenu';
+    /*$menu_name = 'testmenu';
     $label = $this->randomMachineName(16);
     $this->menu = Menu::create([
-      'id'          => $menu_name,
-      'label'       => $label,
-      'description' => $this->randomString(32),
+    'id'          => $menu_name,
+    'label'       => $label,
+    'description' => $this->randomString(32),
     ]);
     $this->menu->save();
     // Set default configs for menu items.
     $defaults = [
-      'title'       => 'Extras Link',
-      'link'        => 'https://example.com',
-      'enabled'     => TRUE,
-      'description' => 'Test Description',
-      'expanded'    => TRUE,
-      'menu_name'   => $this->menu->id(),
-      'parent'      => "{$this->menu->id()}:",
-      'weight'      => -10,
-      'body'        => '___ Menu Item Extras Field Value Level ___',
+    'title'       => 'Extras Link',
+    'link'        => 'https://example.com',
+    'enabled'     => TRUE,
+    'description' => 'Test Description',
+    'expanded'    => TRUE,
+    'menu_name'   => $this->menu->id(),
+    'parent'      => "{$this->menu->id()}:",
+    'weight'      => -10,
+    'body'        => '___ Menu Item Extras Field Value Level ___',
     ];
     // Generate menu items.
     for ($i = 1; $i <= $this->linksNumber; $i++) {
-      if ($i > 1) {
-        /** @var \Drupal\menu_link_content\Entity\MenuLinkContent $previous_link */
-        $previous_link = $this->links[$i - 1]['entity'];
-      }
-      $link = MenuLinkContent::create(NestedArray::mergeDeep($defaults, [
-        'title' => $defaults['title'] . "[{$i}]",
-        'body' => $defaults['body'] . "[{$i}]",
-        'parent' => isset($previous_link) ? $previous_link->getPluginId() : $defaults['parent'],
-      ]));
-      $link->save();
-      $this->links[$i] = [
-        'title'  => $link->get('title')->getString(),
-        'body'   => $link->get('body')->getString(),
-        'entity' => $link,
-      ];
+    if ($i > 1) {*/
+    /** @var \Drupal\menu_link_content\Entity\MenuLinkContent $previous_link */
+    /* $previous_link = $this->links[$i - 1]['entity'];
     }
+    $link = MenuLinkContent::create(NestedArray::mergeDeep($defaults, [
+    'title' => $defaults['title'] . "[{$i}]",
+    'body' => $defaults['body'] . "[{$i}]",
+    'parent' => isset($previous_link) ?
+    $previous_link->getPluginId() :
+    $defaults['parent'],
+    ]));
+    $link->save();
+    $this->links[$i] = [
+    'title'  => $link->get('title')->getString(),
+    'body'   => $link->get('body')->getString(),
+    'entity' => $link,
+    ];
+    }*/
   }
 
   /**

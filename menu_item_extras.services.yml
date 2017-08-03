@@ -1,4 +1,11 @@
 services:
   menu_item_extras.menu_link_tree_handler:
-    class: Drupal\menu_item_extras\MenuLinkTreeHandler
+    class: Drupal\menu_item_extras\Service\MenuLinkTreeHandler
     arguments: ['@entity_type.manager']
+  menu_item_extras.menu_link_content_helper:
+    class: Drupal\menu_item_extras\Service\MenuLinkContentService
+    arguments: ['@entity_type.manager']
+  menu_item_extras.route_subscriber:
+    class: Drupal\menu_item_extras\Routing\RouteSubscriber
+    tags:
+      - { name: event_subscriber }

@@ -9,8 +9,53 @@
  * Implements hook_install().
  */
 function menu_item_extras_install() {
-  $definition = \Drupal::service('entity_field.manager')
-    ->getFieldStorageDefinitions('menu_link_content')['body'];
-  \Drupal::service('field_storage_definition.listener')
-    ->onFieldStorageDefinitionCreate($definition);
+  $menus = \Drupal::entityTypeManager()
+    ->getStorage('menu')
+    ->loadMultiple();
+  if (!empty($menus)) {
+    /** @var \Drupal\menu_item_extras\Service\MenuLinkContentService $mlc_helper */
+    $mlc_helper = \Drupal::service('menu_item_extras.menu_link_content_helper');
+    foreach ($menus as $menu_id => $menu) {
+      $mlc_helper->updateMenuItemsBundle($menu_id);
+    }
+  }
 }
+
+/**
+ * Implements hook_uninstall().
+ */
+function menu_item_extras_uninstall() {
+  $menus = \Drupal::entityTypeManager()
+    ->getStorage('menu')
+    ->loadMultiple();
+  if (!empty($menus)) {
+    /** @var \Drupal\menu_item_extras\Service\MenuLinkContentService $mlc_helper */
+    $mlc_helper = \Drupal::service('menu_item_extras.menu_link_content_helper');
+    foreach ($menus as $menu_id => $menu) {
+      $mlc_helper->updateMenuItemsBundle($menu_id, FALSE);
+    }
+  }
+}
+
+/**
+ * Implements hook_update_N().
+ *
+ * Trigger entity update for changes in entity schema.
+ */
+function menu_item_extras_update_8001(&$sandbox) {
+  $entity_type = \Drupal::entityTypeManager()
+    ->getDefinition('menu_link_content');
+  \Drupal::entityDefinitionUpdateManager()->updateEntityType($entity_type);
+}
+
+// /**
+// * Implements hook_update_N().
+// *
+// * Trigger entity update for changes in entity schema.
+// */
+// function menu_item_extras_update_8002(&$sandbox) {
+// // TODO: Move body field to dynamically generated field_body.
+// // $entity_type = \Drupal::entityTypeManager()
+// // ->getStorage('menu_link_content')
+// // ->getQuery()->condition('body', '', '<>')->execute();
+// }

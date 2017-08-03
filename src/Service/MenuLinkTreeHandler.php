@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\menu_item_extras;
+namespace Drupal\menu_item_extras\Service;
 
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Menu\MenuLinkInterface;
@@ -60,15 +60,18 @@ class MenuLinkTreeHandler {
   public function getMenuLinkItemContent(MenuLinkInterface $link) {
     $content = [];
     /** @var \Drupal\menu_link_content\Entity\MenuLinkContent $menu_item */
-    $menu_item = $this->getMenuLinkItemEntity($link);
-    if ($menu_item && $menu_item->hasField('body') && !$menu_item->get('body')->isEmpty()) {
-      $field_body = $menu_item->get('body')->getValue();
-      $content['body'] = [
-        '#type' => 'processed_text',
-        '#text' => $field_body[0]['value'],
-        '#format' => $field_body[0]['format'],
-      ];
-    }
+    // TODO: Return rendered content.
+    /*$menu_item = $this->getMenuLinkItemEntity($link);
+    if ($menu_item &&
+    $menu_item->hasField('body') &&
+    !$menu_item->get('body')->isEmpty()) {
+    $field_body = $menu_item->get('body')->getValue();
+    $content['body'] = [
+    '#type' => 'processed_text',
+    '#text' => $field_body[0]['value'],
+    '#format' => $field_body[0]['format'],
+    ];
+    }*/
 
     return $content;
   }

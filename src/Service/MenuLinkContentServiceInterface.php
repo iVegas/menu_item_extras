@@ -32,4 +32,9 @@ interface MenuLinkContentServiceInterface {
    */
   public function cleanupFields(ContentEntityInterface $entity);
 
+  /**
+   * Run entity definition updates for menu_link_content entity.
+   */
+  public function doEntityUpdate();
+
 }

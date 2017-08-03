@@ -8,7 +8,7 @@ use Drupal\Core\Menu\MenuLinkInterface;
 /**
  * Class MenuLinkTreeHandler.
  */
-class MenuLinkTreeHandler {
+class MenuLinkTreeHandler implements MenuLinkTreeHandlerInterface {
 
   /**
    * The entity type manager.
@@ -49,13 +49,7 @@ class MenuLinkTreeHandler {
   }
 
   /**
-   * Get Menu Link Content entity content.
-   *
-   * @param \Drupal\Core\Menu\MenuLinkInterface $link
-   *   Original link entity.
-   *
-   * @return array
-   *   Renderable menu item content.
+   * {@inheritdoc}
    */
   public function getMenuLinkItemContent(MenuLinkInterface $link) {
     $content = [];
@@ -77,10 +71,7 @@ class MenuLinkTreeHandler {
   }
 
   /**
-   * Process menu tree items. Add menu item content.
-   *
-   * @param array $items
-   *   Menu tree items.
+   * {@inheritdoc}
    */
   public function processMenuLinkTree(array &$items) {
     foreach ($items as &$item) {

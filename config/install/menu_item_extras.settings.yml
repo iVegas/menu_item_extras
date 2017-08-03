@@ -1,3 +1,1 @@
-allowed_menus:
-  - main
-menu_as_bundle: true
+allowed_menus: [ ]

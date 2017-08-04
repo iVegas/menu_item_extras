@@ -3,6 +3,7 @@
 namespace Drupal\menu_item_extras\Service;
 
 use Drupal\Core\Entity\ContentEntityInterface;
+use Drupal\Core\Entity\EntityDefinitionUpdateManagerInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 
@@ -13,16 +14,31 @@ use Drupal\Core\Field\BaseFieldDefinition;
  */
 class MenuLinkContentService implements MenuLinkContentServiceInterface {
 
+  /**
+   * Entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
   private $entityTypeManager;
+
+  /**
+   * Entity definition update manager.
+   *
+   * @var \Drupal\Core\Entity\EntityDefinitionUpdateManagerInterface
+   */
+  private $entityDefinitionUpdateManager;
 
   /**
    * MenuLinkContentHelper constructor.
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
    *   Entity type manager.
+   * @param \Drupal\Core\Entity\EntityDefinitionUpdateManagerInterface $entityDefinitionUpdateManager
+   *   Entity definition update manager.
    */
-  public function __construct(EntityTypeManagerInterface $entityTypeManager) {
+  public function __construct(EntityTypeManagerInterface $entityTypeManager, EntityDefinitionUpdateManagerInterface $entityDefinitionUpdateManager) {
     $this->entityTypeManager = $entityTypeManager;
+    $this->entityDefinitionUpdateManager = $entityDefinitionUpdateManager;
   }
 
   /**
@@ -54,6 +70,15 @@ class MenuLinkContentService implements MenuLinkContentServiceInterface {
         $entity->set($field_name, NULL);
       }
     }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function doEntityUpdate() {
+    $entity_type = $this->entityTypeManager
+      ->getDefinition('menu_link_content');
+    \Drupal::entityDefinitionUpdateManager()->updateEntityType($entity_type);
   }
 
 }

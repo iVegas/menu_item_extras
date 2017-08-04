@@ -8,3 +8,4 @@ dependencies:
   - drupal:text
   - drupal:ckeditor
   - drupal:menu_link_content
+  - view_mode_selector:view_mode_selector

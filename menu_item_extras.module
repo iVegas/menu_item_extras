@@ -177,11 +177,10 @@ function menu_item_extras_form_menu_link_content_form_alter(&$form, FormStateInt
  */
 function menu_item_extras_entity_view_alter(array &$build, EntityInterface $entity, EntityViewDisplayInterface $display) {
   // Disable rendering of standard entity fields for menu link content.
-  if ($entity->getEntityTypeId() == 'menu_link_content') {
-    $build['title']['#access'] = FALSE;
-    $build['description']['#access'] = FALSE;
-    $build['weight']['#access'] = FALSE;
-    $build['expanded']['#access'] = FALSE;
-    $build['enabled']['#access'] = FALSE;
+  if ($entity->getEntityTypeId() === 'menu_link_content') {
+    $hidden_fields = ['title', 'description', 'weight', 'expanded', 'enabled'];
+    foreach ($hidden_fields as $hidden_field) {
+      $build[$hidden_field]['#access'] = FALSE;
+    }
   }
 }

@@ -67,9 +67,7 @@ class MenuLinkTreeHandler implements MenuLinkTreeHandlerInterface {
     /** @var \Drupal\menu_link_content\Entity\MenuLinkContent $menu_item */
     $entity = $this->getMenuLinkItemEntity($link);
     if ($entity) {
-      // Check menu link and menu link item properties.
-      // If item has different properties it has custom fields and we render it.
-      $view_builder = \Drupal::entityTypeManager()
+      $view_builder = $this->entityTypeManager
         ->getViewBuilder($entity->getEntityTypeId());
       $content = $view_builder->view($entity, 'full', $this->languageManager->getCurrentLanguage()->getId());
     }

@@ -104,6 +104,7 @@ before_install:
   - drupal-ti before_install
   # Codesniffer and Coder
   - composer global require "drupal/coder:^8.2"
+  # Symlinks for Codesniffer
   - ln -s ~/.composer/vendor/drupal/coder/coder_sniffer/Drupal ~/.composer/vendor/squizlabs/php_codesniffer/CodeSniffer/Standards/Drupal
   - ln -s ~/.composer/vendor/drupal/coder/coder_sniffer/DrupalPractice ~/.composer/vendor/squizlabs/php_codesniffer/CodeSniffer/Standards/DrupalPractice
 

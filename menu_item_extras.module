@@ -148,8 +148,14 @@ function menu_item_extras_theme_suggestions_menu_alter(array &$suggestions, arra
  * Implements hook_preprocess_menu().
  */
 function menu_item_extras_preprocess_menu(&$variables) {
-  \Drupal::service('menu_item_extras.menu_link_tree_handler')
-    ->processMenuLinkTree($variables['items']);
+  // We preprocess only menus that has additional fields.
+  $entity_manager = \Drupal::service('entity_field.manager');
+  $bundle_fields = array_keys($entity_manager->getFieldDefinitions('menu_link_content', $variables['menu_name']));
+  $entity_type_fields = array_keys($entity_manager->getBaseFieldDefinitions('menu_link_content'));
+  if ($bundle_fields !== $entity_type_fields) {
+    \Drupal::service('menu_item_extras.menu_link_tree_handler')
+      ->processMenuLinkTree($variables['items']);
+  }
 }
 
 /**
@@ -166,6 +172,25 @@ function menu_item_extras_form_menu_link_content_form_alter(&$form, FormStateInt
       unset($form['menu_parent']['#options'][$option_id]);
     }
   }
+}
+
+/**
+ * Implements hook_entity_extra_field_info().
+ *
+ * Creates pseudo field for managing menu item child in render.
+ *
+ * @see hook_entity_extra_field_info()
+ */
+function menu_item_extras_entity_extra_field_info() {
+  $fields = [];
+  foreach (array_keys(\Drupal::service('entity_type.bundle.info')->getBundleInfo('menu_link_content')) as $bundle) {
+    $fields['menu_link_content'][$bundle]['display']['children'] = [
+      'label' => t('Children'),
+      'description' => t('Child items position in render.'),
+      'visible' => FALSE,
+    ];
+  }
+  return $fields;
 }
 
 /**

@@ -53,7 +53,7 @@ class MenuLinkTreeHandler implements MenuLinkTreeHandlerInterface {
     $metadata = $link->getMetaData();
     if (!empty($metadata['entity_id'])) {
       /** @var \Drupal\menu_link_content\Entity\MenuLinkContent $menu_item */
-      $menu_item = $this->entityTypeManager
+      $menu_item = \Drupal::entityTypeManager()
         ->getStorage('menu_link_content')
         ->load($metadata['entity_id']);
     }

@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Manage field for the menu items.
+ * Manage fields for the menu items.
  */
 
 use Drupal\Core\Entity\EntityInterface;
@@ -10,6 +10,8 @@ use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
+use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\menu_item_extras\Utility\Utility;
 
 /**
  * Implements hook_help().
@@ -49,6 +51,33 @@ function menu_item_extras_entity_type_build(array &$entity_types) {
   /** @var \Drupal\Core\Config\Entity\ConfigEntityTypeInterface $menu */
   $menu = $entity_types['menu'];
   $menu->set('bundle_of', $content_entity);
+}
+
+/**
+ * Implements hook_entity_base_field_info().
+ *
+ * Adds a view mode field for later using it per menu item and manage render
+ * based on the view mode.
+ *
+ * @see hook_entity_base_field_info()
+ */
+function menu_item_extras_entity_base_field_info(EntityTypeInterface $entity_type) {
+  $fields = [];
+
+  if ($entity_type->id() === 'menu_link_content') {
+
+    $fields['view_mode'] = BaseFieldDefinition::create('string')
+      ->setLabel(t('View mode'))
+      ->setDescription(t('Per item view mode selector.'))
+      ->setTranslatable(TRUE)
+      ->setDisplayOptions('form', [
+        'type' => 'menu_item_extras_view_mode_selector_select',
+        'weight' => 0,
+      ])
+      ->setDisplayConfigurable('form', TRUE);
+  }
+
+  return $fields;
 }
 
 /**
@@ -149,10 +178,7 @@ function menu_item_extras_theme_suggestions_menu_alter(array &$suggestions, arra
  */
 function menu_item_extras_preprocess_menu(&$variables) {
   // We preprocess only menus that has additional fields.
-  $entity_manager = \Drupal::service('entity_field.manager');
-  $bundle_fields = array_keys($entity_manager->getFieldDefinitions('menu_link_content', $variables['menu_name']));
-  $entity_type_fields = array_keys($entity_manager->getBaseFieldDefinitions('menu_link_content'));
-  if ($bundle_fields !== $entity_type_fields) {
+  if (Utility::checkBundleHasExtraFieldsThanEntity('menu_link_content', $variables['menu_name'])) {
     \Drupal::service('menu_item_extras.menu_link_tree_handler')
       ->processMenuLinkTree($variables['items']);
   }

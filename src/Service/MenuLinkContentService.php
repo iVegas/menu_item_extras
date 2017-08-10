@@ -6,6 +6,8 @@ use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityDefinitionUpdateManagerInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\Core\Entity\EntityFieldManagerInterface;
+use Drupal\Core\Field\FieldStorageDefinitionListenerInterface;
 
 /**
  * Class MenuLinkContentHelper.
@@ -29,16 +31,44 @@ class MenuLinkContentService implements MenuLinkContentServiceInterface {
   private $entityDefinitionUpdateManager;
 
   /**
+   * The entity field manager.
+   *
+   * @var \Drupal\Core\Entity\EntityFieldManagerInterface
+   */
+  private $entityFieldManager;
+
+  /**
+   * The field storage definition listener.
+   *
+   * @var \Drupal\Core\Field\FieldStorageDefinitionListenerInterface
+   */
+  private $fieldStorageDefinitionListener;
+
+  /**
    * MenuLinkContentHelper constructor.
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
    *   Entity type manager.
    * @param \Drupal\Core\Entity\EntityDefinitionUpdateManagerInterface $entityDefinitionUpdateManager
    *   Entity definition update manager.
+   * @param \Drupal\Core\Entity\EntityFieldManagerInterface $entityFieldManager
+   *   The entity field manager.
+   * @param \Drupal\Core\Field\FieldStorageDefinitionListenerInterface $fieldStorageDefinitionListener
+   *   The field storage definition listener.
    */
-  public function __construct(EntityTypeManagerInterface $entityTypeManager, EntityDefinitionUpdateManagerInterface $entityDefinitionUpdateManager) {
+  public function __construct(EntityTypeManagerInterface $entityTypeManager, EntityDefinitionUpdateManagerInterface $entityDefinitionUpdateManager, EntityFieldManagerInterface $entityFieldManager, FieldStorageDefinitionListenerInterface $fieldStorageDefinitionListener) {
     $this->entityTypeManager = $entityTypeManager;
     $this->entityDefinitionUpdateManager = $entityDefinitionUpdateManager;
+    $this->entityFieldManager = $entityFieldManager;
+    $this->fieldStorageDefinitionListener = $fieldStorageDefinitionListener;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function installViewModeField() {
+    $definition = $this->entityFieldManager->getFieldStorageDefinitions('menu_link_content')['view_mode'];
+    $this->fieldStorageDefinitionListener->onFieldStorageDefinitionCreate($definition);
   }
 
   /**
@@ -78,7 +108,7 @@ class MenuLinkContentService implements MenuLinkContentServiceInterface {
   public function doEntityUpdate() {
     $entity_type = $this->entityTypeManager
       ->getDefinition('menu_link_content');
-    \Drupal::entityDefinitionUpdateManager()->updateEntityType($entity_type);
+    $this->entityDefinitionUpdateManager->updateEntityType($entity_type);
   }
 
 }

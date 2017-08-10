@@ -5,6 +5,11 @@ namespace Drupal\menu_item_extras\Plugin\Field\FieldWidget;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Field\WidgetBase;
+use Drupal\Core\Field\FieldDefinitionInterface;
+use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Entity\EntityDisplayRepositoryInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\menu_item_extras\Utility\Utility;
 
 /**
@@ -16,7 +21,54 @@ use Drupal\menu_item_extras\Utility\Utility;
  *  field_types = {"string"}
  * )
  */
-class MenuItemExtrasViewModeSelectorSelect extends WidgetBase {
+class MenuItemExtrasViewModeSelectorSelect extends WidgetBase implements ContainerFactoryPluginInterface {
+
+  /**
+   * The entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityManagerInterface
+   */
+  private $entityTypeManager;
+
+  /**
+   * The entity display repository.
+   *
+   * @var \Drupal\Core\Entity\EntityDisplayRepositoryInterface
+   */
+  private $entityDisplayRepository;
+
+  /**
+   * Constructs an MenuItemExtrasViewModeSelectorSelect object.
+   *
+   * @param string $plugin_id
+   *   The plugin_id for the formatter.
+   * @param mixed $plugin_definition
+   *   The plugin implementation definition.
+   * @param \Drupal\Core\Field\FieldDefinitionInterface $field_definition
+   *   The definition of the field to which the formatter is associated.
+   * @param array $settings
+   *   The formatter settings.
+   * @param array $third_party_settings
+   *   Any third party settings.
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
+   *   The entity type manager.
+   * @param \Drupal\Core\Entity\EntityDisplayRepositoryInterface $entityDisplayRepository
+   *   The entity display repository.
+   */
+  public function __construct($plugin_id, $plugin_definition, FieldDefinitionInterface $field_definition, array $settings, array $third_party_settings, EntityTypeManagerInterface $entityTypeManager, EntityDisplayRepositoryInterface $entityDisplayRepository) {
+    parent::__construct($plugin_id, $plugin_definition, $field_definition, $settings, $third_party_settings);
+    $this->entityTypeManager = $entityTypeManager;
+    $this->entityDisplayRepository = $entityDisplayRepository;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
+    return new static(
+        $plugin_id, $plugin_definition, $configuration['field_definition'], $configuration['settings'], $configuration['third_party_settings'], $container->get('entity_type.manager'), $container->get('entity_display.repository')
+    );
+  }
 
   /**
    * Extracts from form state menu link view modes.
@@ -43,9 +95,9 @@ class MenuItemExtrasViewModeSelectorSelect extends WidgetBase {
     $bundle = $storage['form_display']->getTargetBundle();
     $entity_type = $storage['form_display']->getTargetEntityTypeId();
     // Get all view modes for the current bundle.
-    $view_modes = \Drupal::entityManager()->getViewModeOptionsByBundle($entity_type, $bundle);
+    $view_modes = $this->entityDisplayRepository->getViewModeOptionsByBundle($entity_type, $bundle);
     if (count($view_modes) === 0) {
-      $view_modes['default'] = t('Default');
+      $view_modes['default'] = $this->t('Default');
     }
     return $view_modes;
   }

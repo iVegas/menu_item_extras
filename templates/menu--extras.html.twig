@@ -7,7 +7,7 @@
  * - menu_name: The machine name of the menu.
  * - items: A nested list of menu items. Each menu item contains:
  *   - attributes: HTML attributes for the menu item.
- *   - below: The menu item child items.
+ *   - content.children: The menu item child items.
  *   - title: The menu link title.
  *   - url: The menu link url, instance of \Drupal\Core\Url
  *   - content: The field item content.
@@ -46,18 +46,17 @@
       %}
       <li{{ item.attributes.addClass(classes) }}>
 
-        {{ link(item.title, item.url) }}
+        {{ item.content.link }}
 
-        {% if item.below or item.content %}
+        {% if item.content %}
           <div class="menu-level js-menu-level">
 
             {% if item.content %}
             <div class="menu-item--content-extras">
-              {{ item.content }}
+              {{ item.content | without('link') }}
             </div>
             {% endif %}
 
-            {{ menus.menu_links(item.below, attributes, menu_level + 1) }}
           </div>
         {% endif %}
 

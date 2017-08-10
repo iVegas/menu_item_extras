@@ -23,6 +23,17 @@ interface MenuLinkTreeHandlerInterface {
   public function getMenuLinkItemContent(MenuLinkInterface $link);
 
   /**
+   * Checks if Menu Link Children is enabled to display.
+   *
+   * @param \Drupal\Core\Menu\MenuLinkInterface $link
+   *   Original link entity.
+   *
+   * @return bool
+   *   Returns TRUE is Menu Link Children is enabled in display.
+   */
+  public function isMenuLinkDisplayedChildren(MenuLinkInterface $link);
+
+  /**
    * Process menu tree items. Add menu item content.
    *
    * @param array $items

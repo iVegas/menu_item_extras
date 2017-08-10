@@ -5,6 +5,7 @@ namespace Drupal\menu_item_extras\Service;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\Core\Menu\MenuLinkInterface;
+use Drupal\Core\Link;
 
 /**
  * Class MenuLinkTreeHandler.
@@ -66,10 +67,11 @@ class MenuLinkTreeHandler implements MenuLinkTreeHandlerInterface {
     $content = [];
     /** @var \Drupal\menu_link_content\Entity\MenuLinkContent $menu_item */
     $entity = $this->getMenuLinkItemEntity($link);
+    $content['link'] = Link::fromTextAndUrl($link->getTitle(), $link->getUrlObject())->toRenderable();
     if ($entity) {
       $view_builder = $this->entityTypeManager
         ->getViewBuilder($entity->getEntityTypeId());
-      $content = $view_builder->view($entity, 'full', $this->languageManager->getCurrentLanguage()->getId());
+      $content['content'] = $view_builder->view($entity, 'default', $this->languageManager->getCurrentLanguage()->getId());
     }
     return $content;
   }
@@ -77,15 +79,39 @@ class MenuLinkTreeHandler implements MenuLinkTreeHandlerInterface {
   /**
    * {@inheritdoc}
    */
+  public function isMenuLinkDisplayedChildren(MenuLinkInterface $link) {
+    /** @var \Drupal\menu_link_content\Entity\MenuLinkContent $menu_item */
+    $entity = $this->getMenuLinkItemEntity($link);
+    if ($entity) {
+      $display = $this->entityTypeManager
+        ->getStorage('entity_view_display')
+        ->load($entity->getEntityTypeId() . '.' . $entity->bundle() . '.' . 'default');
+      if ($display->getComponent('children')) {
+        return TRUE;
+      }
+    }
+    return FALSE;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function processMenuLinkTree(array &$items) {
+    $content = '';
     foreach ($items as &$item) {
       if (isset($item['original_link'])) {
-        $item['content'] = $this->getMenuLinkItemContent($item['original_link']);
+        $content = $this->getMenuLinkItemContent($item['original_link']);
       }
       // Process subitems.
       if ($item['below']) {
         $this->processMenuLinkTree($item['below']);
+        if ($this->isMenuLinkDisplayedChildren($item['original_link'])) {
+          foreach ($item['below'] as $child) {
+            $content['content']['children'][] = $child['content'];
+          }
+        }
       }
+      $item['content'] = $content;
     }
   }
 

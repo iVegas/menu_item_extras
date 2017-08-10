@@ -51,14 +51,11 @@ function menu_item_extras_update_8001(&$sandbox) {
   $mlc_helper->doEntityUpdate();
 }
 
-// /**
-// * Implements hook_update_N().
-// *
-// * Trigger entity update for changes in entity schema.
-// */
+/*
 // function menu_item_extras_update_8002(&$sandbox) {
 // // TODO: Move body field to dynamically generated field_body.
 // // $entity_type = \Drupal::entityTypeManager()
 // // ->getStorage('menu_link_content')
 // // ->getQuery()->condition('body', '', '<>')->execute();
 // }
+*/

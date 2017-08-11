@@ -14,6 +14,7 @@ function menu_item_extras_install() {
     ->loadMultiple();
   /** @var \Drupal\menu_item_extras\Service\MenuLinkContentService $mlc_helper */
   $mlc_helper = \Drupal::service('menu_item_extras.menu_link_content_helper');
+  $mlc_helper->installViewModeField();
   if (!empty($menus)) {
     foreach ($menus as $menu_id => $menu) {
       $mlc_helper->updateMenuItemsBundle($menu_id);
@@ -50,14 +51,11 @@ function menu_item_extras_update_8001(&$sandbox) {
   $mlc_helper->doEntityUpdate();
 }
 
-// /**
-// * Implements hook_update_N().
-// *
-// * Trigger entity update for changes in entity schema.
-// */
-// function menu_item_extras_update_8002(&$sandbox) {
-// // TODO: Move body field to dynamically generated field_body.
-// // $entity_type = \Drupal::entityTypeManager()
-// // ->getStorage('menu_link_content')
-// // ->getQuery()->condition('body', '', '<>')->execute();
-// }
+/*
+function menu_item_extras_update_8002(&$sandbox) {
+// TODO: Move body field to dynamically generated field_body.
+$entity_type = \Drupal::entityTypeManager()
+->getStorage('menu_link_content')
+->getQuery()->condition('body', '', '<>')->execute();
+}
+ */

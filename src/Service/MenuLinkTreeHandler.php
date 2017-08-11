@@ -69,9 +69,16 @@ class MenuLinkTreeHandler implements MenuLinkTreeHandlerInterface {
     $entity = $this->getMenuLinkItemEntity($link);
     $content['link'] = Link::fromTextAndUrl($link->getTitle(), $link->getUrlObject())->toRenderable();
     if ($entity) {
+      $view_mode = 'default';
+      if (!$entity->get('view_mode')->isEmpty()) {
+        $value = $entity->get('view_mode')->first()->getValue();
+        if (!empty($value['value'])) {
+          $view_mode = $value['value'];
+        }
+      }
       $view_builder = $this->entityTypeManager
         ->getViewBuilder($entity->getEntityTypeId());
-      $content['content'] = $view_builder->view($entity, 'default', $this->languageManager->getCurrentLanguage()->getId());
+      $content['content'] = $view_builder->view($entity, $view_mode, $this->languageManager->getCurrentLanguage()->getId());
     }
     return $content;
   }
@@ -83,9 +90,16 @@ class MenuLinkTreeHandler implements MenuLinkTreeHandlerInterface {
     /** @var \Drupal\menu_link_content\Entity\MenuLinkContent $menu_item */
     $entity = $this->getMenuLinkItemEntity($link);
     if ($entity) {
+      $view_mode = 'default';
+      if (!$entity->get('view_mode')->isEmpty()) {
+        $value = $entity->get('view_mode')->first()->getValue();
+        if (!empty($value['value'])) {
+          $view_mode = $value['value'];
+        }
+      }
       $display = $this->entityTypeManager
         ->getStorage('entity_view_display')
-        ->load($entity->getEntityTypeId() . '.' . $entity->bundle() . '.' . 'default');
+        ->load($entity->getEntityTypeId() . '.' . $entity->bundle() . '.' . $view_mode);
       if ($display->getComponent('children')) {
         return TRUE;
       }

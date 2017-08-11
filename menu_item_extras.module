@@ -155,15 +155,7 @@ function menu_item_extras_preprocess_block(&$variables) {
  * Implements hook_theme_suggestions_HOOK_alter().
  */
 function menu_item_extras_theme_suggestions_menu_alter(array &$suggestions, array $variables) {
-  $entity_manager = \Drupal::service('entity_field.manager');
-  $bundle_fields = array_keys($entity_manager->getFieldDefinitions('menu_link_content', $variables['menu_name']));
-  $entity_type_fields = array_keys($entity_manager->getBaseFieldDefinitions('menu_link_content'));
-
-  if ($bundle_fields !== $entity_type_fields) {
-    kint($bundle_fields);
-    kint($entity_type_fields);
-
-
+  if (Utility::checkBundleHasExtraFieldsThanEntity('menu_link_content', $variables['menu_name'])) {
     $suggestion_prefix = 'menu__extras';
     $menu_name = $variables['menu_name'];
     $menu_name = strtr($menu_name, '-', '_');

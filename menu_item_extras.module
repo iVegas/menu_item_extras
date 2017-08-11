@@ -126,19 +126,27 @@ function menu_item_extras_preprocess_block(&$variables) {
  * Implements hook_theme_suggestions_HOOK_alter().
  */
 function menu_item_extras_theme_suggestions_menu_alter(array &$suggestions, array $variables) {
-  $suggestion_prefix = 'menu__extras';
+  $entity_manager = \Drupal::service('entity_field.manager');
+  $bundle_fields = array_keys($entity_manager->getFieldDefinitions('menu_link_content', $variables['menu_name']));
+  $entity_type_fields = array_keys($entity_manager->getBaseFieldDefinitions('menu_link_content'));
 
-  $menu_name = $variables['menu_name'];
-  $menu_name_sanitized = strtr($menu_name, '-', '_');
+  if ($bundle_fields !== $entity_type_fields) {
+    kint($bundle_fields);
+    kint($entity_type_fields);
 
-  $suggestions = [];
 
-  // Custom suggestions.
-  $suggestions[] = $suggestion_prefix;
-  $suggestions[] = $suggestion_prefix . '__' . $menu_name_sanitized;
-  // Custom suggestions for the parent region.
-  if (isset($variables['attributes']['data-region'])) {
-    $suggestions[] = $suggestion_prefix . '__' . $menu_name_sanitized . '__' . $variables['attributes']['data-region'];
+    $suggestion_prefix = 'menu__extras';
+    $menu_name = $variables['menu_name'];
+    $menu_name = strtr($menu_name, '-', '_');
+
+    $suggestions = [];
+    // Custom suggestions.
+    $suggestions[] = $suggestion_prefix;
+    $suggestions[] = $suggestion_prefix . '__' . $menu_name;
+    // Custom suggestions for the parent region.
+    if (isset($variables['attributes']['data-region'])) {
+      $suggestions[] = $suggestion_prefix . '__' . $menu_name . '__' . $variables['attributes']['data-region'];
+    }
   }
 
   return $suggestions;

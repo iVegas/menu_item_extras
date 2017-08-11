@@ -64,10 +64,10 @@ class MenuLinkTreeHandler implements MenuLinkTreeHandlerInterface {
    * {@inheritdoc}
    */
   public function getMenuLinkItemContent(MenuLinkInterface $link) {
-    $content = [];
+    $render_output = [];
     /** @var \Drupal\menu_link_content\Entity\MenuLinkContent $menu_item */
     $entity = $this->getMenuLinkItemEntity($link);
-    $content['link'] = Link::fromTextAndUrl($link->getTitle(), $link->getUrlObject())->toRenderable();
+    $render_output['link'] = Link::fromTextAndUrl($link->getTitle(), $link->getUrlObject())->toRenderable();
     if ($entity) {
       $view_mode = 'default';
       if (!$entity->get('view_mode')->isEmpty()) {
@@ -78,9 +78,10 @@ class MenuLinkTreeHandler implements MenuLinkTreeHandlerInterface {
       }
       $view_builder = $this->entityTypeManager
         ->getViewBuilder($entity->getEntityTypeId());
-      $content['content'] = $view_builder->view($entity, $view_mode, $this->languageManager->getCurrentLanguage()->getId());
+      $render_entity = $view_builder->view($entity, $view_mode, $this->languageManager->getCurrentLanguage()->getId());
+      $render_output['content'] = $render_entity;
     }
-    return $content;
+    return $render_output;
   }
 
   /**

@@ -1,7 +1,0 @@
-name: Menu Item Extras Demo
-type: module
-description: Provide a demo example of Mega Menu
-package: Menu
-core: 8.x
-dependencies:
-  - menu_item_extras

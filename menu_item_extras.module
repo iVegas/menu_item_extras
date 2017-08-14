@@ -242,7 +242,7 @@ function menu_item_extras_entity_extra_field_info() {
     $fields['menu_link_content'][$bundle]['display']['children'] = [
       'label' => t('Children'),
       'description' => t('Child items position in render.'),
-      'visible' => FALSE,
+      'visible' => TRUE,
     ];
   }
   return $fields;

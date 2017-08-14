@@ -1,4 +1,4 @@
-uuid: 9b87a180-0aa8-4dda-b6c6-13f7e6e83ea3
+uuid: 7746eab1-8e4f-4127-aa51-a587b0065c49
 langcode: en
 status: true
 dependencies:
@@ -22,5 +22,5 @@ settings:
   provider: system
   label_display: '0'
   level: 1
-  depth: 0
+  depth: 1
 visibility: {  }

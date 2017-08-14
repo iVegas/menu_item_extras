@@ -22,6 +22,9 @@ function template_preprocess_menu_link_content(array &$variables) {
   // Helpful $content variable for templates.
   foreach (Element::children($variables['elements']) as $key) {
     $variables['content'][$key] = $variables['elements'][$key];
+    if ($key === 'children') {
+      $variables['content'][$key]['#theme'] = 'menu_item_content';
+    }
   }
   $variables['attributes']['class'][] = 'menu_link_content';
   $variables['attributes']['class'][] = Html::getClass('menu_link_content' . $menu_link_content->getMenuName());

@@ -132,6 +132,11 @@ function menu_item_extras_theme() {
     'file' => 'menu_item_extras.theme.inc',
     'template' => 'menu-link-content',
   ];
+  $theme['menu_item_content'] = [
+    'render element' => 'elements',
+    'file' => 'menu_item_extras.theme.inc',
+    'template' => 'menu-item-content',
+  ];
   return $theme;
 }
 
@@ -168,6 +173,22 @@ function menu_item_extras_theme_suggestions_menu_link_content(array $variables) 
   $suggestions[] = 'menu_link_content__' . $menu_link_content->getMenuName() . '__' . $sanitized_view_mode;
   $suggestions[] = 'menu_link_content__' . $menu_link_content->id();
   $suggestions[] = 'menu_link_content__' . $menu_link_content->id() . '__' . $sanitized_view_mode;
+  return $suggestions;
+}
+
+/**
+ * Implements hook_theme_suggestions_HOOK().
+ */
+function menu_item_extras_theme_suggestions_menu_item_content(array $variables) {
+  $suggestions = [];
+  //kint($variables);
+  /*$menu_link_content = $variables['elements']['#menu_link_content'];
+  $sanitized_view_mode = strtr($variables['elements']['#view_mode'], '.', '_');*/
+  //$suggestions[] = 'menu_item_content__' . $sanitized_view_mode;
+  //$suggestions[] = 'menu_item_content__' . $menu_link_content->getMenuName();
+  //$suggestions[] = 'menu_item_content__' . $menu_link_content->getMenuName() . '__' . $sanitized_view_mode;
+  //$suggestions[] = 'menu_item_content__' . $menu_link_content->id();
+  //$suggestions[] = 'menu_item_content__' . $menu_link_content->id() . '__' . $sanitized_view_mode;
   return $suggestions;
 }
 

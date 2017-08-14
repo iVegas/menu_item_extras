@@ -67,7 +67,6 @@ class MenuLinkTreeHandler implements MenuLinkTreeHandlerInterface {
     $render_output = [];
     /** @var \Drupal\menu_link_content\Entity\MenuLinkContent $menu_item */
     $entity = $this->getMenuLinkItemEntity($link);
-    $render_output['link'] = Link::fromTextAndUrl($link->getTitle(), $link->getUrlObject())->toRenderable();
     if ($entity) {
       $view_mode = 'default';
       if (!$entity->get('view_mode')->isEmpty()) {
@@ -81,6 +80,7 @@ class MenuLinkTreeHandler implements MenuLinkTreeHandlerInterface {
       $render_entity = $view_builder->view($entity, $view_mode, $this->languageManager->getCurrentLanguage()->getId());
       $render_output['content'] = $render_entity;
     }
+    $render_output['content']['link'] = Link::fromTextAndUrl($link->getTitle(), $link->getUrlObject())->toRenderable();
     return $render_output;
   }
 
@@ -111,22 +111,30 @@ class MenuLinkTreeHandler implements MenuLinkTreeHandlerInterface {
   /**
    * {@inheritdoc}
    */
-  public function processMenuLinkTree(array &$items) {
+  public function processMenuLinkTree(array &$items, $menu_level = 0) {
     $content = '';
     foreach ($items as &$item) {
       if (isset($item['original_link'])) {
         $content = $this->getMenuLinkItemContent($item['original_link']);
+        $content['menu_level'] = $menu_level;
       }
       // Process subitems.
       if ($item['below']) {
-        $this->processMenuLinkTree($item['below']);
+        $menu_level++;
+        $this->processMenuLinkTree($item['below'], $menu_level);
         if ($this->isMenuLinkDisplayedChildren($item['original_link'])) {
-          foreach ($item['below'] as $child) {
+          foreach ($item['below'] as &$child) {
+            $child['content']['menu_level'] = $menu_level;
             $content['content']['children'][] = $child['content'];
           }
         }
       }
-      $item['content'] = $content;
+
+      if ($content['menu_level'] === 0) {
+        $item = array_merge($item, $content);
+      } else {
+        $item['content'] = $content;
+      }
     }
   }
 

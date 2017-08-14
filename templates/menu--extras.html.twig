@@ -19,15 +19,25 @@
  *   - in_active_trail: TRUE if the link is in the active trail.
  */
 #}
-{% import _self as menus %}
+{#{% import _self as menus %}#}
 
 {#
   We call a macro which calls itself to render the full tree.
   @see http://twig.sensiolabs.org/doc/tags/macro.html
 #}
-{{ menus.menu_links(items, attributes, 0) }}
+{#{{ menus.menu_links(items, attributes, 0) }}#}
 
-{% macro menu_links(items, attributes, menu_level) %}
+
+{#{% for item in items %}
+  {{ item.content.link }}
+  {{ item.content | without('link') }}
+{% endfor %}#}
+
+{% extends "menu-item-content.html.twig" %}
+
+{% set elements = items %}
+
+{#{% macro menu_links(items, attributes, menu_level) %}
   {% import _self as menus %}
   {% if items %}
     {% if menu_level == 0 %}
@@ -50,19 +60,19 @@
         {{ item.content.link }}
 
         {% if item.content %}
-          <div class="menu-level js-menu-level">
+        <div class="menu-dropdown menu-dropdown-{{ menu_level }}">
+          {{ item.content | without('link') }}
 
-            {% if item.content %}
-            <div class="menu-item--content-extras">
-              {{ item.content | without('link') }}
-            </div>
-            {% endif %}
 
-          </div>
+          #}{#{% if item.below %}
+            {{ menus.menu_links(item.below, attributes, menu_level + 1) }}
+          {% endif %}#}{#
+
+        </div>
         {% endif %}
 
       </li>
     {% endfor %}
     </ul>
   {% endif %}
-{% endmacro %}
+{% endmacro %}#}

@@ -219,6 +219,17 @@ function menu_item_extras_form_menu_link_content_form_alter(&$form, FormStateInt
 }
 
 /**
+ * Implements hook_menu_insert().
+ */
+function menu_item_extras_menu_insert(EntityInterface $entity) {
+  /** @var \Drupal\menu_item_extras\Service\MenuLinkContentService $mlc_helper */
+  $mlc_helper = \Drupal::service('menu_item_extras.menu_link_content_helper');
+  $mlc_helper->installViewModeField();
+  $mlc_helper->updateMenuItemsBundle($entity->id());
+  $mlc_helper->doEntityUpdate();
+}
+
+/**
  * Implements hook_entity_extra_field_info().
  *
  * Creates pseudo field for managing menu item child in render.

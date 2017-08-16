@@ -49,7 +49,7 @@
         {{ link(item.title, item.url) }}
 
         {% if item.below or item.content %}
-          <div class="menu-level js-menu-level">
+          <div class="menu-level js-menu-level menu-dropdown-level-{{ menu_level }}">
 
             {% if item.content %}
             <div class="menu-item--content-extras">
@@ -57,7 +57,9 @@
             </div>
             {% endif %}
 
+            {% if item.below %}
             {{ menus.menu_links(item.below, attributes, menu_level + 1) }}
+            {% endif %}
           </div>
         {% endif %}
 

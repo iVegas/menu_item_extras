@@ -79,6 +79,10 @@ function menu_item_extras_preprocess_block(&$variables) {
  * Implements hook_theme_suggestions_HOOK_alter().
  */
 function menu_item_extras_theme_suggestions_menu_alter(array &$suggestions, array $variables) {
+  if (empty($variables['menu_name'])) {
+    return $suggestions;
+  }
+
   $suggestion_prefix = 'menu__extras';
   $allowed_menus = \Drupal::configFactory()
     ->get('menu_item_extras.settings')
@@ -152,8 +156,8 @@ function menu_item_extras_form_alter(array &$form, FormStateInterface $form_stat
     $form['add_extras'] = [
       '#type' => 'checkbox',
       '#title' => 'Add extras',
-      '#weight' => 3,
-      '#description' => t("Add extra fields for the menu items. <em class='color-warning'>If you'll disable this, all extra data will be removed.</em>"),
+      '#weight' => 1,
+      '#description' => t("Add extra fields for menu items. <em class='color-warning'>If disabled - all extra data will be removed.</em>"),
       '#default_value' => $default_value,
     ];
 

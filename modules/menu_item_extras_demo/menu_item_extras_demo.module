@@ -5,3 +5,48 @@
  * Manage fields for the menu items.
  */
 
+
+/**
+ * Implements hook_preprocess_node() for paragraph node templates.
+ *
+ * Attach css we need for paragraph demo content.
+ */
+function menu_item_extras_demo_preprocess_menu(&$variables) {
+  if ($variables['menu_name'] === 'menu-item-extras-demo-menu') {
+    $variables['#attached']['library'][] = 'menu_item_extras_demo/demo';
+  }
+}
+
+/**
+ * Implements hook_theme().
+ */
+/*function menu_item_extras_demo_theme() {
+  //$theme = [];
+  $theme['menu__extras'] = [
+    'render element' => 'content',
+    'base hook' => 'menu',
+    'template' => 'menu--extras',
+  ];
+  $theme['menu_link_content'] = [
+    'render element' => 'elements',
+    'template' => 'menu-link-content',
+  ];
+  $theme['menu_item_content'] = [
+    'render element' => 'elements',
+    'template' => 'menu-item-content',
+  ];
+  return $theme;
+}*/
+
+
+
+/**
+ * Implements hook_theme_registry_alter
+ */
+/*function menu_item_extras_demo_theme_registry_alter(&$theme_registry) {
+  $path = drupal_get_path('module', 'menu_item_extras_demo') . '/templates';
+
+  $theme_registry['menu__extras']['path'] = $path;
+  $theme_registry['menu_link_content']['path'] = $path;
+  $theme_registry['menu_item_content']['path'] = $path;
+}*/

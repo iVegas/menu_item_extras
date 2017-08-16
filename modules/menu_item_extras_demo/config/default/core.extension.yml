@@ -26,6 +26,7 @@ module:
   kint: 0
   link: 0
   menu_item_extras: 0
+  menu_item_extras_demo: 0
   menu_ui: 0
   node: 0
   options: 0

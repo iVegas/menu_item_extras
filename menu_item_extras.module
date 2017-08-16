@@ -166,6 +166,7 @@ function menu_item_extras_preprocess_block(&$variables) {
  */
 function menu_item_extras_theme_suggestions_menu_link_content(array $variables) {
   $suggestions = [];
+  /* @var \Drupal\menu_link_content\Entity\MenuLinkContent $menu_link_content */
   $menu_link_content = $variables['elements']['#menu_link_content'];
   $sanitized_view_mode = strtr($variables['elements']['#view_mode'], '.', '_');
   $suggestions[] = 'menu_link_content__' . $sanitized_view_mode;
@@ -181,14 +182,11 @@ function menu_item_extras_theme_suggestions_menu_link_content(array $variables) 
  */
 function menu_item_extras_theme_suggestions_menu_item_content(array $variables) {
   $suggestions = [];
-  //kint($variables);
-  /*$menu_link_content = $variables['elements']['#menu_link_content'];
-  $sanitized_view_mode = strtr($variables['elements']['#view_mode'], '.', '_');*/
-  //$suggestions[] = 'menu_item_content__' . $sanitized_view_mode;
-  //$suggestions[] = 'menu_item_content__' . $menu_link_content->getMenuName();
-  //$suggestions[] = 'menu_item_content__' . $menu_link_content->getMenuName() . '__' . $sanitized_view_mode;
-  //$suggestions[] = 'menu_item_content__' . $menu_link_content->id();
-  //$suggestions[] = 'menu_item_content__' . $menu_link_content->id() . '__' . $sanitized_view_mode;
+
+  if (isset($variables['elements'][0]['menu_level'])) {
+    $suggestions[] = 'menu_item_content__level_' . $variables['elements'][0]['menu_level'];
+  }
+
   return $suggestions;
 }
 

@@ -13,8 +13,7 @@
 #}
 
 
-<ul class="menu menu-level-{{ elements|first.menu_level }}">
-  {#{{ kint(elements) }}#}
+<ul class="menu-extras menu-level-{{ elements|first.menu_level }}">
 {% for key, item in elements if key|first != '#' %}
   {% set classes = [
     'menu-item',
@@ -30,7 +29,7 @@
     {{ item.content.link }}
 
     {% if rendered_content %}
-      <div class="menu-dropdown menu-dropdown-{{ item.menu_level }} menu-type-{{ item.content['#view_mode'] }}">
+      <div class="menu-dropdown menu-dropdown-{{ item.menu_level }}">
         {{ rendered_content }}
       </div>
     {% endif %}

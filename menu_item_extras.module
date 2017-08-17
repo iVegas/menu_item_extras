@@ -132,10 +132,10 @@ function menu_item_extras_theme() {
     'file' => 'menu_item_extras.theme.inc',
     'template' => 'menu-link-content',
   ];
-  $theme['menu_item_content'] = [
+  $theme['menu_levels'] = [
     'render element' => 'elements',
-    'file' => 'menu_item_extras.theme.inc',
-    'template' => 'menu-item-content',
+    'template' => 'menu-levels',
+    'base hook' => 'menu_levels',
   ];
   return $theme;
 }
@@ -183,9 +183,9 @@ function menu_item_extras_theme_suggestions_menu_link_content(array $variables) 
 /**
  * Implements hook_theme_suggestions_HOOK().
  */
-function menu_item_extras_theme_suggestions_menu_item_content(array $variables) {
+function menu_item_extras_theme_suggestions_menu_levels(array $variables) {
   $suggestions = [];
-  $suggestion_prefix = 'menu_item_content';
+  $suggestion_prefix = 'menu-levels';
 
   if (isset($variables['elements'][0]['menu_level'])) {
     $level = 'level_' . $variables['elements'][0]['menu_level'];

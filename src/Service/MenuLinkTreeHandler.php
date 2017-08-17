@@ -80,7 +80,6 @@ class MenuLinkTreeHandler implements MenuLinkTreeHandlerInterface {
       $render_entity = $view_builder->view($entity, $view_mode, $this->languageManager->getCurrentLanguage()->getId());
       $render_output['content'] = $render_entity;
     }
-    //$render_output['content']['link'] = Link::fromTextAndUrl($link->getTitle(), $link->getUrlObject())->toRenderable();
     return $render_output;
   }
 
@@ -98,6 +97,7 @@ class MenuLinkTreeHandler implements MenuLinkTreeHandlerInterface {
           $view_mode = $value['value'];
         }
       }
+      /* @var \Drupal\Core\Entity\Entity\EntityViewDisplay $display */
       $display = $this->entityTypeManager
         ->getStorage('entity_view_display')
         ->load($entity->getEntityTypeId() . '.' . $entity->bundle() . '.' . $view_mode);

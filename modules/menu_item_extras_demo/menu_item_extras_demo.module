@@ -5,7 +5,6 @@
  * Manage fields for the menu items.
  */
 
-
 /**
  * Implements hook_preprocess_node() for paragraph node templates.
  *
@@ -18,36 +17,9 @@ function menu_item_extras_demo_preprocess_menu(&$variables) {
 }
 
 /**
- * Implements hook_theme().
- */
-/*function menu_item_extras_demo_theme() {
-  //$theme = [];
-  $theme['menu__extras__menu_item_extras_demo_menu'] = [
-    'render element' => 'content',
-    'base hook' => 'menu',
-    'template' => 'menu--extras--menu-item-extras-demo-menu',
-  ];
-  $theme['menu_link_content'] = [
-    'render element' => 'elements',
-    'base hook' => 'menu_link_content',
-    'template' => 'menu-link-content',
-  ];
-  $theme['menu_link_content__menu_item_extras_demo_menu'] = [
-    'template' => 'menu-link-content--menu-item-extras-demo-menu',
-  ];
-  $theme['menu_item_content'] = [
-    'render element' => 'elements',
-    'template' => 'menu-item-content',
-  ];
-  return $theme;
-}*/
-
-
-
-/**
  * Implements hook_preprocess().
  */
-/*function menu_item_extras_demo_preprocess(&$variables, $hook, &$info) {
+function menu_item_extras_demo_preprocess(&$variables, $hook, &$info) {
   $module_path = drupal_get_path('module', 'menu_item_extras_demo');
 
   if ($hook == 'menu') {
@@ -56,9 +28,9 @@ function menu_item_extras_demo_preprocess_menu(&$variables) {
       $info['path'] = $module_path . '/templates';
     }
   }
-  if ($hook == 'menu_link_content') {*/
+  if ($hook == 'menu_link_content') {
     /* @var \Drupal\menu_link_content\Entity\MenuLinkContent $menu_link_content */
-/*    $menu_link_content = $variables['elements']['#menu_link_content'];
+    $menu_link_content = $variables['elements']['#menu_link_content'];
     $sanitized_view_mode = strtr($variables['elements']['#view_mode'], '.', '_');
 
     if (substr($info['theme path'], 0, 7) != 'themes/') {
@@ -67,17 +39,4 @@ function menu_item_extras_demo_preprocess_menu(&$variables) {
       $info['template'] = 'menu-link-content--' . $menu_link_content->getMenuName() . '--' . $sanitized_view_mode;
     }
   }
-}*/
-
-
-
-/**
- * Implements hook_theme_registry_alter
- */
-/*function menu_item_extras_demo_theme_registry_alter(&$theme_registry) {
-  $path = drupal_get_path('module', 'menu_item_extras_demo') . '/templates';
-
-  $theme_registry['menu__extras']['path'] = $path;
-  $theme_registry['menu_link_content']['path'] = $path;
-  $theme_registry['menu_item_content']['path'] = $path;
-}*/
+}

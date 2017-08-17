@@ -187,11 +187,10 @@ function menu_item_extras_theme_suggestions_menu_levels(array $variables) {
   $suggestions = [];
   $suggestion_prefix = 'menu-levels';
 
+  $menu_name = $variables['elements']['#menu_name'];
   if (isset($variables['elements'][0]['menu_level'])) {
     $level = 'level_' . $variables['elements'][0]['menu_level'];
   }
-  $menu_name = $variables['elements']['#menu_name'];
-
 
   if (isset($level)) {
     $suggestions[] = $suggestion_prefix . '__' . $level;

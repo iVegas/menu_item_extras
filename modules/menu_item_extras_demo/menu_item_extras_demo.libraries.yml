@@ -8,7 +8,3 @@ demo:
     - core/drupal
     - core/drupalSettings
     - core/jquery.once
-    - core/jquery.form
-    - core/drupal.ajax
-    - core/drupal.dropbutton
-

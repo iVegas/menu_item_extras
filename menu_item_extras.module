@@ -166,14 +166,17 @@ function menu_item_extras_preprocess_block(&$variables) {
  */
 function menu_item_extras_theme_suggestions_menu_link_content(array $variables) {
   $suggestions = [];
+  $suggestion_prefix = 'menu_link_content';
   /* @var \Drupal\menu_link_content\Entity\MenuLinkContent $menu_link_content */
   $menu_link_content = $variables['elements']['#menu_link_content'];
   $sanitized_view_mode = strtr($variables['elements']['#view_mode'], '.', '_');
-  $suggestions[] = 'menu_link_content__' . $sanitized_view_mode;
-  $suggestions[] = 'menu_link_content__' . $menu_link_content->getMenuName();
-  $suggestions[] = 'menu_link_content__' . $menu_link_content->getMenuName() . '__' . $sanitized_view_mode;
-  $suggestions[] = 'menu_link_content__' . $menu_link_content->id();
-  $suggestions[] = 'menu_link_content__' . $menu_link_content->id() . '__' . $sanitized_view_mode;
+
+  $suggestions[] = $suggestion_prefix . '__' . $sanitized_view_mode;
+  $suggestions[] = $suggestion_prefix . '__' . $menu_link_content->getMenuName();
+  $suggestions[] = $suggestion_prefix . '__' . $menu_link_content->getMenuName() . '__' . $sanitized_view_mode;
+  $suggestions[] = $suggestion_prefix . '__' . $menu_link_content->id();
+  $suggestions[] = $suggestion_prefix . '__' . $menu_link_content->id() . '__' . $sanitized_view_mode;
+
   return $suggestions;
 }
 
@@ -182,9 +185,20 @@ function menu_item_extras_theme_suggestions_menu_link_content(array $variables) 
  */
 function menu_item_extras_theme_suggestions_menu_item_content(array $variables) {
   $suggestions = [];
+  $suggestion_prefix = 'menu_item_content';
 
   if (isset($variables['elements'][0]['menu_level'])) {
-    $suggestions[] = 'menu_item_content__level_' . $variables['elements'][0]['menu_level'];
+    $level = 'level_' . $variables['elements'][0]['menu_level'];
+  }
+  $menu_name = $variables['elements']['#menu_name'];
+
+
+  if (isset($level)) {
+    $suggestions[] = $suggestion_prefix . '__' . $level;
+  }
+  $suggestions[] = $suggestion_prefix . '__' . $menu_name;
+  if (isset($level)) {
+    $suggestions[] = $suggestion_prefix . '__' . $menu_name . '__' . $level;
   }
 
   return $suggestions;

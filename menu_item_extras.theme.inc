@@ -18,12 +18,14 @@ use Drupal\Component\Utility\Html;
  *   - menu_link_content: An individual menu_link_content for display.
  */
 function template_preprocess_menu_link_content(array &$variables) {
+  /* @var \Drupal\menu_link_content\Entity\MenuLinkContent $menu_link_content */
   $menu_link_content = $variables['elements']['#menu_link_content'];
   // Helpful $content variable for templates.
   foreach (Element::children($variables['elements']) as $key) {
     $variables['content'][$key] = $variables['elements'][$key];
     if ($key === 'children') {
       $variables['content'][$key]['#theme'] = 'menu_item_content';
+      $variables['content'][$key]['#menu_name'] = $menu_link_content->getMenuName();
     }
   }
   $variables['attributes']['class'][] = 'menu_link_content';

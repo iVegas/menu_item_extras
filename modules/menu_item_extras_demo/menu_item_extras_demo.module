@@ -22,20 +22,51 @@ function menu_item_extras_demo_preprocess_menu(&$variables) {
  */
 /*function menu_item_extras_demo_theme() {
   //$theme = [];
-  $theme['menu__extras'] = [
+  $theme['menu__extras__menu_item_extras_demo_menu'] = [
     'render element' => 'content',
     'base hook' => 'menu',
-    'template' => 'menu--extras',
+    'template' => 'menu--extras--menu-item-extras-demo-menu',
   ];
   $theme['menu_link_content'] = [
     'render element' => 'elements',
+    'base hook' => 'menu_link_content',
     'template' => 'menu-link-content',
+  ];
+  $theme['menu_link_content__menu_item_extras_demo_menu'] = [
+    'template' => 'menu-link-content--menu-item-extras-demo-menu',
   ];
   $theme['menu_item_content'] = [
     'render element' => 'elements',
     'template' => 'menu-item-content',
   ];
   return $theme;
+}*/
+
+
+
+/**
+ * Implements hook_preprocess().
+ */
+/*function menu_item_extras_demo_preprocess(&$variables, $hook, &$info) {
+  $module_path = drupal_get_path('module', 'menu_item_extras_demo');
+
+  if ($hook == 'menu') {
+    if (substr($info['theme path'], 0, 7) != 'themes/') {
+      $info['theme path'] = $module_path;
+      $info['path'] = $module_path . '/templates';
+    }
+  }
+  if ($hook == 'menu_link_content') {*/
+    /* @var \Drupal\menu_link_content\Entity\MenuLinkContent $menu_link_content */
+/*    $menu_link_content = $variables['elements']['#menu_link_content'];
+    $sanitized_view_mode = strtr($variables['elements']['#view_mode'], '.', '_');
+
+    if (substr($info['theme path'], 0, 7) != 'themes/') {
+      $info['theme path'] = $module_path;
+      $info['path'] = $module_path . '/templates';
+      $info['template'] = 'menu-link-content--' . $menu_link_content->getMenuName() . '--' . $sanitized_view_mode;
+    }
+  }
 }*/
 
 

@@ -6,3 +6,4 @@ hidden: false
 core: 8.x
 dependencies:
   - drupal:menu_item_extras
+base theme: classy

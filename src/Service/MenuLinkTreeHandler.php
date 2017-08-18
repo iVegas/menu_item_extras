@@ -6,6 +6,7 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Entity\EntityRepositoryInterface;
 use Drupal\Core\Menu\MenuLinkInterface;
 use Drupal\Core\Link;
+use Drupal\menu_link_content\Entity\MenuLinkContent;
 
 /**
  * Class MenuLinkTreeHandler.
@@ -63,6 +64,18 @@ class MenuLinkTreeHandler implements MenuLinkTreeHandlerInterface {
     return $menu_item;
   }
 
+  protected function menuLinkContentViewMode(MenuLinkContent $entity) {
+    $view_mode = 'default';
+    if (!$entity->get('view_mode')->isEmpty()) {
+      $value = $entity->get('view_mode')->first()->getValue();
+      if (!empty($value['value'])) {
+        $view_mode = $value['value'];
+      }
+    }
+
+    return $view_mode;
+  }
+
   /**
    * {@inheritdoc}
    */
@@ -70,20 +83,17 @@ class MenuLinkTreeHandler implements MenuLinkTreeHandlerInterface {
     $render_output = [];
     /** @var \Drupal\menu_link_content\Entity\MenuLinkContent $menu_item */
     $entity = $this->getMenuLinkItemEntity($link);
-    $render_output['link'] = Link::fromTextAndUrl($link->getTitle(), $link->getUrlObject())->toRenderable();
     if ($entity) {
-      $view_mode = 'default';
-      if (!$entity->get('view_mode')->isEmpty()) {
-        $value = $entity->get('view_mode')->first()->getValue();
-        if (!empty($value['value'])) {
-          $view_mode = $value['value'];
-        }
-      }
+      $view_mode = $this->menuLinkContentViewMode($entity);
       $view_builder = $this->entityTypeManager
         ->getViewBuilder($entity->getEntityTypeId());
       $render_entity = $view_builder->view($entity, $view_mode);
       $render_output['content'] = $render_entity;
     }
+
+    $render_output['content']['#title'] = $link->getTitle();
+    $render_output['content']['#url'] = $link->getUrlObject();
+
     return $render_output;
   }
 
@@ -94,13 +104,8 @@ class MenuLinkTreeHandler implements MenuLinkTreeHandlerInterface {
     /** @var \Drupal\menu_link_content\Entity\MenuLinkContent $menu_item */
     $entity = $this->getMenuLinkItemEntity($link);
     if ($entity) {
-      $view_mode = 'default';
-      if (!$entity->get('view_mode')->isEmpty()) {
-        $value = $entity->get('view_mode')->first()->getValue();
-        if (!empty($value['value'])) {
-          $view_mode = $value['value'];
-        }
-      }
+      $view_mode = $this->menuLinkContentViewMode($entity);
+      /* @var \Drupal\Core\Entity\Entity\EntityViewDisplay $display */
       $display = $this->entityTypeManager
         ->getStorage('entity_view_display')
         ->load($entity->getEntityTypeId() . '.' . $entity->bundle() . '.' . $view_mode);
@@ -114,22 +119,27 @@ class MenuLinkTreeHandler implements MenuLinkTreeHandlerInterface {
   /**
    * {@inheritdoc}
    */
-  public function processMenuLinkTree(array &$items) {
-    $content = '';
+  public function processMenuLinkTree(array &$items, $menu_level = 0) {
     foreach ($items as &$item) {
+      $content = [];
+
       if (isset($item['original_link'])) {
         $content = $this->getMenuLinkItemContent($item['original_link']);
+        $content['menu_level'] = $menu_level;
       }
       // Process subitems.
       if ($item['below']) {
-        $this->processMenuLinkTree($item['below']);
+        $menu_level++;
+        $this->processMenuLinkTree($item['below'], $menu_level);
         if ($this->isMenuLinkDisplayedChildren($item['original_link'])) {
-          foreach ($item['below'] as $child) {
-            $content['content']['children'][] = $child['content'];
+          foreach ($item['below'] as &$child) {
+            $child['content']['menu_level'] = $menu_level;
+            $content['content']['children'][] = $child;
           }
         }
       }
-      $item['content'] = $content;
+
+      $item = array_merge($item, $content);
     }
   }
 

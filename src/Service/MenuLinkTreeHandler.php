@@ -5,7 +5,6 @@ namespace Drupal\menu_item_extras\Service;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Entity\EntityRepositoryInterface;
 use Drupal\Core\Menu\MenuLinkInterface;
-use Drupal\Core\Link;
 use Drupal\menu_link_content\Entity\MenuLinkContent;
 
 /**
@@ -64,6 +63,15 @@ class MenuLinkTreeHandler implements MenuLinkTreeHandlerInterface {
     return $menu_item;
   }
 
+  /**
+   * Get menu_link_content view mode.
+   *
+   * @param \Drupal\menu_link_content\Entity\MenuLinkContent $entity
+   *   Link object.
+   *
+   * @return string
+   *   View mode machine name.
+   */
   protected function menuLinkContentViewMode(MenuLinkContent $entity) {
     $view_mode = 'default';
     if (!$entity->get('view_mode')->isEmpty()) {

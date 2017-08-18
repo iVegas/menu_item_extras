@@ -1,6 +1,6 @@
 name: Menu Item Extras
 type: module
-description: Provide an additional custom fields which can be used on Menu link
+description: "Provide an additional custom fields which can be used on Menu link"
 package: Menu
 core: 8.x
 dependencies:

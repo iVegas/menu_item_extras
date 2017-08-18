@@ -1,8 +1,0 @@
-name: Menu Item Extras Demo
-description: "Provide a demo example of Mega Menu"
-type: module
-package: Menu
-hidden: false
-core: 8.x
-dependencies:
-  - drupal:menu_item_extras

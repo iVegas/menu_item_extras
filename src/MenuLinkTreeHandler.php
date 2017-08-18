@@ -56,6 +56,9 @@ class MenuLinkTreeHandler {
         ->getStorage('menu_link_content')
         ->load($metadata['entity_id']);
     }
+    if ($menu_item) {
+      $menu_item = $this->entityRepository->getTranslationFromContext($menu_item);
+    }
     return $menu_item;
   }
 
@@ -73,7 +76,6 @@ class MenuLinkTreeHandler {
     /** @var \Drupal\menu_link_content\Entity\MenuLinkContent $menu_item */
     $menu_item = $this->getMenuLinkItemEntity($link);
     if ($menu_item && $menu_item->hasField('body') && !$menu_item->get('body')->isEmpty()) {
-      $menu_item = $this->entityRepository->getTranslationFromContext($menu_item);
       $field_body = $menu_item->get('body')->getValue();
       $content['body'] = [
         '#type' => 'processed_text',

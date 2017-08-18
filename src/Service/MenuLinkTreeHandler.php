@@ -6,6 +6,7 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\Core\Menu\MenuLinkInterface;
 use Drupal\Core\Link;
+use Drupal\menu_link_content\Entity\MenuLinkContent;
 
 /**
  * Class MenuLinkTreeHandler.
@@ -60,6 +61,18 @@ class MenuLinkTreeHandler implements MenuLinkTreeHandlerInterface {
     return $menu_item;
   }
 
+  protected function menuLinkContentViewMode(MenuLinkContent $entity) {
+    $view_mode = 'default';
+    if (!$entity->get('view_mode')->isEmpty()) {
+      $value = $entity->get('view_mode')->first()->getValue();
+      if (!empty($value['value'])) {
+        $view_mode = $value['value'];
+      }
+    }
+
+    return $view_mode;
+  }
+
   /**
    * {@inheritdoc}
    */
@@ -68,18 +81,16 @@ class MenuLinkTreeHandler implements MenuLinkTreeHandlerInterface {
     /** @var \Drupal\menu_link_content\Entity\MenuLinkContent $menu_item */
     $entity = $this->getMenuLinkItemEntity($link);
     if ($entity) {
-      $view_mode = 'default';
-      if (!$entity->get('view_mode')->isEmpty()) {
-        $value = $entity->get('view_mode')->first()->getValue();
-        if (!empty($value['value'])) {
-          $view_mode = $value['value'];
-        }
-      }
+      $view_mode = $this->menuLinkContentViewMode($entity);
       $view_builder = $this->entityTypeManager
         ->getViewBuilder($entity->getEntityTypeId());
       $render_entity = $view_builder->view($entity, $view_mode, $this->languageManager->getCurrentLanguage()->getId());
       $render_output['content'] = $render_entity;
     }
+
+    $render_output['content']['#title'] = $link->getTitle();
+    $render_output['content']['#url'] = $link->getUrlObject();
+
     return $render_output;
   }
 
@@ -90,13 +101,7 @@ class MenuLinkTreeHandler implements MenuLinkTreeHandlerInterface {
     /** @var \Drupal\menu_link_content\Entity\MenuLinkContent $menu_item */
     $entity = $this->getMenuLinkItemEntity($link);
     if ($entity) {
-      $view_mode = 'default';
-      if (!$entity->get('view_mode')->isEmpty()) {
-        $value = $entity->get('view_mode')->first()->getValue();
-        if (!empty($value['value'])) {
-          $view_mode = $value['value'];
-        }
-      }
+      $view_mode = $this->menuLinkContentViewMode($entity);
       /* @var \Drupal\Core\Entity\Entity\EntityViewDisplay $display */
       $display = $this->entityTypeManager
         ->getStorage('entity_view_display')

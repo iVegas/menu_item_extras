@@ -21,13 +21,12 @@ function template_preprocess_menu_link_content(array &$variables) {
   /* @var \Drupal\menu_link_content\Entity\MenuLinkContent $menu_link_content */
   $menu_link_content = $variables['elements']['#menu_link_content'];
   // Helpful $content variable for templates.
-  foreach (Element::children($variables['elements']) as $key) {
-    $variables['content'][$key] = $variables['elements'][$key];
-    if ($key === 'children') {
-      $variables['content'][$key]['#theme'] = 'menu_levels';
-      $variables['content'][$key]['#menu_name'] = $menu_link_content->getMenuName();
-    }
+  $variables['content'] = $variables['elements'];
+  if (isset($variables['content']['children'])) {
+    $variables['content']['children']['#theme'] = 'menu_levels';
+    $variables['content']['children']['#menu_name'] = $menu_link_content->getMenuName();
   }
+
   $variables['attributes']['class'][] = 'menu_link_content';
   $variables['attributes']['class'][] = Html::getClass('menu_link_content' . $menu_link_content->getMenuName());
   if ($variables['elements']['#view_mode']) {

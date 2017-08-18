@@ -3,7 +3,7 @@
 namespace Drupal\menu_item_extras\Service;
 
 use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Core\Language\LanguageManagerInterface;
+use Drupal\Core\Entity\EntityRepositoryInterface;
 use Drupal\Core\Menu\MenuLinkInterface;
 use Drupal\Core\Link;
 
@@ -20,23 +20,23 @@ class MenuLinkTreeHandler implements MenuLinkTreeHandlerInterface {
   protected $entityTypeManager;
 
   /**
-   * The language manager.
+   * The entity repository.
    *
-   * @var \Drupal\Core\Language\LanguageManagerInterface
+   * @var \Drupal\Core\Entity\EntityRepositoryInterface
    */
-  protected $languageManager;
+  protected $entityRepository;
 
   /**
    * Constructs a new MenuLinkTreeHandler.
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
    *   The entity type manager.
-   * @param \Drupal\Core\Language\LanguageManagerInterface $language_manager
-   *   The language manager.
+   * @param \Drupal\Core\Entity\EntityRepositoryInterface $entity_repository
+   *   The entity repository manager.
    */
-  public function __construct(EntityTypeManagerInterface $entity_type_manager, LanguageManagerInterface $language_manager) {
+  public function __construct(EntityTypeManagerInterface $entity_type_manager, EntityRepositoryInterface $entity_repository) {
     $this->entityTypeManager = $entity_type_manager;
-    $this->languageManager = $language_manager;
+    $this->entityRepository = $entity_repository;
   }
 
   /**
@@ -56,6 +56,9 @@ class MenuLinkTreeHandler implements MenuLinkTreeHandlerInterface {
       $menu_item = $this->entityTypeManager
         ->getStorage('menu_link_content')
         ->load($metadata['entity_id']);
+    }
+    if ($menu_item) {
+      $menu_item = $this->entityRepository->getTranslationFromContext($menu_item);
     }
     return $menu_item;
   }
@@ -78,7 +81,7 @@ class MenuLinkTreeHandler implements MenuLinkTreeHandlerInterface {
       }
       $view_builder = $this->entityTypeManager
         ->getViewBuilder($entity->getEntityTypeId());
-      $render_entity = $view_builder->view($entity, $view_mode, $this->languageManager->getCurrentLanguage()->getId());
+      $render_entity = $view_builder->view($entity, $view_mode);
       $render_output['content'] = $render_entity;
     }
     return $render_output;

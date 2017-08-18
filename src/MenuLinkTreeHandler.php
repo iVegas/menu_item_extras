@@ -2,6 +2,7 @@
 
 namespace Drupal\menu_item_extras;
 
+use Drupal\Core\Entity\EntityRepositoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Menu\MenuLinkInterface;
 
@@ -18,13 +19,23 @@ class MenuLinkTreeHandler {
   protected $entityTypeManager;
 
   /**
+   * The entity repository manager.
+   *
+   * @var \Drupal\Core\Entity\EntityRepositoryInterface
+   */
+  protected $entityRepository;
+
+  /**
    * Constructs a new MenuLinkTreeHandler.
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
    *   The entity type manager.
+   * @param \Drupal\Core\Entity\EntityRepositoryInterface $entity_repository
+   *   The entity repository manager.
    */
-  public function __construct(EntityTypeManagerInterface $entity_type_manager) {
+  public function __construct(EntityTypeManagerInterface $entity_type_manager, EntityRepositoryInterface $entity_repository) {
     $this->entityTypeManager = $entity_type_manager;
+    $this->entityRepository = $entity_repository;
   }
 
   /**
@@ -62,6 +73,7 @@ class MenuLinkTreeHandler {
     /** @var \Drupal\menu_link_content\Entity\MenuLinkContent $menu_item */
     $menu_item = $this->getMenuLinkItemEntity($link);
     if ($menu_item && $menu_item->hasField('body') && !$menu_item->get('body')->isEmpty()) {
+      $menu_item = $this->entityRepository->getTranslationFromContext($menu_item);
       $field_body = $menu_item->get('body')->getValue();
       $content['body'] = [
         '#type' => 'processed_text',

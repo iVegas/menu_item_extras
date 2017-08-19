@@ -5,7 +5,6 @@
  * Theme functions for the menu_item_extras module.
  */
 
-use Drupal\Core\Render\Element;
 use Drupal\Component\Utility\Html;
 
 /**

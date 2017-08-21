@@ -5,8 +5,6 @@ namespace Drupal\menu_item_extras\Form;
 use Drupal\Core\Entity\EntityConfirmFormBase;
 use Drupal\Core\Url;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Database\Connection;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Class ConfirmClearMenuForm.
@@ -16,42 +14,10 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class ConfirmClearMenuForm extends EntityConfirmFormBase {
 
   /**
-   * The database connection.
-   *
-   * @var \Drupal\Core\Database\Connection
-   */
-  protected $connection;
-
-  /**
-   * Constructs a new ConfirmClearMenuForm.
-   *
-   * @param \Drupal\Core\Database\Connection $connection
-   *   The database connection.
-   */
-  public function __construct(Connection $connection) {
-    $this->connection = $connection;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function create(ContainerInterface $container) {
-    return new static(
-        $container->get('database')
-    );
-  }
-
-  /**
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    // Clears view mode field in menu db table.
-    $this->connection->update('menu_link_content_data')
-      ->fields([
-        'view_mode' => NULL,
-      ])
-      ->condition('menu_name', $this->entity->id())
-      ->execute();
+    \Drupal::service('menu_item_extras.menu_link_content_helper')->clearMenuData($this->entity->id());
     drupal_set_message($this->t('Extra data for %label was deleted.', [
       '%label' => $this->entity->label(),
     ]));
@@ -78,7 +44,7 @@ class ConfirmClearMenuForm extends EntityConfirmFormBase {
    * {@inheritdoc}
    */
   public function getQuestion() {
-    return t('Do you want to clear extra data in %menu_name?', ['%menu_name' => $this->entity->label()]);
+    return $this->t('Do you want to clear extra data in %menu_name?', ['%menu_name' => $this->entity->label()]);
   }
 
 }

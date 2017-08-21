@@ -115,6 +115,19 @@ class MenuLinkContentService implements MenuLinkContentServiceInterface {
 
   /**
    * {@inheritdoc}
+   */
+  public function clearMenuData($menu_id) {
+    // Clears view mode field in menu db table.
+    $this->connection->update('menu_link_content_data')
+      ->fields([
+        'view_mode' => NULL,
+      ])
+      ->condition('menu_name', $menu_id)
+      ->execute();
+  }
+
+  /**
+   * {@inheritdoc}
    *
    * @todo May be rewritten with states and batch for processing large data.
    */

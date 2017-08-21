@@ -1,0 +1,7 @@
+entity.menu.clear_extra_data:
+  path: '/admin/structure/menu/manage/{menu}/clear'
+  defaults:
+    _entity_form: 'menu.clear'
+    _title_callback: '\Drupal\menu_ui\Controller\MenuController::menuTitle'
+  requirements:
+    _entity_access: 'menu.update'

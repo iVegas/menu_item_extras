@@ -12,6 +12,7 @@ use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\menu_item_extras\Utility\Utility;
+use Drupal\Core\Url;
 
 /**
  * Implements hook_help().
@@ -52,6 +53,8 @@ function menu_item_extras_entity_type_build(array &$entity_types) {
     /** @var \Drupal\Core\Config\Entity\ConfigEntityTypeInterface $menu */
     $menu = $entity_types['menu'];
     $menu->set('bundle_of', $content_entity);
+    $entity_types['menu']
+      ->setFormClass('clear', 'Drupal\menu_item_extras\Form\ConfirmClearMenuForm');
   }
 }
 
@@ -250,6 +253,27 @@ function menu_item_extras_form_menu_link_content_form_alter(&$form, FormStateInt
       unset($form['menu_parent']['#options'][$option_id]);
     }
   }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ *
+ * Adds `Clear related data` button. Currently, clear data in view_mode field
+ * and makes uninstalling easy.
+ *
+ * @see menu_item_extras_entity_base_field_info()
+ * @see Drupal\menu_item_extras\Form\ConfirmClearMenuForm
+ */
+function menu_item_extras_form_menu_edit_form_alter(&$form, $form_state) {
+  $menu = $form_state->getFormObject()->getEntity()->id();
+  $form['actions']['clear'] = [
+    '#type' => 'link',
+    '#title' => t('Clear related data'),
+    '#weight' => 6,
+    '#url' => Url::fromRoute('entity.menu.clear_extra_data', ['menu' => $menu]),
+    '#button_type' => 'danger',
+    '#attributes' => ['class' => ['button', 'button--danger']],
+  ];
 }
 
 /**

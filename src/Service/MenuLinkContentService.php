@@ -8,6 +8,8 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Field\FieldStorageDefinitionListenerInterface;
+use Drupal\Core\Entity\EntityLastInstalledSchemaRepositoryInterface;
+use Drupal\Core\Database\Connection;
 
 /**
  * Class MenuLinkContentHelper.
@@ -40,9 +42,23 @@ class MenuLinkContentService implements MenuLinkContentServiceInterface {
   /**
    * The field storage definition listener.
    *
-   * @var \Drupal\Core\Field\FieldStorageDefinitionListenerInterface
+   * @var \Drupal\Core\Entity\EntityLastInstalledSchemaRepositoryInterface
    */
   private $fieldStorageDefinitionListener;
+
+  /**
+   * The entity last installed schema repository.
+   *
+   * @var \Drupal\Core\Entity\EntityLastInstalledSchemaRepositoryInterface
+   */
+  private $entityLastInstalledSchemaRepository;
+
+  /**
+   * The current database connection.
+   *
+   * @var \Drupal\Core\Database\Connection
+   */
+  protected $connection;
 
   /**
    * MenuLinkContentHelper constructor.
@@ -55,12 +71,18 @@ class MenuLinkContentService implements MenuLinkContentServiceInterface {
    *   The entity field manager.
    * @param \Drupal\Core\Field\FieldStorageDefinitionListenerInterface $fieldStorageDefinitionListener
    *   The field storage definition listener.
+   * @param \Drupal\Core\Entity\EntityLastInstalledSchemaRepositoryInterface $entityLastInstalledSchemaRepository
+   *   The entity last installed schema repository.
+   * @param \Drupal\Core\Database\Connection $connection
+   *   The current database connection.
    */
-  public function __construct(EntityTypeManagerInterface $entityTypeManager, EntityDefinitionUpdateManagerInterface $entityDefinitionUpdateManager, EntityFieldManagerInterface $entityFieldManager, FieldStorageDefinitionListenerInterface $fieldStorageDefinitionListener) {
+  public function __construct(EntityTypeManagerInterface $entityTypeManager, EntityDefinitionUpdateManagerInterface $entityDefinitionUpdateManager, EntityFieldManagerInterface $entityFieldManager, FieldStorageDefinitionListenerInterface $fieldStorageDefinitionListener, EntityLastInstalledSchemaRepositoryInterface $entityLastInstalledSchemaRepository, Connection $connection) {
     $this->entityTypeManager = $entityTypeManager;
     $this->entityDefinitionUpdateManager = $entityDefinitionUpdateManager;
     $this->entityFieldManager = $entityFieldManager;
     $this->fieldStorageDefinitionListener = $fieldStorageDefinitionListener;
+    $this->entityLastInstalledSchemaRepository = $entityLastInstalledSchemaRepository;
+    $this->connection = $connection;
   }
 
   /**
@@ -81,12 +103,55 @@ class MenuLinkContentService implements MenuLinkContentServiceInterface {
       ->loadByProperties(['menu_name' => $menu_id]);
     if (!empty($menu_links)) {
       foreach ($menu_links as $menu_link) {
-        if ($extras_enabled && $menu_link->bundle() === 'menu_link_content') {
+        if ($extras_enabled) {
           $menu_link->set('bundle', $menu_id)->save();
         }
-        elseif (!$extras_enabled && $menu_link->bundle() !== 'menu_link_content') {
+        else {
           $menu_link->set('bundle', 'menu_link_content')->save();
         }
+      }
+    }
+  }
+
+  /**
+   * {@inheritdoc}
+   *
+   * @todo May be rewritten with states and batch for processing large data.
+   */
+  public function updateMenuLinkContentBundle() {
+    // Retrieve existing field data.
+    $tables = [
+      "menu_link_content",
+      "menu_link_content_data",
+    ];
+    $existing_data = [];
+    foreach ($tables as $table) {
+      // Get the old data.
+      $existing_data[$table] = $this->connection->select($table)
+        ->fields($table)
+        ->execute()
+        ->fetchAll(\PDO::FETCH_ASSOC);
+      // Wipe it.
+      $this->connection->truncate($table)->execute();
+    }
+    // Update definitions and scheme.
+    // Process field storage definition changes.
+    $this->entityTypeManager->clearCachedDefinitions();
+    $storage_definitions = $this->entityFieldManager->getFieldStorageDefinitions('menu_link_content');
+    $original_storage_definitions = $this->entityLastInstalledSchemaRepository->getLastInstalledFieldStorageDefinitions('menu_link_content');
+    $storage_definition = isset($storage_definitions['bundle']) ? $storage_definitions['bundle'] : NULL;
+    $original_storage_definition = isset($original_storage_definitions['bundle']) ? $original_storage_definitions['bundle'] : NULL;
+    $this->fieldStorageDefinitionListener->onFieldStorageDefinitionUpdate($storage_definition, $original_storage_definition);
+    // Restore the data.
+    foreach ($tables as $table) {
+      if (!empty($existing_data[$table])) {
+        $insert_query = $this->connection
+          ->insert($table)
+          ->fields(array_keys(end($existing_data[$table])));
+        foreach ($existing_data[$table] as $row) {
+          $insert_query->values(array_values($row));
+        }
+        $insert_query->execute();
       }
     }
   }

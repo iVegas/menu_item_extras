@@ -1,9 +1,6 @@
-menu_item_extras.settings:
+menu_item_extras.utility:
   type: config_object
   mapping:
-    allowed_menus:
-      type: sequence
-      label: 'Allowed menus for Expanded functionality'
-      sequence:
-        type: string
-        label: 'Menu ID'
+    entity_type_build_status:
+     type: boolean
+     label: 'Status of entity in menu_item_extras_entity_type_build(). Used on uninstall.'

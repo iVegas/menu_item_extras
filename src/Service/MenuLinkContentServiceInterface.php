@@ -25,7 +25,7 @@ interface MenuLinkContentServiceInterface {
   public function updateMenuItemsBundle($menu_id, $extras_enabled = TRUE);
 
   /**
-   * Cleanup all field that added by entity bundle.
+   * Cleanups all field that added by entity bundle.
    *
    * @param \Drupal\Core\Entity\ContentEntityInterface $entity
    *   Entity for manipulating.
@@ -33,8 +33,13 @@ interface MenuLinkContentServiceInterface {
   public function cleanupFields(ContentEntityInterface $entity);
 
   /**
-   * Run entity definition updates for menu_link_content entity.
+   * Runs entity definition updates for menu_link_content entity.
    */
   public function doEntityUpdate();
+
+  /**
+   * Runs field `bundle` updates for entity.
+   */
+  public function updateMenuLinkContentBundle();
 
 }

@@ -40,6 +40,10 @@ function menu_item_extras_uninstall() {
     }
   }
   $mlc_helper->doEntityUpdate();
+  // Clear cache plugins for invoking hook_entity_type_build and rebuid entity.
+  // @see menu_item_extras_entity_type_build().
+  \Drupal::configFactory()->getEditable('menu_item_extras.utility')->delete();
+  \Drupal::service('plugin.cache_clearer')->clearCachedDefinitions();
   $mlc_helper->updateMenuLinkContentBundle();
 }
 

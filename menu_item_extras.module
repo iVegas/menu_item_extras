@@ -41,16 +41,18 @@ function menu_item_extras_help($route_name, RouteMatchInterface $route_match) {
  * Implements hook_entity_type_build().
  */
 function menu_item_extras_entity_type_build(array &$entity_types) {
-  $content_entity = 'menu_link_content';
-  // Set entity type to be bundled.
-  /** @var \Drupal\Core\Entity\ContentEntityTypeInterface $mlc */
-  $mlc = $entity_types[$content_entity];
-  $mlc->set('bundle_entity_type', 'menu');
-  $mlc->set('field_ui_base_route', 'entity.menu.edit_form');
-  // Set entity to be a bundle entity type for previous entity.
-  /** @var \Drupal\Core\Config\Entity\ConfigEntityTypeInterface $menu */
-  $menu = $entity_types['menu'];
-  $menu->set('bundle_of', $content_entity);
+  if (\Drupal::service('config.factory')->get('menu_item_extras.utility')->get('entity_type_build_status')) {
+    $content_entity = 'menu_link_content';
+    // Set entity type to be bundled.
+    /** @var \Drupal\Core\Entity\ContentEntityTypeInterface $mlc */
+    $mlc = $entity_types[$content_entity];
+    $mlc->set('bundle_entity_type', 'menu');
+    $mlc->set('field_ui_base_route', 'entity.menu.edit_form');
+    // Set entity to be a bundle entity type for previous entity.
+    /** @var \Drupal\Core\Config\Entity\ConfigEntityTypeInterface $menu */
+    $menu = $entity_types['menu'];
+    $menu->set('bundle_of', $content_entity);
+  }
 }
 
 /**

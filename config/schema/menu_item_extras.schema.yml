@@ -1,9 +1,0 @@
-menu_item_extras.settings:
-  type: config_object
-  mapping:
-    allowed_menus:
-      type: sequence
-      label: 'Allowed menus for Expanded functionality'
-      sequence:
-        type: string
-        label: 'Menu ID'

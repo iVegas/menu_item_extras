@@ -67,6 +67,16 @@ function menu_item_extras_update_8022() {
   \Drupal::service('menu_item_extras.menu_link_content_helper')->updateMenuLinkContentBundle();
 }
 
+/**
+ * Implements hook_update_N().
+ *
+ * Trigger entity update for changes bundle in entity scheme.
+ */
+function menu_item_extras_update_8023() {
+  \Drupal::service('config.factory')->getEditable('menu_item_extras.utility')->set('entity_type_build_status', TRUE)->save();
+  \Drupal::service('menu_item_extras.menu_link_content_helper')->updateMenuLinkContentBundle();
+}
+
 /*
 function menu_item_extras_update_8002(&$sandbox) {
 // TODO: Move body field to dynamically generated field_body.

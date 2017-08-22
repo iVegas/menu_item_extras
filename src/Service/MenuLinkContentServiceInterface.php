@@ -38,6 +38,14 @@ interface MenuLinkContentServiceInterface {
   public function doEntityUpdate();
 
   /**
+   * Clears special menu or all menus extra data.
+   *
+   * @param string $menu_id
+   *   Machine menu name for clearing.
+   */
+  public function clearMenuData($menu_id = 'all');
+
+  /**
    * Runs field `bundle` updates for entity.
    */
   public function updateMenuLinkContentBundle();

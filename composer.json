@@ -31,8 +31,5 @@
   "support": {
     "issues": "https://www.drupal.org/project/issues/menu_item_extras",
     "source": "http://cgit.drupalcode.org/menu_item_extras"
-  },
-  "require": {
-      "drupal/view_mode_selector": "^8.1"
   }
 }

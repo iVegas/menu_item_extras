@@ -120,7 +120,7 @@ class MenuLinkContentService implements MenuLinkContentServiceInterface {
     // Clears view mode field in menu db table.
     $query = $this->connection->update('menu_link_content_data')
       ->fields(['view_mode' => NULL]);
-    if ($menu_id === 'all') {
+    if ($menu_id !== 'all') {
       $query->condition('menu_name', $menu_id);
     }
     $query->execute();

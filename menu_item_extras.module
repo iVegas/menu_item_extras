@@ -301,6 +301,7 @@ function menu_item_extras_entity_extra_field_info() {
       'label' => t('Children'),
       'description' => t('Child items position in render.'),
       'visible' => TRUE,
+      'weight' => 1,
     ];
   }
   return $fields;

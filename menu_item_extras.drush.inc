@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Drush commands for Advanced CSS/JS Aggregation.
+ * Drush commands for menu item extras.
  */
 
 /**

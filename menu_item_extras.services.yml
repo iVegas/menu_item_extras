@@ -9,3 +9,9 @@ services:
     class: Drupal\menu_item_extras\Routing\RouteSubscriber
     tags:
       - { name: event_subscriber }
+  menu_item_extras.uninstall_validator:
+    class: Drupal\menu_item_extras\MenuItemExtrasUninstallValidator
+    tags:
+      - { name: module_install.uninstall_validator }
+    arguments: ['@database', '@string_translation']
+    lazy: true

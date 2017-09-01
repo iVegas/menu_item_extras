@@ -4,11 +4,39 @@ namespace Drupal\menu_item_extras\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\system\MenuInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
+use Drupal\menu_item_extras\Service\MenuLinkContentServiceInterface;
 
 /**
  * Defines a route controller for a form for menu link content entity creation.
  */
 class MenuController extends ControllerBase {
+
+  /**
+   * The menu link content service helper.
+   *
+   * @var \Drupal\menu_item_extras\Service\MenuLinkContentServiceInterface
+   */
+  protected $menuLinkContentHelper;
+
+  /**
+   * Constructs a new \Drupal\menu_item_extras\Controller\MenuController object.
+   *
+   * @param \Drupal\menu_item_extras\Service\MenuLinkContentServiceInterface $menuLinkContentHelper
+   *   The menu link content service helper.
+   */
+  public function __construct(MenuLinkContentServiceInterface $menuLinkContentHelper) {
+    $this->menuLinkContentHelper = $menuLinkContentHelper;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container) {
+    return new static(
+        $container->get('menu_item_extras.menu_link_content_helper')
+    );
+  }
 
   /**
    * Provides the menu link creation form.
@@ -29,6 +57,18 @@ class MenuController extends ControllerBase {
         'bundle' => $menu->id(),
       ]);
     return $this->entityFormBuilder()->getForm($menu_link);
+  }
+
+  /**
+   * Provides removing extra data action.
+   *
+   * @return array
+   *   Returns redirect to the uninstall page.
+   */
+  public function removeExtraData() {
+    $this->menuLinkContentHelper->clearMenuData('all');
+    drupal_set_message($this->t('Extra data for all menus were deleted.'), 'status');
+    return $this->redirect('system.modules_uninstall');
   }
 
 }

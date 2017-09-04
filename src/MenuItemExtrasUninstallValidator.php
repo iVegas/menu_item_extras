@@ -39,7 +39,7 @@ class MenuItemExtrasUninstallValidator implements ModuleUninstallValidatorInterf
    * {@inheritdoc}
    */
   public function validate($module) {
-    if ($module == 'menu_item_extras' && $this->hasExtraData()) {
+    if ($module === 'menu_item_extras' && $this->hasExtraData()) {
       $reasons = [];
       $reasons[] = $this->t('There are extra data for menus. <a href=":url">Remove extra data</a>.', [
         ':url' => Url::fromRoute('menu_item_extras.clear_all_extra_data')->toString(),

@@ -5,6 +5,8 @@ namespace Drupal\menu_item_extras\Form;
 use Drupal\Core\Entity\EntityConfirmFormBase;
 use Drupal\Core\Url;
 use Drupal\Core\Form\FormStateInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
+use Drupal\menu_item_extras\Service\MenuLinkContentServiceInterface;
 
 /**
  * Class ConfirmClearMenuForm.
@@ -14,10 +16,36 @@ use Drupal\Core\Form\FormStateInterface;
 class ConfirmClearMenuForm extends EntityConfirmFormBase {
 
   /**
+   * The menu link content service helper.
+   *
+   * @var \Drupal\menu_item_extras\Service\MenuLinkContentServiceInterface
+   */
+  protected $menuLinkContentHelper;
+
+  /**
+   * Constructs a new \Drupal\menu_item_extras\Form\ConfirmClearMenuForm object.
+   *
+   * @param \Drupal\menu_item_extras\Service\MenuLinkContentServiceInterface $menuLinkContentHelper
+   *   The menu link content service helper.
+   */
+  public function __construct(MenuLinkContentServiceInterface $menuLinkContentHelper) {
+    $this->menuLinkContentHelper = $menuLinkContentHelper;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container) {
+    return new static(
+        $container->get('menu_item_extras.menu_link_content_helper')
+    );
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    \Drupal::service('menu_item_extras.menu_link_content_helper')->clearMenuData($this->entity->id());
+    $this->menuLinkContentHelper->clearMenuData($this->entity->id());
     drupal_set_message($this->t('Extra data for %label was deleted.', [
       '%label' => $this->entity->label(),
     ]));

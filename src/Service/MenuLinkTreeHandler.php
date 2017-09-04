@@ -124,27 +124,22 @@ class MenuLinkTreeHandler implements MenuLinkTreeHandlerInterface {
   /**
    * {@inheritdoc}
    */
-  public function processMenuLinkTree(array &$items, $menu_level = 0, &$parrent_content = FALSE) {
+  public function processMenuLinkTree(array &$items, $menu_level = -1) {
+    $menu_level++;
     foreach ($items as &$item) {
       $content = [];
-
-      if (isset($item['original_link']) && !$parrent_content) {
+      if (isset($item['original_link'])) {
         $content['#item'] = $item;
         $content['content'] = $this->getMenuLinkItemContent($item['original_link']);
         $content['menu_level'] = $menu_level;
       }
-      if (isset($item['original_link']) && $parrent_content) {
-        $parrent_content['children']['#item'] = $item;
-        $parrent_content['children']['content'] = $this->getMenuLinkItemContent($item['original_link']);
-        $parrent_content['children']['menu_level'] = $menu_level;
-      }
       // Process subitems.
       if ($item['below']) {
-        $menu_level++;
-        $this->processMenuLinkTree($item['below'], $menu_level, $content['content']);
+        $content['content']['children'] = $this->processMenuLinkTree($item['below'], $menu_level);
       }
       $item = $content;
     }
+    return $items;
   }
 
 }

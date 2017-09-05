@@ -3,6 +3,9 @@
 namespace Drupal\Tests\menu_item_extras\Functional;
 
 use Drupal\Component\Utility\NestedArray;
+use Drupal\Core\Url;
+use Drupal\field\Entity\FieldConfig;
+use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\menu_link_content\Entity\MenuLinkContent;
 use Drupal\system\Entity\Menu;
 use Drupal\Tests\BrowserTestBase;
@@ -51,6 +54,8 @@ class MenuItemExtrasRenderTest extends BrowserTestBase {
     parent::setUp();
     // Add a new custom menu.
     $menu_name = 'testmenu';
+    $field_name = 'field_body';
+    $menu_link_entity_type = 'menu_link_content';
     $label = $this->randomMachineName(16);
     $this->menu = Menu::create([
       'id' => $menu_name,
@@ -59,6 +64,34 @@ class MenuItemExtrasRenderTest extends BrowserTestBase {
     ]);
 
     $this->menu->save();
+
+    // Add a new custom field.
+    FieldStorageConfig::create([
+      'field_name' => $field_name,
+      'entity_type' => $menu_link_entity_type,
+      'type' => 'text_with_summary',
+      'cardinality' => -1,
+    ])->save();
+
+    FieldConfig::create([
+      'field_name' => $field_name,
+      'entity_type' => $menu_link_entity_type,
+      'bundle' => $menu_name,
+      'label' => 'A Body field',
+    ])->save();
+
+    entity_get_form_display($menu_link_entity_type, $menu_name, 'default')
+      ->setComponent($field_name, [
+        'type' => 'text_textarea_with_summary',
+      ])
+      ->save();
+
+    entity_get_display($menu_link_entity_type, $menu_name, 'default')
+      ->setComponent($field_name, [
+        'type' => 'text_default',
+      ])
+      ->save();
+
     // Add block.
     $this->block = $this->drupalPlaceBlock(
       'system_menu_block:' . $this->menu->id(),
@@ -78,7 +111,7 @@ class MenuItemExtrasRenderTest extends BrowserTestBase {
       'menu_name' => $this->menu->id(),
       'parent' => "{$this->menu->id()}:",
       'weight' => -10,
-      'field_body' => '___ Menu Item Extras Field Value Level ___',
+      $field_name => '___ Menu Item Extras Field Value Level ___',
     ];
     // Generate menu items.
     for ($i = 1; $i <= $this->linksNumber; $i++) {
@@ -89,7 +122,7 @@ class MenuItemExtrasRenderTest extends BrowserTestBase {
       /** @var \Drupal\menu_link_content\MenuLinkContentInterface $link */
       $link = MenuLinkContent::create(NestedArray::mergeDeep($defaults, [
         'title' => $defaults['title'] . "[{$i}]",
-        'field_body' => $defaults['field_body'] . "[{$i}]",
+        $field_name => $defaults[$field_name] . "[{$i}]",
         'parent' => (isset($previous_link) ?
           $previous_link->getPluginId() :
           $defaults['parent']
@@ -98,7 +131,7 @@ class MenuItemExtrasRenderTest extends BrowserTestBase {
       $link->save();
       $this->links[$i] = [
         'title' => $link->get('title')->getString(),
-        'field_body' => $link->get('field_body')->getString(),
+        $field_name => $defaults[$field_name] . "[{$i}]",
         'entity' => $link,
       ];
     }
@@ -112,7 +145,23 @@ class MenuItemExtrasRenderTest extends BrowserTestBase {
     $this->drupalGet('<front>');
     foreach ($this->links as $link) {
       $assert->pageTextContains($link['title']);
-      $assert->pageTextContains($link['body']);
+      $assert->pageTextContains($link['field_body']);
+    }
+  }
+
+  /**
+   * Render errors availability test.
+   */
+  public function testRenderClearCache() {
+    $assert = $this->assertSession();
+    $this->drupalLogin($this->rootUser);
+    foreach ($this->links as $link) {
+      $this->drupalGet(Url::fromRoute(
+        'entity.menu_link_content.edit_form',
+        ['menu_link_content' => $link['entity']]
+      ));
+      $assert->pageTextContains($link['title']);
+      $assert->pageTextContains($link['field_body']);
     }
   }
 

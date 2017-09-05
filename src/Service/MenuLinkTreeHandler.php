@@ -137,7 +137,7 @@ class MenuLinkTreeHandler implements MenuLinkTreeHandlerInterface {
       if ($item['below']) {
         $content['content']['children'] = $this->processMenuLinkTree($item['below'], $menu_level);
       }
-      $item = $content;
+      $item = array_merge($item, $content);
     }
     return $items;
   }

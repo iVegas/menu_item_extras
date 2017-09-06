@@ -138,7 +138,7 @@ function menu_item_extras_theme() {
     'template' => 'menu-link-content',
   ];
   $theme['menu_levels'] = [
-    'render element' => 'elements',
+    'render element' => 'items',
     'template' => 'menu-levels',
     'base hook' => 'menu_levels',
   ];
@@ -192,9 +192,9 @@ function menu_item_extras_theme_suggestions_menu_levels(array $variables) {
   $suggestions = [];
   $suggestion_prefix = 'menu-levels';
 
-  $menu_name = $variables['elements']['#menu_name'];
-  if (isset($variables['elements'][0]['menu_level'])) {
-    $level = 'level_' . $variables['elements'][0]['menu_level'];
+  $menu_name = $variables['items']['#menu_name'];
+  if (isset($variables['items'][0]['menu_level'])) {
+    $level = 'level_' . $variables['items'][0]['menu_level'];
   }
 
   if (isset($level)) {
@@ -234,7 +234,7 @@ function menu_item_extras_theme_suggestions_menu_alter(array &$suggestions, arra
 function menu_item_extras_preprocess_menu(&$variables) {
   // We preprocess only menus that has additional fields.
   if (Utility::checkBundleHasExtraFieldsThanEntity('menu_link_content', $variables['menu_name'])) {
-    \Drupal::service('menu_item_extras.menu_link_tree_handler')
+    $variables['items'] = \Drupal::service('menu_item_extras.menu_link_tree_handler')
       ->processMenuLinkTree($variables['items']);
   }
 }

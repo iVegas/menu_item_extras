@@ -96,11 +96,8 @@ class MenuLinkTreeHandler implements MenuLinkTreeHandlerInterface {
       $view_builder = $this->entityTypeManager
         ->getViewBuilder($entity->getEntityTypeId());
       $render_entity = $view_builder->view($entity, $view_mode);
-      $render_output['content'] = $render_entity;
+      $render_output = $render_entity;
     }
-
-    $render_output['content']['#title'] = $link->getTitle();
-    $render_output['content']['#url'] = $link->getUrlObject();
 
     return $render_output;
   }
@@ -127,28 +124,22 @@ class MenuLinkTreeHandler implements MenuLinkTreeHandlerInterface {
   /**
    * {@inheritdoc}
    */
-  public function processMenuLinkTree(array &$items, $menu_level = 0) {
+  public function processMenuLinkTree(array &$items, $menu_level = -1) {
+    $menu_level++;
     foreach ($items as &$item) {
       $content = [];
-
       if (isset($item['original_link'])) {
-        $content = $this->getMenuLinkItemContent($item['original_link']);
+        $content['#item'] = $item;
+        $content['content'] = $this->getMenuLinkItemContent($item['original_link']);
         $content['menu_level'] = $menu_level;
       }
       // Process subitems.
       if ($item['below']) {
-        $menu_level++;
-        $this->processMenuLinkTree($item['below'], $menu_level);
-        if ($this->isMenuLinkDisplayedChildren($item['original_link'])) {
-          foreach ($item['below'] as &$child) {
-            $child['content']['menu_level'] = $menu_level;
-            $content['content']['children'][] = $child;
-          }
-        }
+        $content['content']['children'] = $this->processMenuLinkTree($item['below'], $menu_level);
       }
-
       $item = array_merge($item, $content);
     }
+    return $items;
   }
 
 }

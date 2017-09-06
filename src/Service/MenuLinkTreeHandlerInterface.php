@@ -38,6 +38,9 @@ interface MenuLinkTreeHandlerInterface {
    *
    * @param array $items
    *   Menu tree items.
+   *
+   * @return array
+   *   Returns modified menu tree items array.
    */
   public function processMenuLinkTree(array &$items);
 

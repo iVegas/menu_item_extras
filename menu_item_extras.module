@@ -156,13 +156,16 @@ function menu_item_extras_preprocess_block(&$variables) {
     $variables['content']['#theme'] = 'menu';
     // Pass region name to the suggestions_menu_alter for
     // the region suggestion.
-    $block_id = $variables['elements']['#id'];
-    /** @var \Drupal\Core\Config\Entity\ConfigEntityStorageInterface $block_storage */
-    $block_storage = \Drupal::entityTypeManager()
-      ->getStorage('block');
-    /** @var \Drupal\block\BlockInterface $block */
-    $block = $block_storage->load($block_id);
-    $variables['content']['#attributes']['data-region'] = $block->getRegion();
+    if (!empty($variables['elements']['#id'])) {
+      /** @var \Drupal\Core\Config\Entity\ConfigEntityStorageInterface $block_storage */
+      $block_storage = \Drupal::entityTypeManager()
+        ->getStorage('block');
+      /** @var \Drupal\block\BlockInterface $block */
+      $block = $block_storage->load($variables['elements']['#id']);
+      if (!empty($block)) {
+        $variables['content']['#attributes']['data-region'] = $block->getRegion();
+      }
+    }
   }
 }
 

@@ -1,0 +1,50 @@
+uuid: 85c85fd2-a824-4d72-9382-58d632946b97
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.menu_link_content.mie-demo-base-menu.field_body
+    - field.field.menu_link_content.mie-demo-base-menu.field_image
+    - image.style.thumbnail
+    - system.menu.mie-demo-base-menu
+  module:
+    - image
+    - link
+    - menu_item_extras
+    - text
+id: menu_link_content.mie-demo-base-menu.default
+targetEntityType: menu_link_content
+bundle: mie-demo-base-menu
+mode: default
+content:
+  field_body:
+    weight: 21
+    settings:
+      rows: 5
+      placeholder: ''
+    third_party_settings: {  }
+    type: text_textarea
+    region: content
+  field_image:
+    weight: 22
+    settings:
+      progress_indicator: throbber
+      preview_image_style: thumbnail
+    third_party_settings: {  }
+    type: image_image
+    region: content
+  title:
+    type: string_textfield
+    weight: -5
+    region: content
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  view_mode:
+    type: menu_item_extras_view_mode_selector_select
+    weight: 0
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+hidden: {  }

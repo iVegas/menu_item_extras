@@ -1,0 +1,10 @@
+demo:
+  css:
+    theme:
+      css/demo.css: {}
+
+  dependencies:
+    - core/jquery
+    - core/drupal
+    - core/drupalSettings
+    - core/jquery.once

@@ -96,15 +96,6 @@ class Utility {
         'value' => $field_body_value,
         'format' => 'basic_html',
       ],
-      'field_custom_block' => [
-        'target_id' => $field_custom_block_id,
-      ],
-      'field_image' => [
-        'target_id' => $field_image_id,
-        'alt' => '',
-        'width' => '',
-        'height' => '',
-      ],
       'view_mode' => 'default',
     ];
     if (!empty($parent_uuid)) {
@@ -112,6 +103,19 @@ class Utility {
     }
     if (!empty($view_mode)) {
       $values['view_mode'] = $view_mode;
+    }
+    if (!empty($field_custom_block_id)) {
+      $values['field_custom_block'] = [
+        'target_id' => $field_custom_block_id,
+      ];
+    }
+    if (!empty($field_image_id)) {
+      $values['field_image'] = [
+        'target_id' => $field_image_id,
+        'alt' => '',
+        'width' => '',
+        'height' => '',
+      ];
     }
     $sample_link = MenuLinkContent::create($values);
     $sample_link->save();

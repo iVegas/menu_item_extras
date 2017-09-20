@@ -7,7 +7,7 @@ dependencies:
     - system
   theme:
     - bartik
-id: menuitemextrasdemomenu
+id: miedemobasemenu
 theme: bartik
 region: primary_menu
 weight: 0

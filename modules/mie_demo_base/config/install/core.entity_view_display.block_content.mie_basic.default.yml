@@ -1,0 +1,21 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - block_content.type.mie_basic
+    - field.field.block_content.mie_basic.body
+  module:
+    - text
+id: block_content.mie_basic.default
+targetEntityType: block_content
+bundle: mie_basic
+mode: default
+content:
+  body:
+    label: hidden
+    type: text_default
+    weight: 0
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+hidden: {  }

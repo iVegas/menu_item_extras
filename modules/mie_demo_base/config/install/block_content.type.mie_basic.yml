@@ -1,0 +1,7 @@
+langcode: en
+status: true
+dependencies: {  }
+id: mie_basic
+label: 'Menu Item Extras Basic block'
+revision: 0
+description: 'A mie basic block contains a title and a body.'

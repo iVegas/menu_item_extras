@@ -4,6 +4,7 @@ dependencies:
   config:
     - core.entity_view_mode.menu_link_content.banner
     - field.field.menu_link_content.mie-demo-base-menu.field_body
+    - field.field.menu_link_content.mie-demo-base-menu.field_custom_block
     - field.field.menu_link_content.mie-demo-base-menu.field_image
     - system.menu.mie-demo-base-menu
   module:
@@ -26,6 +27,15 @@ content:
     third_party_settings: {  }
     type: text_default
     region: content
+  field_custom_block:
+    type: entity_reference_entity_view
+    weight: 3
+    region: content
+    label: hidden
+    settings:
+      view_mode: default
+      link: false
+    third_party_settings: {  }
   field_image:
     weight: 1
     label: hidden

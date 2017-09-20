@@ -4,3 +4,40 @@
  * @file
  * Installation hooks for mie_demo_base module.
  */
+
+use Drupal\mie_demo_base\Utility\Utility;
+
+/**
+ * Implements hook_install().
+ */
+function mie_demo_base_install() {
+  // Create test image files.
+  $demo_image = Utility::createFile('sample.png');
+  // Create test blocks.
+  $sample_block = Utility::createMieBasicBlockContent(
+          'Sample Block', '<h2>Menu Item Extras - a new way for Drupal Mega Menus!</h2>
+      <p>It allows add fields to menus and configures the display.</p>'
+  );
+  // Create test links.
+  $first_sample_link_first_level = Utility::createMieDemoBaseMenuMenuLinkContent(
+          'First Link of Level One', 'http://example.com', 0, 'Sample Description', '', 'First Link of Level One Body Value', $sample_block->id(), $demo_image->id()
+  );
+  Utility::createMieDemoBaseMenuMenuLinkContent(
+      'First Link of Level Two', 'http://example.com', 1, 'Sample Description', $first_sample_link_first_level->uuid(), 'First Link of Level Two Body Value', $sample_block->id(), $demo_image->id()
+  );
+  Utility::createMieDemoBaseMenuMenuLinkContent(
+      'Second Link of Level Two', 'http://example.com', 2, 'Sample Description', $first_sample_link_first_level->uuid(), 'Second Link of Level Two Body Value'
+  );
+  $second_sample_link_first_level = Utility::createMieDemoBaseMenuMenuLinkContent(
+          'Second Link of Level One', 'http://example.com', 3, 'Sample Description', '', 'First Link of Level One Body Value', $sample_block->id(), $demo_image->id()
+  );
+  Utility::createMieDemoBaseMenuMenuLinkContent(
+      'Third Link of Level Two', 'http://example.com', 4, 'Sample Description', $second_sample_link_first_level->uuid(), 'Third Link of Level Two Body Value'
+  );
+  $fourth_sample_link_second_level = Utility::createMieDemoBaseMenuMenuLinkContent(
+          'Fourth Link of Level Two', 'http://example.com', 5, 'Sample Description', $second_sample_link_first_level->uuid(), 'Fourth Link of Level Two Body Value'
+  );
+  Utility::createMieDemoBaseMenuMenuLinkContent(
+      'Fifth Link of Level Two', 'http://example.com', 6, 'Sample Description', $fourth_sample_link_second_level->uuid(), 'Fifth Link of Level Two Body Value'
+  );
+}

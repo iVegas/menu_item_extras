@@ -5,6 +5,30 @@
  * Manage fields for the menu items.
  */
 
+use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\Core\Url;
+
+/**
+ * Implements hook_help().
+ */
+function mie_demo_base_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    // Help for the paragraphs demo module.
+    case 'help.page.mie_demo_base':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('The Menu Item Extras Demo Base module provides <em>Menu Item Extras Demo Menu</em> for the <a href=":menu_item_extras">Menu Items Extras module</a>.', [':menu_item_extras' => Url::fromRoute('help.page', ['name' => 'menu_item_extras'])->toString()]) . '</p>';
+      $output .= '<h3>' . t('Uses') . '</h3>';
+      $output .= '<dt>' . t('Changing demo menu') . '</dt>';
+      $output .= '<dd>' . t('Administrators can edit the provided <em>Menu Item Extras Demo Menu</em> on the');
+      $output .= t('&nbsp;<a href=":mie_demo_base">Menu Item Extras Demo Menu page</a>', [':mie_demo_base' => Url::fromRoute('entity.menu.edit_form', ['menu' => 'mie-demo-base-menu'])->toString()]);
+      $output .= t('&nbsp;if the <a href=":field_ui">Field UI</a> module is enabled. For more information on fields and entities, see the <a href=":field">Field module help page</a>.', [':field_ui' => (\Drupal::moduleHandler()->moduleExists('field_ui')) ? Url::fromRoute('help.page', ['name' => 'field_ui'])->toString() : '#']) . '</dd>';
+      $output .= '<dt>' . t('Deleting demo menu') . '</dt>';
+      $output .= '<dd>' . t('The provided <em>Menu Item Extras Demo Menu</em> stay available even when the Menu Item Extras Demo Base module is uninstalled. They can be deleted individually on the <a href=":mie_demo_base">Menu Item Extras Demo Menu page</a>.', [':mie_demo_base' => Url::fromRoute('entity.menu.edit_form', ['menu' => 'mie-demo-base-menu'])->toString()]) . '</dd>';
+      return $output;
+  }
+}
+
 /**
  * Implements hook_preprocess_node() for paragraph node templates.
  *

@@ -10,7 +10,7 @@ use Drupal\menu_link_content\Entity\MenuLinkContent;
 /**
  * Utility functions specific to mie_demo_base.
  */
-class Utility {
+class MieDemoBaseUtility {
 
   /**
    * Creates Drupal file from module files directory.

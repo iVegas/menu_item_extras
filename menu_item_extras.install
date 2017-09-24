@@ -120,11 +120,19 @@ function menu_item_extras_update_8023() {
           'status' => TRUE,
         ]);
         // Add or remove the body field, as needed.
-        $field_storage = FieldStorageConfig::loadByName('menu_link_content', 'body');
-        $field = FieldConfig::loadByName('menu_link_content', $item->menu_name, 'body');
+        $field_storage = FieldStorageConfig::loadByName('menu_link_content', 'field_body');
+        if (empty($field_storage)) {
+          $field_storage = FieldStorageConfig::create([
+            'field_name' => 'field_body',
+            'entity_type' => 'menu_link_content',
+            'type' => 'text_with_summary',
+          ]);
+          $field_storage->save();
+        }
+        $field = FieldConfig::loadByName('menu_link_content', $item->menu_name, 'field_body');
         if (empty($field)) {
           $field = FieldConfig::create([
-            'field_name' => 'body',
+            'field_name' => 'field_body',
             'entity_type' => 'menu_link_content',
             'field_storage' => $field_storage,
             'bundle' => $item->menu_name,
@@ -151,13 +159,13 @@ function menu_item_extras_update_8023() {
           }
           // Assign widget settings for the 'default' form mode.
           $entity_form_display
-            ->setComponent('body', [
+            ->setComponent('field_body', [
               'type' => 'text_textarea_with_summary',
             ]);
           $entity_form_display->save();
 
           // Assign display settings for the 'default' and 'teaser' view modes.
-          $display->setComponent('body', [
+          $display->setComponent('field_body', [
             'label' => 'hidden',
             'type' => 'text_default',
           ]);
@@ -166,11 +174,10 @@ function menu_item_extras_update_8023() {
       }
       $entity = $storage->load($id);
       /** @var \Drupal\menu_link_content\MenuLinkContentInterface $entity */
-      $entity->set('body', [
+      $entity->set('field_body', [
         'value' => $item->body__value,
         'format' => $item->body__format,
       ]);
-      $entity->set('bundle', $item->menu_name);
       $entity->save();
     }
     \Drupal::state()->delete('menu_item_extras_1_to_2');

@@ -124,6 +124,7 @@ function menu_item_extras_update_8023() {
         $field = FieldConfig::loadByName('menu_link_content', $item->menu_name, 'body');
         if (empty($field)) {
           $field = FieldConfig::create([
+            'field_name' => 'body',
             'field_storage' => $field_storage,
             'bundle' => $item->menu_name,
             'label' => t('Body'),

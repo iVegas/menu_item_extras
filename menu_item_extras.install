@@ -5,6 +5,11 @@
  * Contains install/uninstall functionality of module.
  */
 
+use Drupal\Core\Entity\Entity\EntityFormDisplay;
+use Drupal\Core\Entity\Entity\EntityViewDisplay;
+use Drupal\field\Entity\FieldConfig;
+use Drupal\field\Entity\FieldStorageConfig;
+
 /**
  * Implements hook_install().
  */
@@ -53,6 +58,23 @@ function menu_item_extras_uninstall() {
  * Trigger entity update for changes in entity schema.
  */
 function menu_item_extras_update_8021(&$sandbox) {
+  /** @var \Drupal\Core\Database\Query\SelectInterface $query */
+  $query = \Drupal::database()
+    ->select('menu_link_content_data', 'md')
+    ->fields('md', [
+      'id',
+      'menu_name',
+      'body__value',
+      'body__format',
+    ])
+    ->condition('body__value', NULL, 'IS NOT NULL');
+  $result = $query
+    ->execute()
+    ->fetchAllAssoc('id');
+  \Drupal::state()->set('menu_item_extras_1_to_2', $result);
+  \Drupal::database()->schema()->dropField('menu_link_content_data', 'body__value');
+  \Drupal::database()->schema()->dropField('menu_link_content_data', 'body__format');
+
   /** @var \Drupal\menu_item_extras\Service\MenuLinkContentService $mlc_helper */
   $mlc_helper = \Drupal::service('menu_item_extras.menu_link_content_helper');
   $mlc_helper->doEntityUpdate();
@@ -75,13 +97,80 @@ function menu_item_extras_update_8022() {
 function menu_item_extras_update_8023() {
   \Drupal::service('config.factory')->getEditable('menu_item_extras.utility')->set('entity_type_build_status', TRUE)->save();
   \Drupal::service('menu_item_extras.menu_link_content_helper')->updateMenuLinkContentBundle();
-}
 
-/*
-function menu_item_extras_update_8002(&$sandbox) {
-// TODO: Move body field to dynamically generated field_body.
-$entity_type = \Drupal::entityTypeManager()
-->getStorage('menu_link_content')
-->getQuery()->condition('body', '', '<>')->execute();
+  $result = \Drupal::state()->get('menu_item_extras_1_to_2');
+  if (!empty($result)) {
+    $storage = \Drupal::entityTypeManager()
+      ->getStorage('menu_link_content');
+    foreach ($result as $id => $item) {
+      // Try loading the display from configuration.
+      $display = EntityViewDisplay::load('menu_link_content.' . $item->menu_name . '.default');
+
+      // If not found, create a fresh display object.
+      // We do not preemptively create new entity_view_display configuration
+      // entries for each existing entity type and bundle
+      // whenever a new view mode becomes available.
+      // Instead, configuration entries are only created when
+      // a display object is explicitly configured and saved.
+      if (!$display) {
+        $display = EntityViewDisplay::create([
+          'targetEntityType' => 'menu_link_content',
+          'bundle' => $item->menu_name,
+          'mode' => 'default',
+          'status' => TRUE,
+        ]);
+        // Add or remove the body field, as needed.
+        $field_storage = FieldStorageConfig::loadByName('menu_link_content', 'body');
+        $field = FieldConfig::loadByName('menu_link_content', $item->menu_name, 'body');
+        if (empty($field)) {
+          $field = FieldConfig::create([
+            'field_storage' => $field_storage,
+            'bundle' => $item->menu_name,
+            'label' => t('Body'),
+            'settings' => ['display_summary' => TRUE],
+          ]);
+          $field->save();
+
+          $entity_form_display = EntityFormDisplay::load('menu_link_content.' . $item->menu_name . '.default');
+
+          // If not found, create a fresh entity object.
+          // We do not preemptively create new entity form display
+          // configuration entries for each existing entity type
+          // and bundle whenever a new form mode becomes available.
+          // Instead, configuration entries are only created when
+          // an entity form display is explicitly configured and saved.
+          if (!$entity_form_display) {
+            $entity_form_display = EntityFormDisplay::create([
+              'targetEntityType' => 'menu_link_content',
+              'bundle' => $item->menu_name,
+              'mode' => 'default',
+              'status' => TRUE,
+            ]);
+          }
+          // Assign widget settings for the 'default' form mode.
+          $entity_form_display
+            ->setComponent('body', [
+              'type' => 'text_textarea_with_summary',
+            ]);
+          $entity_form_display->save();
+
+          // Assign display settings for the 'default' and 'teaser' view modes.
+          $display->setComponent('body', [
+            'label' => 'hidden',
+            'type' => 'text_default',
+          ]);
+          $display->save();
+        }
+      }
+      $entity = $storage->load($id);
+      /** @var \Drupal\menu_link_content\MenuLinkContentInterface $entity */
+      $entity->set('body', [
+        'value' => $item->body__value,
+        'format' => $item->body__format,
+      ]);
+      $entity->set('bundle', $item->menu_name);
+      $entity->save();
+    }
+    \Drupal::state()->delete('menu_item_extras_1_to_2');
+  }
 }
- */

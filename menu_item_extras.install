@@ -102,10 +102,31 @@ function menu_item_extras_update_8023() {
   if (!empty($result)) {
     $storage = \Drupal::entityTypeManager()
       ->getStorage('menu_link_content');
+    // Add or remove the body field, as needed.
+    $field_storage = FieldStorageConfig::loadByName('menu_link_content', 'field_body');
+    if (empty($field_storage)) {
+      $field_storage = FieldStorageConfig::create([
+        'field_name' => 'field_body',
+        'entity_type' => 'menu_link_content',
+        'type' => 'text_with_summary',
+      ]);
+      $field_storage->save();
+    }
     foreach ($result as $id => $item) {
+      $field = FieldConfig::loadByName('menu_link_content', $item->menu_name, 'field_body');
+      if (empty($field)) {
+        $field = FieldConfig::create([
+          'field_name' => 'field_body',
+          'entity_type' => 'menu_link_content',
+          'field_storage' => $field_storage,
+          'bundle' => $item->menu_name,
+          'label' => t('Body'),
+          'settings' => ['display_summary' => TRUE],
+        ]);
+        $field->save();
+      }
       // Try loading the display from configuration.
       $display = EntityViewDisplay::load('menu_link_content.' . $item->menu_name . '.default');
-
       // If not found, create a fresh display object.
       // We do not preemptively create new entity_view_display configuration
       // entries for each existing entity type and bundle
@@ -119,59 +140,44 @@ function menu_item_extras_update_8023() {
           'mode' => 'default',
           'status' => TRUE,
         ]);
-        // Add or remove the body field, as needed.
-        $field_storage = FieldStorageConfig::loadByName('menu_link_content', 'field_body');
-        if (empty($field_storage)) {
-          $field_storage = FieldStorageConfig::create([
-            'field_name' => 'field_body',
-            'entity_type' => 'menu_link_content',
-            'type' => 'text_with_summary',
-          ]);
-          $field_storage->save();
-        }
-        $field = FieldConfig::loadByName('menu_link_content', $item->menu_name, 'field_body');
-        if (empty($field)) {
-          $field = FieldConfig::create([
-            'field_name' => 'field_body',
-            'entity_type' => 'menu_link_content',
-            'field_storage' => $field_storage,
-            'bundle' => $item->menu_name,
-            'label' => t('Body'),
-            'settings' => ['display_summary' => TRUE],
-          ]);
-          $field->save();
-
-          $entity_form_display = EntityFormDisplay::load('menu_link_content.' . $item->menu_name . '.default');
-
-          // If not found, create a fresh entity object.
-          // We do not preemptively create new entity form display
-          // configuration entries for each existing entity type
-          // and bundle whenever a new form mode becomes available.
-          // Instead, configuration entries are only created when
-          // an entity form display is explicitly configured and saved.
-          if (!$entity_form_display) {
-            $entity_form_display = EntityFormDisplay::create([
-              'targetEntityType' => 'menu_link_content',
-              'bundle' => $item->menu_name,
-              'mode' => 'default',
-              'status' => TRUE,
-            ]);
-          }
-          // Assign widget settings for the 'default' form mode.
-          $entity_form_display
-            ->setComponent('field_body', [
-              'type' => 'text_textarea_with_summary',
-            ]);
-          $entity_form_display->save();
-
-          // Assign display settings for the 'default' and 'teaser' view modes.
-          $display->setComponent('field_body', [
-            'label' => 'hidden',
-            'type' => 'text_default',
-          ]);
-          $display->save();
-        }
+        $display->save();
       }
+      $component = $display->getComponent('field_body');
+      if (empty($component)) {
+        // Assign display settings for the 'default' and 'teaser' view modes.
+        $display->setComponent('field_body', [
+          'label' => 'hidden',
+          'type' => 'text_default',
+        ]);
+        $display->save();
+      }
+
+      $display = EntityFormDisplay::load('menu_link_content.' . $item->menu_name . '.default');
+
+      // If not found, create a fresh entity object.
+      // We do not preemptively create new entity form display
+      // configuration entries for each existing entity type
+      // and bundle whenever a new form mode becomes available.
+      // Instead, configuration entries are only created when
+      // an entity form display is explicitly configured and saved.
+      if (!$display) {
+        $display = EntityFormDisplay::create([
+          'targetEntityType' => 'menu_link_content',
+          'bundle' => $item->menu_name,
+          'mode' => 'default',
+          'status' => TRUE,
+        ]);
+      }
+      $component = $display->getComponent('field_body');
+      if (empty($component)) {
+        // Assign widget settings for the 'default' form mode.
+        $display
+          ->setComponent('field_body', [
+            'type' => 'text_textarea_with_summary',
+          ]);
+        $display->save();
+      }
+
       $entity = $storage->load($id);
       /** @var \Drupal\menu_link_content\MenuLinkContentInterface $entity */
       $entity->set('field_body', [

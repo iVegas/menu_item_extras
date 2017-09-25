@@ -97,6 +97,35 @@ function menu_item_extras_update_8022() {
  * Trigger entity update for changes bundle in entity scheme.
  */
 function menu_item_extras_update_8023() {
+  $menus = \Drupal::entityTypeManager()->getStorage('menu')->loadMultiple();
+  $linkStorage = \Drupal::entityTypeManager()->getStorage('menu_link_content');
+  foreach ($menus as $menu) {
+    $links = $linkStorage->loadByProperties(['menu_name' => $menu->id()]);
+    if (!empty($links)) {
+      \Drupal::database()
+        ->update('menu_link_content_data')
+        ->fields([
+          'bundle' => $menu->id(),
+        ])
+        ->condition('id', array_keys($links), 'IN')
+        ->execute();
+      \Drupal::database()
+        ->update('menu_link_content')
+        ->fields([
+          'bundle' => $menu->id(),
+        ])
+        ->condition('id', array_keys($links), 'IN')
+        ->execute();
+    }
+  }
+}
+
+/**
+ * Implements hook_update_N().
+ *
+ * Trigger entity update for changes bundle in entity scheme.
+ */
+function menu_item_extras_update_8024() {
   \Drupal::service('config.factory')->getEditable('menu_item_extras.utility')->set('entity_type_build_status', TRUE)->save();
   \Drupal::service('menu_item_extras.menu_link_content_helper')->updateMenuLinkContentBundle();
 
@@ -115,18 +144,29 @@ function menu_item_extras_update_8023() {
       $field_storage->save();
     }
     foreach ($result as $id => $item) {
+      /** @var \Drupal\menu_link_content\MenuLinkContentInterface $entity */
+      $entity = $storage->load($id);
+
       $field = FieldConfig::loadByName('menu_link_content', $item->menu_name, 'field_body');
       if (empty($field)) {
         $field = FieldConfig::create([
           'field_name' => 'field_body',
           'entity_type' => 'menu_link_content',
-          'field_storage' => $field_storage,
-          'bundle' => $item->menu_name,
+          'field_storage' => 'menu_link_content.field_body',
+          'bundle' => $entity->bundle(),
           'label' => t('Body'),
           'settings' => ['display_summary' => TRUE],
         ]);
         $field->save();
+        drupal_flush_all_caches();
       }
+
+      $entity->get('field_body')->setValue([
+        'value' => $item->body__value,
+        'format' => $item->body__format,
+      ]);
+
+      $entity->save();
       // Try loading the display from configuration.
       $display = EntityViewDisplay::load('menu_link_content.' . $item->menu_name . '.default');
       // If not found, create a fresh display object.
@@ -138,7 +178,7 @@ function menu_item_extras_update_8023() {
       if (!$display) {
         $display = EntityViewDisplay::create([
           'targetEntityType' => 'menu_link_content',
-          'bundle' => $item->menu_name,
+          'bundle' => $entity->bundle(),
           'mode' => 'default',
           'status' => TRUE,
         ]);
@@ -165,7 +205,7 @@ function menu_item_extras_update_8023() {
       if (!$display) {
         $display = EntityFormDisplay::create([
           'targetEntityType' => 'menu_link_content',
-          'bundle' => $item->menu_name,
+          'bundle' => $entity->bundle(),
           'mode' => 'default',
           'status' => TRUE,
         ]);
@@ -180,13 +220,6 @@ function menu_item_extras_update_8023() {
         $display->save();
       }
 
-      $entity = $storage->load($id);
-      /** @var \Drupal\menu_link_content\MenuLinkContentInterface $entity */
-      $entity->set('field_body', [
-        'value' => $item->body__value,
-        'format' => $item->body__format,
-      ]);
-      $entity->save();
     }
     \Drupal::state()->delete('menu_item_extras_1_to_2');
   }

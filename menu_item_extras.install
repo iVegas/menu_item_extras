@@ -86,6 +86,8 @@ function menu_item_extras_update_8021(&$sandbox) {
  * Trigger entity update for changes bundle in entity scheme.
  */
 function menu_item_extras_update_8022() {
+  module_load_include('module', 'menu_item_extras');
+  drupal_flush_all_caches();
   \Drupal::service('menu_item_extras.menu_link_content_helper')->updateMenuLinkContentBundle();
 }
 

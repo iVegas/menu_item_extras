@@ -77,15 +77,16 @@ function menu_item_extras_update_8021(&$sandbox) {
 /**
  * Implements hook_update_N().
  *
- * Drop 1.x body fields.
+ * Make 1.x body fields empty.
  */
 function menu_item_extras_update_8022(&$sandbox) {
   \Drupal::database()
-    ->schema()
-    ->dropField('menu_link_content_data', 'body__value');
-  \Drupal::database()
-    ->schema()
-    ->dropField('menu_link_content_data', 'body__format');
+    ->update('menu_link_content_data')
+    ->fields([
+      'body__value' => NULL,
+      'body__format' => NULL,
+    ])
+    ->execute();
 }
 
 /**

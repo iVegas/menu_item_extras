@@ -55,7 +55,7 @@ function menu_item_extras_uninstall() {
 /**
  * Implements hook_update_N().
  *
- * Trigger entity update for changes in entity schema.
+ * Collect data to update.
  */
 function menu_item_extras_update_8021(&$sandbox) {
   /** @var \Drupal\Core\Database\Query\SelectInterface $query */
@@ -72,9 +72,33 @@ function menu_item_extras_update_8021(&$sandbox) {
     ->execute()
     ->fetchAllAssoc('id');
   \Drupal::state()->set('menu_item_extras_1_to_2', $result);
-  \Drupal::database()->schema()->dropField('menu_link_content_data', 'body__value');
-  \Drupal::database()->schema()->dropField('menu_link_content_data', 'body__format');
+}
 
+/**
+ * Implements hook_update_N().
+ *
+ * Drop 1.x body fields.
+ */
+function menu_item_extras_update_8022(&$sandbox) {
+  \Drupal::database()
+    ->schema()
+    ->dropField('menu_link_content_data', 'body__value');
+  \Drupal::database()
+    ->schema()
+    ->dropField('menu_link_content_data', 'body__format');
+}
+
+/**
+ * Implements hook_update_N().
+ *
+ * Apply entity changes.
+ */
+function menu_item_extras_update_8023(&$sandbox) {
+  \Drupal::service('config.factory')
+    ->getEditable('menu_item_extras.utility')
+    ->set('entity_type_build_status', TRUE)
+    ->save();
+  \Drupal::service('plugin.cache_clearer')->clearCachedDefinitions();
   /** @var \Drupal\menu_item_extras\Service\MenuLinkContentService $mlc_helper */
   $mlc_helper = \Drupal::service('menu_item_extras.menu_link_content_helper');
   $mlc_helper->doEntityUpdate();
@@ -83,20 +107,20 @@ function menu_item_extras_update_8021(&$sandbox) {
 /**
  * Implements hook_update_N().
  *
- * Trigger entity update for changes bundle in entity scheme.
+ * Update existing menu items.
  */
-function menu_item_extras_update_8022() {
-  module_load_include('module', 'menu_item_extras');
-  drupal_flush_all_caches();
-  \Drupal::service('menu_item_extras.menu_link_content_helper')->updateMenuLinkContentBundle();
+function menu_item_extras_update_8024() {
+  /** @var \Drupal\menu_item_extras\Service\MenuLinkContentService $mlc_helper */
+  $mlc_helper = \Drupal::service('menu_item_extras.menu_link_content_helper');
+  $mlc_helper->updateMenuLinkContentBundle();
 }
 
 /**
  * Implements hook_update_N().
  *
- * Trigger entity update for changes bundle in entity scheme.
+ * Update existing menu items.
  */
-function menu_item_extras_update_8023() {
+function menu_item_extras_update_8025() {
   $menus = \Drupal::entityTypeManager()->getStorage('menu')->loadMultiple();
   $linkStorage = \Drupal::entityTypeManager()->getStorage('menu_link_content');
   foreach ($menus as $menu) {
@@ -108,6 +132,7 @@ function menu_item_extras_update_8023() {
           'bundle' => $menu->id(),
         ])
         ->condition('id', array_keys($links), 'IN')
+        ->condition('bundle', 'menu_link_content')
         ->execute();
       \Drupal::database()
         ->update('menu_link_content')
@@ -115,6 +140,7 @@ function menu_item_extras_update_8023() {
           'bundle' => $menu->id(),
         ])
         ->condition('id', array_keys($links), 'IN')
+        ->condition('bundle', 'menu_link_content')
         ->execute();
     }
   }
@@ -123,102 +149,54 @@ function menu_item_extras_update_8023() {
 /**
  * Implements hook_update_N().
  *
- * Trigger entity update for changes bundle in entity scheme.
+ * Finalize 1.x to 2.x update path.
  */
-function menu_item_extras_update_8024() {
-  \Drupal::service('config.factory')->getEditable('menu_item_extras.utility')->set('entity_type_build_status', TRUE)->save();
-  \Drupal::service('menu_item_extras.menu_link_content_helper')->updateMenuLinkContentBundle();
+function menu_item_extras_update_8026() {
+  \Drupal::service('menu_item_extras.menu_link_content_helper')
+    ->updateMenuLinkContentBundle();
 
   $result = \Drupal::state()->get('menu_item_extras_1_to_2');
   if (!empty($result)) {
-    $storage = \Drupal::entityTypeManager()
+
+    $field_name = 'field_body';
+    $display_mode = 'default';
+
+    $link_storage = \Drupal::entityTypeManager()
       ->getStorage('menu_link_content');
-    // Add or remove the body field, as needed.
-    $field_storage = FieldStorageConfig::loadByName('menu_link_content', 'field_body');
-    if (empty($field_storage)) {
-      $field_storage = FieldStorageConfig::create([
-        'field_name' => 'field_body',
-        'entity_type' => 'menu_link_content',
-        'type' => 'text_with_summary',
-      ]);
-      $field_storage->save();
-    }
+
+    /** @var \Drupal\menu_item_extras\Service\UpdateHelper $updater */
+    $updater = \Drupal::service('menu_item_extras.update');
+
+    $field_storage = $updater->checkBodyFieldStorage(
+      $field_name, 'menu_link_content', 'text_with_summary'
+    );
+
     foreach ($result as $id => $item) {
       /** @var \Drupal\menu_link_content\MenuLinkContentInterface $entity */
-      $entity = $storage->load($id);
+      $entity = $link_storage->load($id);
 
-      $field = FieldConfig::loadByName('menu_link_content', $item->menu_name, 'field_body');
-      if (empty($field)) {
-        $field = FieldConfig::create([
-          'field_name' => 'field_body',
-          'entity_type' => 'menu_link_content',
-          'field_storage' => 'menu_link_content.field_body',
-          'bundle' => $entity->bundle(),
-          'label' => t('Body'),
-          'settings' => ['display_summary' => TRUE],
-        ]);
-        $field->save();
-        drupal_flush_all_caches();
-      }
+      $updater->checkBodyField(
+        $field_storage,
+        $entity,
+        $field_name,
+        t('Body'),
+        ['display_summary' => TRUE]
+      );
 
-      $entity->get('field_body')->setValue([
+      $entity->get($field_name)->setValue([
         'value' => $item->body__value,
         'format' => $item->body__format,
       ]);
 
       $entity->save();
-      // Try loading the display from configuration.
-      $display = EntityViewDisplay::load('menu_link_content.' . $item->menu_name . '.default');
-      // If not found, create a fresh display object.
-      // We do not preemptively create new entity_view_display configuration
-      // entries for each existing entity type and bundle
-      // whenever a new view mode becomes available.
-      // Instead, configuration entries are only created when
-      // a display object is explicitly configured and saved.
-      if (!$display) {
-        $display = EntityViewDisplay::create([
-          'targetEntityType' => 'menu_link_content',
-          'bundle' => $entity->bundle(),
-          'mode' => 'default',
-          'status' => TRUE,
-        ]);
-        $display->save();
-      }
-      $component = $display->getComponent('field_body');
-      if (empty($component)) {
-        // Assign display settings for the 'default' and 'teaser' view modes.
-        $display->setComponent('field_body', [
-          'label' => 'hidden',
-          'type' => 'text_default',
-        ]);
-        $display->save();
-      }
 
-      $display = EntityFormDisplay::load('menu_link_content.' . $item->menu_name . '.default');
-
-      // If not found, create a fresh entity object.
-      // We do not preemptively create new entity form display
-      // configuration entries for each existing entity type
-      // and bundle whenever a new form mode becomes available.
-      // Instead, configuration entries are only created when
-      // an entity form display is explicitly configured and saved.
-      if (!$display) {
-        $display = EntityFormDisplay::create([
-          'targetEntityType' => 'menu_link_content',
-          'bundle' => $entity->bundle(),
-          'mode' => 'default',
-          'status' => TRUE,
-        ]);
-      }
-      $component = $display->getComponent('field_body');
-      if (empty($component)) {
-        // Assign widget settings for the 'default' form mode.
-        $display
-          ->setComponent('field_body', [
-            'type' => 'text_textarea_with_summary',
-          ]);
-        $display->save();
-      }
+      $updater->checkViewDisplay($display_mode, $entity, $field_name, [
+        'label' => 'hidden',
+        'type' => 'text_default',
+      ]);
+      $updater->checkFormDisplay($display_mode, $entity, $field_name, [
+        'type' => 'text_textarea_with_summary',
+      ]);
 
     }
     \Drupal::state()->delete('menu_item_extras_1_to_2');

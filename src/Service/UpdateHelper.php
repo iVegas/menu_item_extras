@@ -39,6 +39,7 @@ class UpdateHelper {
       ]);
       $field_storage->save();
     }
+
     return $field_storage;
   }
 
@@ -65,7 +66,7 @@ class UpdateHelper {
       $field = FieldConfig::create([
         'field_name' => $field_name,
         'entity_type' => $entity->getEntityTypeId(),
-        'field_storage' => $field_storage->id(),
+        'field_storage' => $field_storage,
         'bundle' => $entity->bundle(),
         'label' => $label,
         'settings' => $settings,

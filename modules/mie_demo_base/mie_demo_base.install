@@ -12,32 +12,94 @@ use Drupal\mie_demo_base\Utility\MieDemoBaseUtility;
  */
 function mie_demo_base_install() {
   // Create test image files.
-  $demo_image = MieDemoBaseUtility::createFile('sample.png');
-  // Create test blocks.
-  $sample_block = MieDemoBaseUtility::createMieBasicBlockContent(
-          'Sample Block', '<h2>Menu Item Extras - a new way for Drupal Mega Menus!</h2>
-      <p>It allows add fields to menus and configures the display.</p>'
-  );
+  $sample_one = MieDemoBaseUtility::createFile('sample-one.png');
+  $sample_two = MieDemoBaseUtility::createFile('sample-two.jpg');
+  $sample_three = MieDemoBaseUtility::createFile('sample-three.jpeg');
+  $sample_four = MieDemoBaseUtility::createFile('sample-four.jpg');
+  // Create test terms.
+  $terms = [];
+  $terms[] = MieDemoBaseUtility::createMieDemoContentTerm('Demo Term 1', NULL, $sample_two);
+  $terms[] = MieDemoBaseUtility::createMieDemoContentTerm('Demo Term 2', NULL, $sample_three);
+  $terms[] = MieDemoBaseUtility::createMieDemoContentTerm('Demo Term 3', NULL, $sample_four);
   // Create test links.
   $first_sample_link_first_level = MieDemoBaseUtility::createMieDemoBaseMenuMenuLinkContent(
-          'First Link of Level One', 'http://example.com', 0, 'Sample Description', '', 'First Link of Level One Body Value', $sample_block->id(), $demo_image->id()
+          'Link of Level One', 'http://example.com', 0, 'Sample Description', '', 'default', TRUE, 'Link of Level One Body Value', NULL, $sample_one->id()
   );
   MieDemoBaseUtility::createMieDemoBaseMenuMenuLinkContent(
-      'First Link of Level Two', 'http://example.com', 1, 'Sample Description', $first_sample_link_first_level->uuid(), 'First Link of Level Two Body Value', $sample_block->id(), $demo_image->id()
+      'Link of Level Two', 'http://example.com', 1, 'Sample Description', $first_sample_link_first_level->uuid(), 'default', FALSE, 'Link of Level Two Body Value', NULL, $sample_one->id()
   );
   MieDemoBaseUtility::createMieDemoBaseMenuMenuLinkContent(
-      'Second Link of Level Two', 'http://example.com', 2, 'Sample Description', $first_sample_link_first_level->uuid(), 'Second Link of Level Two Body Value'
+      'Link of Level Two', 'http://example.com', 2, 'Sample Description', $first_sample_link_first_level->uuid(), 'default', FALSE, 'Link of Level Two Body Value'
+  );
+  MieDemoBaseUtility::createMieDemoBaseMenuMenuLinkContent(
+      'Link of Level Two', 'http://example.com', 2, 'Sample Description', $first_sample_link_first_level->uuid(), 'default', FALSE, 'Link of Level Two Body Value'
+  );
+  MieDemoBaseUtility::createMieDemoBaseMenuMenuLinkContent(
+      'Link of Level Two', 'http://example.com', 2, 'Sample Description', $first_sample_link_first_level->uuid(), 'default', FALSE, 'Link of Level Two Body Value'
   );
   $second_sample_link_first_level = MieDemoBaseUtility::createMieDemoBaseMenuMenuLinkContent(
-          'Second Link of Level One', 'http://example.com', 3, 'Sample Description', '', 'First Link of Level One Body Value', $sample_block->id(), $demo_image->id()
+          'Link of Level One', 'http://example.com', 3, 'Sample Description', '', 'banner', TRUE, 'Link of Level One Body Value', NULL, $sample_one->id()
   );
   MieDemoBaseUtility::createMieDemoBaseMenuMenuLinkContent(
-      'Third Link of Level Two', 'http://example.com', 4, 'Sample Description', $second_sample_link_first_level->uuid(), 'Third Link of Level Two Body Value'
+      'Link of Level Two', 'http://example.com', 4, 'Sample Description', $second_sample_link_first_level->uuid(), 'default', FALSE, 'Link of Level Two Body Value'
   );
   $fourth_sample_link_second_level = MieDemoBaseUtility::createMieDemoBaseMenuMenuLinkContent(
-          'Fourth Link of Level Two', 'http://example.com', 5, 'Sample Description', $second_sample_link_first_level->uuid(), 'Fourth Link of Level Two Body Value'
+          'Link of Level Two', 'http://example.com', 5, 'Sample Description', $second_sample_link_first_level->uuid(), 'default', TRUE, 'Link of Level Two Body Value'
   );
   MieDemoBaseUtility::createMieDemoBaseMenuMenuLinkContent(
-      'Fifth Link of Level Two', 'http://example.com', 6, 'Sample Description', $fourth_sample_link_second_level->uuid(), 'Fifth Link of Level Two Body Value'
+      'Link of Level Three', 'http://example.com', 6, 'Sample Description', $fourth_sample_link_second_level->uuid(), 'default', FALSE, 'Link of Level Three Body Value'
+  );
+  MieDemoBaseUtility::createMieDemoBaseMenuMenuLinkContent(
+      'Link of Level Three', 'http://example.com', 6, 'Sample Description', $fourth_sample_link_second_level->uuid(), 'default', FALSE, 'Link of Level Three Body Value'
+  );
+  MieDemoBaseUtility::createMieDemoBaseMenuMenuLinkContent(
+      'Link of Level Three', 'http://example.com', 6, 'Sample Description', $fourth_sample_link_second_level->uuid(), 'default', FALSE, 'Link of Level Three Body Value'
+  );
+  MieDemoBaseUtility::createMieDemoBaseMenuMenuLinkContent(
+      'Link of Level Two', 'http://example.com', 7, 'Sample Description', $second_sample_link_first_level->uuid(), 'default', FALSE, 'Link of Level Two Body Value'
+  );
+  MieDemoBaseUtility::createMieDemoBaseMenuMenuLinkContent(
+      'Link of Level Two', 'http://example.com', 7, 'Sample Description', $second_sample_link_first_level->uuid(), 'default', FALSE, 'Link of Level Two Body Value'
+  );
+  MieDemoBaseUtility::createMieDemoBaseMenuMenuLinkContent(
+      'Link of Level Two', 'http://example.com', 7, 'Sample Description', $second_sample_link_first_level->uuid(), 'default', FALSE, 'Link of Level Two Body Value'
+  );
+  // Create links with view block reference.
+  $body = "Menu Item Extras - a new way for Drupal Mega Menus!\nIt allows add fields to menus and configures the display.";
+  $terms_item_sample_link_first_level = MieDemoBaseUtility::createMieDemoBaseMenuMenuLinkContent(
+          'Menu Item with Terms', 'http://example.com', 8, 'Sample Description', '', 'terms', TRUE, $body, $terms
+  );
+  MieDemoBaseUtility::createMieDemoBaseMenuMenuLinkContent(
+      'Link of Level Two', 'http://example.com', 9, 'Sample Description', $terms_item_sample_link_first_level->uuid(), 'default', FALSE, 'Link of Level Two Body Value'
+  );
+  MieDemoBaseUtility::createMieDemoBaseMenuMenuLinkContent(
+      'Link of Level Two', 'http://example.com', 9, 'Sample Description', $terms_item_sample_link_first_level->uuid(), 'default', FALSE, 'Link of Level Two Body Value'
+  );
+  MieDemoBaseUtility::createMieDemoBaseMenuMenuLinkContent(
+      'Link of Level Two', 'http://example.com', 9, 'Sample Description', $terms_item_sample_link_first_level->uuid(), 'default', FALSE, 'Link of Level Two Body Value'
+  );
+  MieDemoBaseUtility::createMieDemoBaseMenuMenuLinkContent(
+      'Link of Level Two', 'http://example.com', 9, 'Sample Description', $terms_item_sample_link_first_level->uuid(), 'default', FALSE, 'Link of Level Two Body Value'
+  );
+  MieDemoBaseUtility::createMieDemoBaseMenuMenuLinkContent(
+      'Link of Level Two', 'http://example.com', 9, 'Sample Description', $terms_item_sample_link_first_level->uuid(), 'default', FALSE, 'Link of Level Two Body Value'
+  );
+  MieDemoBaseUtility::createMieDemoBaseMenuMenuLinkContent(
+      'Link of Level Two', 'http://example.com', 9, 'Sample Description', $terms_item_sample_link_first_level->uuid(), 'default', FALSE, 'Link of Level Two Body Value'
+  );
+  MieDemoBaseUtility::createMieDemoBaseMenuMenuLinkContent(
+      'Link of Level Two', 'http://example.com', 9, 'Sample Description', $terms_item_sample_link_first_level->uuid(), 'default', FALSE, 'Link of Level Two Body Value'
+  );
+  MieDemoBaseUtility::createMieDemoBaseMenuMenuLinkContent(
+      'Link of Level Two', 'http://example.com', 9, 'Sample Description', $terms_item_sample_link_first_level->uuid(), 'default', FALSE, 'Link of Level Two Body Value'
+  );
+  MieDemoBaseUtility::createMieDemoBaseMenuMenuLinkContent(
+      'Link of Level Two', 'http://example.com', 9, 'Sample Description', $terms_item_sample_link_first_level->uuid(), 'default', FALSE, 'Link of Level Two Body Value'
+  );
+  MieDemoBaseUtility::createMieDemoBaseMenuMenuLinkContent(
+      'Link of Level Two', 'http://example.com', 9, 'Sample Description', $terms_item_sample_link_first_level->uuid(), 'default', FALSE, 'Link of Level Two Body Value'
+  );
+  MieDemoBaseUtility::createMieDemoBaseMenuMenuLinkContent(
+      'Link of Level Two', 'http://example.com', 9, 'Sample Description', $terms_item_sample_link_first_level->uuid(), 'default', FALSE, 'Link of Level Two Body Value'
   );
 }

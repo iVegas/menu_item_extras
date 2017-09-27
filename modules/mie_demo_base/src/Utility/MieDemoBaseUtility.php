@@ -4,8 +4,8 @@ namespace Drupal\mie_demo_base\Utility;
 
 use Drupal\file\Entity\File;
 use Drupal\Core\StreamWrapper\PublicStream;
-use Drupal\block_content\Entity\BlockContent;
 use Drupal\menu_link_content\Entity\MenuLinkContent;
+use Drupal\taxonomy\Entity\Term;
 
 /**
  * Utility functions specific to mie_demo_base.
@@ -33,27 +33,40 @@ class MieDemoBaseUtility {
   }
 
   /**
-   * Creates `mie_basic` Block.
+   * Creates taxonomy term with special name and file.
    *
-   * @param string $info
-   *   Block info property.
-   * @param string $body_value
-   *   Field body value.
+   * @param string $term_name
+   *   New term name.
+   * @param string $description
+   *   (optional) New term description.
+   * @param \Drupal\file\Entity\File $file
+   *   (optional) File for the term field `field_mie_image`.
    *
-   * @return \Drupal\block_content\Entity\BlockContent
-   *   Drupal Block Content entity.
+   * @return \Drupal\taxonomy\Entity\Term
+   *   Drupal Term entity.
    */
-  public static function createMieBasicBlockContent($info, $body_value) {
-    $sample_block = BlockContent::create([
-      'type' => 'mie_basic',
-      'info' => $info,
-      'body' => [
-        'value' => $body_value,
-        'format' => 'basic_html',
+  public static function createMieDemoContentTerm($term_name, $description = NULL, File $file = NULL) {
+    $values = [
+      'vid' => 'mie_demo_content',
+      'name' => $term_name,
+      'field_mie_image' => [
+        'target_id' => $file->id(),
       ],
-    ]);
-    $sample_block->save();
-    return $sample_block;
+    ];
+    if (!empty($description)) {
+      $values['description'] = [
+        'value' => $description,
+        'format' => '',
+      ];
+    }
+    if (!empty($file)) {
+      $values['field_mie_image'] = [
+        'target_id' => $file->id(),
+      ];
+    }
+    $term = Term::create($values);
+    $term->save();
+    return $term;
   }
 
   /**
@@ -69,23 +82,26 @@ class MieDemoBaseUtility {
    *   (optional) Menu link description.
    * @param string $parent_uuid
    *   (optional) Menu link parent UUID.
-   * @param string $field_body_value
-   *   (optional) Value for menu link body field.
-   * @param string $field_custom_block_id
-   *   (optional) ID for reference block field.
-   * @param string $field_image_id
-   *   (optional) File ID for image field.
    * @param string $view_mode
    *   (optional) Menu link view mode property.
+   * @param bool $show_expanded
+   *   (optional) Show as expanded menu link.
+   * @param string $field_body_value
+   *   (optional) Value for menu link body field.
+   * @param \Drupal\taxonomy\Entity\Term[] $taxonomy_terms
+   *   (optional) Taxonomy terms for attaching to menu link.
+   * @param string $image_file_id
+   *   (optional) File ID for image field.
    *
    * @return \Drupal\menu_link_content\Entity\MenuLinkContent
    *   Drupal Menu Link Content entity.
    */
-  public static function createMieDemoBaseMenuMenuLinkContent($title, $uri, $weight = 0, $description = '', $parent_uuid = '', $field_body_value = '', $field_custom_block_id = NULL, $field_image_id = NULL, $view_mode = '') {
+  public static function createMieDemoBaseMenuMenuLinkContent($title, $uri, $weight = 0, $description = '', $parent_uuid = '', $view_mode = '', $show_expanded = FALSE, $field_body_value = '', array $taxonomy_terms = NULL, $image_file_id = NULL) {
     $values = [
       'bundle' => 'mie-demo-base-menu',
       'menu_name' => 'mie-demo-base-menu',
       'title' => $title,
+      'expanded' => $show_expanded,
       'link' => [
         'uri' => $uri,
         'title' => $title,
@@ -94,7 +110,7 @@ class MieDemoBaseUtility {
       'description' => $description,
       'field_body' => [
         'value' => $field_body_value,
-        'format' => 'basic_html',
+        'format' => '',
       ],
       'view_mode' => 'default',
     ];
@@ -104,14 +120,14 @@ class MieDemoBaseUtility {
     if (!empty($view_mode)) {
       $values['view_mode'] = $view_mode;
     }
-    if (!empty($field_custom_block_id)) {
-      $values['field_custom_block'] = [
-        'target_id' => $field_custom_block_id,
-      ];
+    if (!empty($taxonomy_terms)) {
+      foreach ($taxonomy_terms as $taxonomy_term) {
+        $values['field_mie_demo_content_terms'][]['target_id'] = $taxonomy_term->id();
+      }
     }
-    if (!empty($field_image_id)) {
+    if (!empty($image_file_id)) {
       $values['field_image'] = [
-        'target_id' => $field_image_id,
+        'target_id' => $image_file_id,
         'alt' => '',
         'width' => '',
         'height' => '',

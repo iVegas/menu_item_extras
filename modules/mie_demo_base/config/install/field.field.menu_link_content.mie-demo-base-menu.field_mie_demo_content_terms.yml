@@ -2,24 +2,24 @@ langcode: en
 status: true
 dependencies:
   config:
-    - block_content.type.mie_basic
-    - field.storage.menu_link_content.field_custom_block
+    - field.storage.menu_link_content.field_mie_demo_content_terms
     - system.menu.mie-demo-base-menu
-id: menu_link_content.mie-demo-base-menu.field_custom_block
-field_name: field_custom_block
+    - taxonomy.vocabulary.mie_demo_content
+id: menu_link_content.mie-demo-base-menu.field_mie_demo_content_terms
+field_name: field_mie_demo_content_terms
 entity_type: menu_link_content
 bundle: mie-demo-base-menu
-label: 'Custom Block'
+label: 'Mie Demo Content Terms'
 description: ''
 required: false
 translatable: false
 default_value: {  }
 default_value_callback: ''
 settings:
-  handler: 'default:block_content'
+  handler: 'default:taxonomy_term'
   handler_settings:
     target_bundles:
-      basic: mie_basic
+      mie_demo_content: mie_demo_content
     sort:
       field: _none
     auto_create: false

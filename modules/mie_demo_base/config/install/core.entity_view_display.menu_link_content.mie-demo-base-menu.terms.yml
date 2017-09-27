@@ -2,17 +2,18 @@ langcode: en
 status: true
 dependencies:
   config:
-    - core.entity_view_mode.menu_link_content.banner
+    - core.entity_view_mode.menu_link_content.terms
     - field.field.menu_link_content.mie-demo-base-menu.field_body
     - field.field.menu_link_content.mie-demo-base-menu.field_image
+    - field.field.menu_link_content.mie-demo-base-menu.field_mie_demo_content_terms
     - system.menu.mie-demo-base-menu
   module:
     - image
     - text
-id: menu_link_content.mie-demo-base-menu.banner
+id: menu_link_content.mie-demo-base-menu.terms
 targetEntityType: menu_link_content
 bundle: mie-demo-base-menu
-mode: banner
+mode: terms
 content:
   children:
     weight: 2
@@ -34,5 +35,14 @@ content:
       image_link: ''
     third_party_settings: {  }
     type: image
+    region: content
+  field_mie_demo_content_terms:
+    weight: 3
+    label: hidden
+    settings:
+      view_mode: default
+      link: false
+    third_party_settings: {  }
+    type: entity_reference_entity_view
     region: content
 hidden: {  }

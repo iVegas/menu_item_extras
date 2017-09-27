@@ -87,7 +87,7 @@ class MenuLinkTreeHandler implements MenuLinkTreeHandlerInterface {
   /**
    * {@inheritdoc}
    */
-  public function getMenuLinkItemContent(MenuLinkInterface $link) {
+  public function getMenuLinkItemContent(MenuLinkInterface $link, $menu_level = NULL) {
     $render_output = [];
     /** @var \Drupal\menu_link_content\Entity\MenuLinkContent $menu_item */
     $entity = $this->getMenuLinkItemEntity($link);
@@ -97,6 +97,10 @@ class MenuLinkTreeHandler implements MenuLinkTreeHandlerInterface {
         ->getViewBuilder($entity->getEntityTypeId());
       $render_entity = $view_builder->view($entity, $view_mode);
       $render_output = $render_entity;
+    }
+
+    if (!is_null($menu_level)) {
+      $render_output['#menu_level'] = $menu_level;
     }
 
     return $render_output;
@@ -130,7 +134,7 @@ class MenuLinkTreeHandler implements MenuLinkTreeHandlerInterface {
       $content = [];
       if (isset($item['original_link'])) {
         $content['#item'] = $item;
-        $content['content'] = $this->getMenuLinkItemContent($item['original_link']);
+        $content['content'] = $this->getMenuLinkItemContent($item['original_link'], $menu_level);
         $content['menu_level'] = $menu_level;
       }
       // Process subitems.

@@ -19,6 +19,8 @@ use Drupal\Component\Utility\Html;
 function template_preprocess_menu_link_content(array &$variables) {
   /* @var \Drupal\menu_link_content\Entity\MenuLinkContent $menu_link_content */
   $menu_link_content = $variables['elements']['#menu_link_content'];
+  // Disabled standard entity render for using custom TWIG render.
+  unset($variables['elements']['#pre_render']);
   // Helpful $content variable for templates.
   $variables['content'] = $variables['elements'];
   if (isset($variables['content']['children'])) {

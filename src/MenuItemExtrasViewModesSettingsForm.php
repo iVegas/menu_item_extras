@@ -98,6 +98,18 @@ class MenuItemExtrasViewModesSettingsForm extends EntityForm {
   /**
    * {@inheritdoc}
    */
+  public function buildForm(array $form, FormStateInterface $form_state) {
+    $form = parent::buildForm($form, $form_state);
+    // Hides delete action as we don't need it.
+    if (!empty($form['actions']['delete'])) {
+      $form['actions']['delete']['#access'] = FALSE;
+    }
+    return $form;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function form(array $form, FormStateInterface $form_state) {
     $form_state->set('menu_overview_form_parents', ['links']);
     $form['links'] = [];
@@ -271,10 +283,7 @@ class MenuItemExtrasViewModesSettingsForm extends EntityForm {
   }
 
   /**
-   * Submit handler for the menu overview form.
-   *
-   * This function takes great care in saving parent items first, then items
-   * underneath them. Saving items in the incorrect order can break the tree.
+   * Submit handler for the menu edit view modes form.
    */
   protected function submitOverviewForm(array $complete_form, FormStateInterface $form_state) {
     $parents = $form_state->get('menu_overview_form_parents');
@@ -284,8 +293,9 @@ class MenuItemExtrasViewModesSettingsForm extends EntityForm {
     $order = is_array($input) ? array_flip(array_keys($input)) : [];
     $form = array_intersect_key(array_merge($order, $form), $form);
 
-    $fields = ['weight', 'parent', 'enabled'];
+    $fields = ['view_mode'];
     $form_links = $form['links'];
+    // Handles saving of updated values.
     foreach (Element::children($form_links) as $id) {
       if (isset($form_links[$id]['#item'])) {
         $element = $form_links[$id];
@@ -295,9 +305,9 @@ class MenuItemExtrasViewModesSettingsForm extends EntityForm {
             $updated_values[$field] = $element[$field]['#value'];
           }
         }
-        if ($updated_values) {
-          $this->menuLinkManager->updateDefinition($element['#item']->link->getPLuginId(), $updated_values);
-        }
+//        if ($updated_values) {
+//          $this->menuLinkManager->updateDefinition($element['#item']->link->getPLuginId(), $updated_values);
+//        }
       }
     }
   }

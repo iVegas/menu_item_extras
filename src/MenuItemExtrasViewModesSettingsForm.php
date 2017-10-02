@@ -7,7 +7,7 @@ use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Entity\EntityForm;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Link;
-use Drupal\Core\Menu\MenuLinkManagerInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Menu\MenuLinkTreeElement;
 use Drupal\Core\Menu\MenuLinkTreeInterface;
 use Drupal\Core\Menu\MenuTreeParameters;
@@ -23,11 +23,11 @@ use Drupal\Core\Entity\EntityDisplayRepositoryInterface;
 class MenuItemExtrasViewModesSettingsForm extends EntityForm {
 
   /**
-   * The menu link manager.
+   * The entity type manager.
    *
-   * @var \Drupal\Core\Menu\MenuLinkManagerInterface
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
    */
-  protected $menuLinkManager;
+  protected $entityTypeManager;
 
   /**
    * The menu tree service.
@@ -67,8 +67,8 @@ class MenuItemExtrasViewModesSettingsForm extends EntityForm {
   /**
    * Constructs a MenuForm object.
    *
-   * @param \Drupal\Core\Menu\MenuLinkManagerInterface $menu_link_manager
-   *   The menu link manager.
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
+   *   The entity type manager.
    * @param \Drupal\Core\Menu\MenuLinkTreeInterface $menu_tree
    *   The menu tree service.
    * @param \Drupal\Core\Utility\LinkGeneratorInterface $link_generator
@@ -78,8 +78,8 @@ class MenuItemExtrasViewModesSettingsForm extends EntityForm {
    * @param \Drupal\Core\Entity\EntityDisplayRepositoryInterface $entityDisplayRepository
    *   The entity display repository.
    */
-  public function __construct(MenuLinkManagerInterface $menu_link_manager, MenuLinkTreeInterface $menu_tree, LinkGeneratorInterface $link_generator, MenuLinkTreeHandlerInterface $menu_link_tree_handler, EntityDisplayRepositoryInterface $entityDisplayRepository) {
-    $this->menuLinkManager = $menu_link_manager;
+  public function __construct(EntityTypeManagerInterface $entity_type_manager, MenuLinkTreeInterface $menu_tree, LinkGeneratorInterface $link_generator, MenuLinkTreeHandlerInterface $menu_link_tree_handler, EntityDisplayRepositoryInterface $entityDisplayRepository) {
+    $this->entityTypeManager = $entity_type_manager;
     $this->menuTree = $menu_tree;
     $this->linkGenerator = $link_generator;
     $this->menuLinkTreeHandler = $menu_link_tree_handler;
@@ -91,7 +91,7 @@ class MenuItemExtrasViewModesSettingsForm extends EntityForm {
    */
   public static function create(ContainerInterface $container) {
     return new static(
-        $container->get('plugin.manager.menu.link'), $container->get('menu.link_tree'), $container->get('link_generator'), $container->get('menu_item_extras.menu_link_tree_handler'), $container->get('entity_display.repository')
+        $container->get('entity_type.manager'), $container->get('menu.link_tree'), $container->get('link_generator'), $container->get('menu_item_extras.menu_link_tree_handler'), $container->get('entity_display.repository')
     );
   }
 
@@ -128,12 +128,7 @@ class MenuItemExtrasViewModesSettingsForm extends EntityForm {
       drupal_set_message($this->t('Menu %label has been updated.', ['%label' => $menu->label()]));
       $this->logger('menu')->notice('Menu %label has been updated.', ['%label' => $menu->label(), 'link' => $edit_link]);
     }
-    else {
-      drupal_set_message($this->t('Menu %label has been added.', ['%label' => $menu->label()]));
-      $this->logger('menu')->notice('Menu %label has been added.', ['%label' => $menu->label(), 'link' => $edit_link]);
-    }
-
-    $form_state->setRedirectUrl($this->entity->urlInfo('edit-form'));
+    $form_state->setRedirectUrl($this->entity->toUrl('view-modes-settings'));
   }
 
   /**
@@ -191,35 +186,30 @@ class MenuItemExtrasViewModesSettingsForm extends EntityForm {
         ],
       ],
       '#attributes' => [
-        'id' => 'menu-overview',
+        'entity_id' => 'menu-overview',
       ],
     ];
 
-    $form['links']['#empty'] = $this->t('There are no menu links yet. <a href=":url">Add link</a>.', [
-      ':url' => $this->url('entity.menu.add_link_form', ['menu' => $this->entity->id()], [
-        'query' => ['destination' => $this->entity->url('edit-form')],
-      ]),
-    ]);
     $links = $this->buildOverviewTreeForm($tree, $delta);
-    foreach (Element::children($links) as $id) {
-      if (isset($links[$id]['#item'])) {
-        $element = $links[$id];
+    foreach (Element::children($links) as $entity_id) {
+      if (isset($links[$entity_id]['#item'])) {
+        $element = $links[$entity_id];
 
-        $form['links'][$id]['#item'] = $element['#item'];
+        $form['links'][$entity_id]['#item'] = $element['#item'];
         $element['parent']['#attributes']['class'] = ['menu-parent'];
-        $element['id']['#attributes']['class'] = ['menu-id'];
+        $element['entity_id']['#attributes']['class'] = ['menu-id'];
 
-        $form['links'][$id]['title'] = [
+        $form['links'][$entity_id]['title'] = [
           [
             '#theme' => 'indentation',
             '#size' => $element['#item']->depth - 1,
           ],
           $element['title'],
         ];
-        $form['links'][$id]['view_mode'] = $element['view_mode'];
+        $form['links'][$entity_id]['view_mode'] = $element['view_mode'];
 
-        $form['links'][$id]['id'] = $element['id'];
-        $form['links'][$id]['parent'] = $element['parent'];
+        $form['links'][$entity_id]['entity_id'] = $element['entity_id'];
+        $form['links'][$entity_id]['parent'] = $element['parent'];
       }
     }
 
@@ -250,20 +240,22 @@ class MenuItemExtrasViewModesSettingsForm extends EntityForm {
 
       /** @var \Drupal\Core\Menu\MenuLinkInterface $link */
       $link = $element->link;
-      if ($link) {
-        $id = 'menu_plugin_id:' . $link->getPluginId();
-        $form[$id]['#item'] = $element;
-        $form[$id]['#attributes'] = $link->isEnabled() ? ['class' => ['menu-enabled']] : ['class' => ['menu-disabled']];
-        $form[$id]['title'] = Link::fromTextAndUrl($link->getTitle(), $link->getUrlObject())->toRenderable();
-        $form[$id]['id'] = [
+      $metadata = $link->getMetaData();
+      if ($link && !empty($metadata['entity_id'])) {
+        $entity_id = $metadata['entity_id'];
+        $metadata = $link->getMetaData();
+        $form[$entity_id]['#item'] = $element;
+        $form[$entity_id]['#attributes'] = $link->isEnabled() ? ['class' => ['menu-enabled']] : ['class' => ['menu-disabled']];
+        $form[$entity_id]['title'] = Link::fromTextAndUrl($link->getTitle(), $link->getUrlObject())->toRenderable();
+        $form[$entity_id]['entity_id'] = [
           '#type' => 'hidden',
-          '#value' => $link->getPluginId(),
+          '#value' => $entity_id,
         ];
-        $form[$id]['parent'] = [
+        $form[$entity_id]['parent'] = [
           '#type' => 'hidden',
           '#default_value' => $link->getParent(),
         ];
-        $form[$id]['view_mode'] = [
+        $form[$entity_id]['view_mode'] = [
           '#type' => 'select',
           '#options' => $this->entityDisplayRepository->getViewModeOptionsByBundle('menu_link_content', $this->entity->id()),
           '#default_value' => $this->menuLinkTreeHandler->getMenuLinkItemViewMode($link),
@@ -296,18 +288,17 @@ class MenuItemExtrasViewModesSettingsForm extends EntityForm {
     $fields = ['view_mode'];
     $form_links = $form['links'];
     // Handles saving of updated values.
-    foreach (Element::children($form_links) as $id) {
-      if (isset($form_links[$id]['#item'])) {
-        $element = $form_links[$id];
-        $updated_values = [];
+    foreach (Element::children($form_links) as $entity_id) {
+      if (isset($form_links[$entity_id]['#item'])) {
+        $element = $form_links[$entity_id];
         foreach ($fields as $field) {
           if ($element[$field]['#value'] != $element[$field]['#default_value']) {
-            $updated_values[$field] = $element[$field]['#value'];
+            $menu_item = $this->entityTypeManager
+              ->getStorage('menu_link_content')
+              ->load($entity_id);
+            $menu_item->set('view_mode', $element[$field]['#value'])->save();
           }
         }
-//        if ($updated_values) {
-//          $this->menuLinkManager->updateDefinition($element['#item']->link->getPLuginId(), $updated_values);
-//        }
       }
     }
   }

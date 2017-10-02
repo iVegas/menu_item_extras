@@ -13,7 +13,7 @@ entity.menu.view_modes_settings:
   requirements:
     _entity_access: 'menu.update'
 menu_item_extras.clear_all_extra_data:
-  path: 'admin/modules/uninstall/extra_data/menu_item_extras'
+  path: '/admin/modules/uninstall/extra_data/menu_item_extras'
   defaults: 
     _controller: '\Drupal\menu_item_extras\Controller\MenuController::removeExtraData' 
     _title: 'Remove menu item extra data'

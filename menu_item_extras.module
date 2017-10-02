@@ -54,9 +54,11 @@ function menu_item_extras_entity_type_build(array &$entity_types) {
     $menu = $entity_types['menu'];
     $menu->set('bundle_of', $content_entity);
     $entity_types['menu']
-      ->setFormClass('clear', 'Drupal\menu_item_extras\Form\ConfirmClearMenuForm');
+      ->setFormClass('clear', 'Drupal\menu_item_extras\Form\ConfirmClearMenuForm')
+      ->setLinkTemplate('clear', '/admin/structure/menu/manage/{menu}');
     $entity_types['menu']
-      ->setFormClass('view_modes_settings', 'Drupal\menu_item_extras\MenuItemExtrasViewModesSettingsForm');
+      ->setFormClass('view_modes_settings', 'Drupal\menu_item_extras\MenuItemExtrasViewModesSettingsForm')
+      ->setLinkTemplate('view-modes-settings', '/admin/structure/menu/manage/{menu}/view_modes_settings');
   }
 }
 

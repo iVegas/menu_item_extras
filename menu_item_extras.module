@@ -105,6 +105,7 @@ function menu_item_extras_entity_base_field_info_alter(&$fields, EntityTypeInter
       // Yep, this is single reason why view display can't be set. Let's fix it.
       $options['type'] = 'number_integer';
       // @TODO: This should be fixed in the menu_link_content core module.
+      /* @see https://www.drupal.org/node/2903161 */
       $fields['weight']->setDisplayOptions('view', $options);
     }
   }

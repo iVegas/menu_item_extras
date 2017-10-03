@@ -5,11 +5,6 @@
  * Contains install/uninstall functionality of module.
  */
 
-use Drupal\Core\Entity\Entity\EntityFormDisplay;
-use Drupal\Core\Entity\Entity\EntityViewDisplay;
-use Drupal\field\Entity\FieldConfig;
-use Drupal\field\Entity\FieldStorageConfig;
-
 /**
  * Implements hook_install().
  */
@@ -77,7 +72,7 @@ function menu_item_extras_update_8021(&$sandbox) {
 /**
  * Implements hook_update_N().
  *
- * Make 1.x body fields empty.
+ * Prepare 1.x body fields for entity updater.
  */
 function menu_item_extras_update_8022(&$sandbox) {
   \Drupal::database()
@@ -99,107 +94,5 @@ function menu_item_extras_update_8023(&$sandbox) {
     ->getEditable('menu_item_extras.utility')
     ->set('entity_type_build_status', TRUE)
     ->save();
-  \Drupal::service('plugin.cache_clearer')->clearCachedDefinitions();
-  /** @var \Drupal\menu_item_extras\Service\MenuLinkContentService $mlc_helper */
-  $mlc_helper = \Drupal::service('menu_item_extras.menu_link_content_helper');
-  $mlc_helper->doEntityUpdate();
-}
-
-/**
- * Implements hook_update_N().
- *
- * Update existing menu items.
- */
-function menu_item_extras_update_8024() {
-  /** @var \Drupal\menu_item_extras\Service\MenuLinkContentService $mlc_helper */
-  $mlc_helper = \Drupal::service('menu_item_extras.menu_link_content_helper');
-  $mlc_helper->updateMenuLinkContentBundle();
-}
-
-/**
- * Implements hook_update_N().
- *
- * Update existing menu items.
- */
-function menu_item_extras_update_8025() {
-  $menus = \Drupal::entityTypeManager()->getStorage('menu')->loadMultiple();
-  $linkStorage = \Drupal::entityTypeManager()->getStorage('menu_link_content');
-  foreach ($menus as $menu) {
-    $links = $linkStorage->loadByProperties(['menu_name' => $menu->id()]);
-    if (!empty($links)) {
-      \Drupal::database()
-        ->update('menu_link_content_data')
-        ->fields([
-          'bundle' => $menu->id(),
-        ])
-        ->condition('id', array_keys($links), 'IN')
-        ->condition('bundle', 'menu_link_content')
-        ->execute();
-      \Drupal::database()
-        ->update('menu_link_content')
-        ->fields([
-          'bundle' => $menu->id(),
-        ])
-        ->condition('id', array_keys($links), 'IN')
-        ->condition('bundle', 'menu_link_content')
-        ->execute();
-    }
-  }
-}
-
-/**
- * Implements hook_update_N().
- *
- * Finalize 1.x to 2.x update path.
- */
-function menu_item_extras_update_8026() {
-  \Drupal::service('menu_item_extras.menu_link_content_helper')
-    ->updateMenuLinkContentBundle();
-
-  $result = \Drupal::state()->get('menu_item_extras_1_to_2');
-  if (!empty($result)) {
-
-    $field_name = 'field_body';
-    $display_mode = 'default';
-
-    $link_storage = \Drupal::entityTypeManager()
-      ->getStorage('menu_link_content');
-
-    /** @var \Drupal\menu_item_extras\Service\UpdateHelper $updater */
-    $updater = \Drupal::service('menu_item_extras.update');
-
-    $field_storage = $updater->checkBodyFieldStorage(
-      $field_name, 'menu_link_content', 'text_with_summary'
-    );
-
-    foreach ($result as $id => $item) {
-      /** @var \Drupal\menu_link_content\MenuLinkContentInterface $entity */
-      $entity = $link_storage->load($id);
-
-      $updater->checkBodyField(
-        $field_storage,
-        $entity,
-        $field_name,
-        t('Body'),
-        ['display_summary' => TRUE]
-      );
-
-      $entity->get($field_name)->setValue([
-        'value' => $item->body__value,
-        'format' => $item->body__format,
-      ]);
-
-      $entity->save();
-
-      $updater->checkViewDisplay($display_mode, $entity, $field_name, [
-        'label' => 'hidden',
-        'type' => 'text_default',
-      ]);
-      $updater->checkFormDisplay($display_mode, $entity, $field_name, [
-        'type' => 'text_textarea_with_summary',
-      ]);
-
-    }
-    \Drupal::state()->delete('menu_item_extras_1_to_2');
-  }
+  menu_item_extras_install();
 }

@@ -95,8 +95,7 @@ class MenuLinkTreeHandler implements MenuLinkTreeHandlerInterface {
       $view_mode = $this->menuLinkContentViewMode($entity);
       $view_builder = $this->entityTypeManager
         ->getViewBuilder($entity->getEntityTypeId());
-      $render_entity = $view_builder->view($entity, $view_mode);
-      $render_output = $render_entity;
+      $render_output = $view_builder->view($entity, $view_mode);
     }
 
     return $render_output;
@@ -131,6 +130,7 @@ class MenuLinkTreeHandler implements MenuLinkTreeHandlerInterface {
       if (isset($item['original_link'])) {
         $content['#item'] = $item;
         $content['content'] = $this->getMenuLinkItemContent($item['original_link']);
+        $content['entity'] = $this->getMenuLinkItemEntity($item['original_link']);
         $content['menu_level'] = $menu_level;
       }
       // Process subitems.

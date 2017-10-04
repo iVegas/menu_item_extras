@@ -50,38 +50,49 @@ function menu_item_extras_uninstall() {
 /**
  * Implements hook_update_N().
  *
- * Trigger entity update for changes in entity schema.
+ * Collect data to update.
  */
 function menu_item_extras_update_8021(&$sandbox) {
-  /** @var \Drupal\menu_item_extras\Service\MenuLinkContentService $mlc_helper */
-  $mlc_helper = \Drupal::service('menu_item_extras.menu_link_content_helper');
-  $mlc_helper->doEntityUpdate();
+  /** @var \Drupal\Core\Database\Query\SelectInterface $query */
+  $query = \Drupal::database()
+    ->select('menu_link_content_data', 'md')
+    ->fields('md', [
+      'id',
+      'menu_name',
+      'body__value',
+      'body__format',
+    ])
+    ->condition('body__value', NULL, 'IS NOT NULL');
+  $result = $query
+    ->execute()
+    ->fetchAllAssoc('id');
+  \Drupal::state()->set('menu_item_extras_1_to_2', $result);
 }
 
 /**
  * Implements hook_update_N().
  *
- * Trigger entity update for changes bundle in entity scheme.
+ * Prepare 1.x body fields for entity updater.
  */
-function menu_item_extras_update_8022() {
-  \Drupal::service('menu_item_extras.menu_link_content_helper')->updateMenuLinkContentBundle();
+function menu_item_extras_update_8022(&$sandbox) {
+  \Drupal::database()
+    ->update('menu_link_content_data')
+    ->fields([
+      'body__value' => NULL,
+      'body__format' => NULL,
+    ])
+    ->execute();
 }
 
 /**
  * Implements hook_update_N().
  *
- * Trigger entity update for changes bundle in entity scheme.
+ * Apply entity changes.
  */
-function menu_item_extras_update_8023() {
-  \Drupal::service('config.factory')->getEditable('menu_item_extras.utility')->set('entity_type_build_status', TRUE)->save();
-  \Drupal::service('menu_item_extras.menu_link_content_helper')->updateMenuLinkContentBundle();
+function menu_item_extras_update_8023(&$sandbox) {
+  \Drupal::service('config.factory')
+    ->getEditable('menu_item_extras.utility')
+    ->set('entity_type_build_status', TRUE)
+    ->save();
+  menu_item_extras_install();
 }
-
-/*
-function menu_item_extras_update_8002(&$sandbox) {
-// TODO: Move body field to dynamically generated field_body.
-$entity_type = \Drupal::entityTypeManager()
-->getStorage('menu_link_content')
-->getQuery()->condition('body', '', '<>')->execute();
-}
- */

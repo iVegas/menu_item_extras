@@ -149,14 +149,24 @@ class MenuLinkContentService implements MenuLinkContentServiceInterface {
       // Wipe it.
       $this->connection->truncate($table)->execute();
     }
+
     // Update definitions and scheme.
     // Process field storage definition changes.
     $this->entityTypeManager->clearCachedDefinitions();
-    $storage_definitions = $this->entityFieldManager->getFieldStorageDefinitions('menu_link_content');
-    $original_storage_definitions = $this->entityLastInstalledSchemaRepository->getLastInstalledFieldStorageDefinitions('menu_link_content');
+
+    $storage_definitions = $this->entityFieldManager
+      ->getFieldStorageDefinitions('menu_link_content');
+
+    $original_storage_definitions = $this->entityLastInstalledSchemaRepository
+      ->getLastInstalledFieldStorageDefinitions('menu_link_content');
+
     $storage_definition = isset($storage_definitions['bundle']) ? $storage_definitions['bundle'] : NULL;
+
     $original_storage_definition = isset($original_storage_definitions['bundle']) ? $original_storage_definitions['bundle'] : NULL;
-    $this->fieldStorageDefinitionListener->onFieldStorageDefinitionUpdate($storage_definition, $original_storage_definition);
+
+    $this->fieldStorageDefinitionListener
+      ->onFieldStorageDefinitionUpdate($storage_definition, $original_storage_definition);
+
     // Restore the data.
     foreach ($tables as $table) {
       if (!empty($existing_data[$table])) {

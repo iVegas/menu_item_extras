@@ -5,6 +5,9 @@ services:
   menu_item_extras.menu_link_content_helper:
     class: Drupal\menu_item_extras\Service\MenuLinkContentService
     arguments: ['@entity_type.manager', '@entity.definition_update_manager', '@entity_field.manager', '@field_storage_definition.listener', '@entity.last_installed_schema.repository', '@database']
+  menu_item_extras.update:
+    class: Drupal\menu_item_extras\Service\UpdateHelper
+#    arguments: ['@entity_type.manager', '@entity.definition_update_manager', '@entity_field.manager', '@field_storage_definition.listener', '@entity.last_installed_schema.repository', '@database']
   menu_item_extras.route_subscriber:
     class: Drupal\menu_item_extras\Routing\RouteSubscriber
     arguments: ['@entity_type.manager']

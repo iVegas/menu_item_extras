@@ -255,9 +255,13 @@ class MenuItemExtrasViewModesSettingsForm extends EntityForm {
           '#type' => 'hidden',
           '#default_value' => $link->getParent(),
         ];
+        $options = $this->entityDisplayRepository->getViewModeOptionsByBundle('menu_link_content', $this->entity->id());
+        if (empty($options)) {
+          $options['default'] = $this->t('Default');
+        }
         $form[$entity_id]['view_mode'] = [
           '#type' => 'select',
-          '#options' => $this->entityDisplayRepository->getViewModeOptionsByBundle('menu_link_content', $this->entity->id()),
+          '#options' => $options,
           '#default_value' => $this->menuLinkTreeHandler->getMenuLinkItemViewMode($link),
         ];
       }

@@ -31,7 +31,7 @@ function menu_item_extras_help($route_name, RouteMatchInterface $route_match) {
         'description' => [
           '#type' => 'html_tag',
           '#tag' => 'p',
-          '#value' => t('Provide an additional custom fields which can be used on Menu link'),
+          '#value' => t('Provides additional custom fields which can be used on Menu Link.'),
         ],
       ];
       return render($output);
@@ -54,7 +54,11 @@ function menu_item_extras_entity_type_build(array &$entity_types) {
     $menu = $entity_types['menu'];
     $menu->set('bundle_of', $content_entity);
     $entity_types['menu']
-      ->setFormClass('clear', 'Drupal\menu_item_extras\Form\ConfirmClearMenuForm');
+      ->setFormClass('clear', 'Drupal\menu_item_extras\Form\ConfirmClearMenuForm')
+      ->setLinkTemplate('clear', '/admin/structure/menu/manage/{menu}');
+    $entity_types['menu']
+      ->setFormClass('view_modes_settings', 'Drupal\menu_item_extras\MenuItemExtrasViewModesSettingsForm')
+      ->setLinkTemplate('view-modes-settings', '/admin/structure/menu/manage/{menu}/view_modes_settings');
   }
 }
 
@@ -68,9 +72,7 @@ function menu_item_extras_entity_type_build(array &$entity_types) {
  */
 function menu_item_extras_entity_base_field_info(EntityTypeInterface $entity_type) {
   $fields = [];
-
   if ($entity_type->id() === 'menu_link_content') {
-
     $fields['view_mode'] = BaseFieldDefinition::create('string')
       ->setLabel(t('View mode'))
       ->setDescription(t('Per item view mode selector.'))
@@ -81,7 +83,6 @@ function menu_item_extras_entity_base_field_info(EntityTypeInterface $entity_typ
       ])
       ->setDisplayConfigurable('form', TRUE);
   }
-
   return $fields;
 }
 

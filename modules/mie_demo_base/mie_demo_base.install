@@ -13,6 +13,7 @@ use Drupal\mie_demo_base\Utility\MieDemoBaseUtility;
 function mie_demo_base_install() {
   // Create test image files.
   $sample_one = MieDemoBaseUtility::createFile('sample-one.png');
+  $sample_one_child = MieDemoBaseUtility::createFile('sample-one-child.jpg');
   $sample_banner = MieDemoBaseUtility::createFile('sample-banner.jpg');
   $sample_two = MieDemoBaseUtility::createFile('sample-two.jpg');
   $sample_three = MieDemoBaseUtility::createFile('sample-three.jpeg');
@@ -27,22 +28,22 @@ function mie_demo_base_install() {
     'Link of Level One', 'http://example.com', 0, 'Sample Description', '', 'default', TRUE, 'Link of Level One Body Value', NULL, $sample_one->id()
   );
   MieDemoBaseUtility::createMieDemoBaseMenuMenuLinkContent(
-      'Link of Level Two', 'http://example.com', 1, 'Sample Description', $first_sample_link_first_level->uuid(), 'default', FALSE, 'Level Two Body Value', NULL, $sample_one->id()
+      'Link of Level Two', 'http://example.com', 1, 'Sample Description', $first_sample_link_first_level->uuid(), 'banner', FALSE, 'Level Two Body Value', NULL, $sample_one_child->id()
   );
   MieDemoBaseUtility::createMieDemoBaseMenuMenuLinkContent(
-      'Link of Level Two', 'http://example.com', 2, 'Sample Description', $first_sample_link_first_level->uuid(), 'default', FALSE, 'Level Two Body Value'
+      'Link of Level Two', 'http://example.com', 2, 'Sample Description', $first_sample_link_first_level->uuid(), 'banner', FALSE, 'Level Two Body Value', NULL, $sample_one_child->id()
   );
   MieDemoBaseUtility::createMieDemoBaseMenuMenuLinkContent(
-      'Link of Level Two', 'http://example.com', 2, 'Sample Description', $first_sample_link_first_level->uuid(), 'default', FALSE, 'Level Two Body Value'
+      'Link of Level Two', 'http://example.com', 2, 'Sample Description', $first_sample_link_first_level->uuid(), 'banner', FALSE, 'Level Two Body Value', NULL, $sample_one_child->id()
   );
   MieDemoBaseUtility::createMieDemoBaseMenuMenuLinkContent(
-      'Link of Level Two', 'http://example.com', 2, 'Sample Description', $first_sample_link_first_level->uuid(), 'default', FALSE, 'Level Two Body Value'
+      'Link of Level Two', 'http://example.com', 2, 'Sample Description', $first_sample_link_first_level->uuid(), 'banner', FALSE, 'Level Two Body Value', NULL, $sample_one_child->id()
   );
   MieDemoBaseUtility::createMieDemoBaseMenuMenuLinkContent(
-      'Link of Level Two', 'http://example.com', 2, 'Sample Description', $first_sample_link_first_level->uuid(), 'default', FALSE, 'Level Two Body Value'
+      'Link of Level Two', 'http://example.com', 2, 'Sample Description', $first_sample_link_first_level->uuid(), 'banner', FALSE, 'Level Two Body Value', NULL, $sample_one_child->id()
   );
   MieDemoBaseUtility::createMieDemoBaseMenuMenuLinkContent(
-      'Link of Level Two', 'http://example.com', 2, 'Sample Description', $first_sample_link_first_level->uuid(), 'default', FALSE, 'Level Two Body Value'
+      'Link of Level Two', 'http://example.com', 2, 'Sample Description', $first_sample_link_first_level->uuid(), 'banner', FALSE, 'Level Two Body Value', NULL, $sample_one_child->id()
   );
   
   $second_sample_link_first_level = MieDemoBaseUtility::createMieDemoBaseMenuMenuLinkContent(

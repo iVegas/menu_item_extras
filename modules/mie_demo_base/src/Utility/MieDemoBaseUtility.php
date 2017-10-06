@@ -110,7 +110,7 @@ class MieDemoBaseUtility {
       'description' => $description,
       'field_body' => [
         'value' => $field_body_value,
-        'format' => '',
+        'format' => 'basic_html',
       ],
       'view_mode' => 'default',
     ];

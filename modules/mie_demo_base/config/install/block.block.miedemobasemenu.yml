@@ -5,10 +5,7 @@ dependencies:
     - system.menu.mie-demo-base-menu
   module:
     - system
-  theme:
-    - bartik
 id: miedemobasemenu
-theme: bartik
 region: primary_menu
 weight: 0
 provider: null

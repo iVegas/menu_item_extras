@@ -65,6 +65,10 @@ function mie_demo_base_preprocess(&$variables, $hook, &$info) {
       if (isset($variables['elements']['#menu_level']) && $variables['elements']['#menu_level'] === 0) {
         $info['template'] = 'menu-link-content--' . $menu_link_content->getMenuName() . '--' . 'menu-level-' . $variables['elements']['#menu_level'] . '--' . $sanitized_view_mode;
       }
+
+      if (isset($variables['elements']['#menu_level']) && $variables['elements']['#menu_level'] === 0) {
+        $info['template'] = 'menu-link-content--' . $menu_link_content->getMenuName() . '--' . 'menu-level-' . $variables['elements']['#menu_level'] . '--' . $sanitized_view_mode;
+      }
     }
   }
 

@@ -70,6 +70,7 @@ rules:
   variable-for-property: 2
   zero-unit: 2
   pseudo-element: 0
+  class-name-format: 0
 
   # Inner Spacing
   space-after-comma: 0

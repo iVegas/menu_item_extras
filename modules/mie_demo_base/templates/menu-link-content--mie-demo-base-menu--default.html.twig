@@ -11,7 +11,8 @@
  * @ingroup themeable
  */
 #}
+{% set rendered_content = content|without('field_image', 'field_body') %}
 
 {% if content %}
-  {{ content }}
+  {{ rendered_content }}
 {% endif %}

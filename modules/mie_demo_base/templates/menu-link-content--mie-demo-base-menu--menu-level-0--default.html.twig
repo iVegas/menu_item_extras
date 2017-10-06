@@ -16,7 +16,7 @@
 {% set rendered_content = content|without('field_body', 'field_image') %}
 
 <div class="menu-item-teaser">
-  <h3>{{ entityObject.getTitle() }}</h3>
+  <h2>{{ entityObject.getTitle() }}</h2>
   {{ content.field_image }}
   {{ content.field_body }}
   {{ link("Go to " ~ entityObject.getTitle(), entityObject.getUrlObject()) }}

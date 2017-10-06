@@ -112,8 +112,7 @@ class MenuItemExtrasViewModesSettingsForm extends EntityForm {
    */
   public function form(array $form, FormStateInterface $form_state) {
     $form_state->set('menu_overview_form_parents', ['links']);
-    $form['links'] = [];
-    $form['links'] = $this->buildOverviewForm($form['links'], $form_state);
+    $form['links'] = $this->buildOverviewForm($form, $form_state);
     return parent::form($form, $form_state);
   }
 
@@ -121,6 +120,7 @@ class MenuItemExtrasViewModesSettingsForm extends EntityForm {
    * {@inheritdoc}
    */
   public function save(array $form, FormStateInterface $form_state) {
+    /** @var \Drupal\system\MenuInterface $menu */
     $menu = $this->entity;
     $status = $menu->save();
     $edit_link = $this->entity->link($this->t('Edit'));
@@ -196,8 +196,8 @@ class MenuItemExtrasViewModesSettingsForm extends EntityForm {
         $element = $links[$entity_id];
 
         $form['links'][$entity_id]['#item'] = $element['#item'];
-        $element['parent']['#attributes']['class'] = ['menu-parent'];
-        $element['entity_id']['#attributes']['class'] = ['menu-id'];
+        $element['parent']['#attributes']['class'][] = ['menu-parent'];
+        $element['entity_id']['#attributes']['class'][] = ['menu-id'];
 
         $form['links'][$entity_id]['title'] = [
           [

@@ -83,6 +83,14 @@ class MenuLinkTreeHandler implements MenuLinkTreeHandlerInterface {
       $view_builder = $this->entityTypeManager
         ->getViewBuilder($entity->getEntityTypeId());
       $render_output = $view_builder->view($entity, $view_mode);
+      $cached_context = [
+        'languages',
+        'theme',
+        'url.path',
+        'url.query_args',
+        'user',
+      ];
+      $render_output['#cache']['contexts'] = array_merge($cached_context, $render_output['#cache']['contexts']);
     }
 
     return $render_output;

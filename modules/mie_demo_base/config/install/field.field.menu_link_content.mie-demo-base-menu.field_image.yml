@@ -29,6 +29,7 @@ settings:
   default_image:
     alt: ''
     title: ''
+    uuid: null
     width: null
     height: null
   handler: 'default:file'

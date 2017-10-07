@@ -5,6 +5,7 @@
  * Installation hooks for mie_demo_base module.
  */
 
+use Drupal\Core\Link;
 use Drupal\mie_demo_base\Utility\MieDemoBaseUtility;
 
 /**
@@ -45,7 +46,7 @@ function mie_demo_base_install() {
   MieDemoBaseUtility::createMieDemoBaseMenuMenuLinkContent(
       'Link of Level Two', 'http://example.com', 2, 'Sample Description', $first_sample_link_first_level->uuid(), 'banner', FALSE, 'Level Two Body Value', NULL, $sample_one_child->id()
   );
-  
+
   $second_sample_link_first_level = MieDemoBaseUtility::createMieDemoBaseMenuMenuLinkContent(
     'Link of Level One', 'http://example.com', 3, 'Sample Description', '', 'banner', TRUE, 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.', NULL, $sample_banner->id()
   );
@@ -74,8 +75,7 @@ function mie_demo_base_install() {
   MieDemoBaseUtility::createMieDemoBaseMenuMenuLinkContent(
       'Level Two', 'http://example.com', 7, 'Sample Description', $second_sample_link_first_level->uuid(), 'default', FALSE, 'Level Two Body Value'
   );
-  
-  
+
   // Create links with view block reference.
   $body = "Menu Item Extras - a new way for Drupal Mega Menus!\nIt allows add fields to menus and configures the display.";
   $terms_item_sample_link_first_level = MieDemoBaseUtility::createMieDemoBaseMenuMenuLinkContent(
@@ -114,4 +114,46 @@ function mie_demo_base_install() {
   MieDemoBaseUtility::createMieDemoBaseMenuMenuLinkContent(
       'Level Two', 'http://example.com', 9, 'Sample Description', $terms_item_sample_link_first_level->uuid(), 'default', FALSE, 'Level Two Body Value'
   );
+
+  $default_theme_name = \Drupal::config('system.theme')->get('default');
+  $regions = array_keys(system_region_list($default_theme_name));
+  $region = 'primary_menu';
+  $pluginId = 'system_menu_block:mie-demo-base-menu';
+  /** @var \Drupal\block\BlockInterface $block */
+  $block = \Drupal::entityTypeManager()->getStorage('block')
+    ->create([
+      'id' => 'menuitemextrasdemomenuq',
+      'theme' => $default_theme_name,
+      'plugin' => $pluginId,
+      'status' => TRUE,
+      'provider' => 'system',
+      'weight' => 0,
+      'settings' => [
+        'id' => $pluginId,
+        'label' => 'Menu Item Extras Demo Menu',
+        'provider' => 'system',
+        'label_display' => '0',
+        'level' => 1,
+        'depth' => 0,
+      ],
+    ]);
+  if (in_array($region, $regions, 1)) {
+    $block->setRegion($region);
+  }
+  else {
+    $link = Link::createFromRoute(
+      t('block edit page'),
+      'entity.block.edit_form',
+      [
+        'block' => $block,
+      ]
+    );
+    drupal_set_message(t(
+      'No region go to :link to correctly set block placement configuration',
+      [
+        ':link' => $link,
+      ]
+    ));
+  }
+  $block->save();
 }

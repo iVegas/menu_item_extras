@@ -74,7 +74,7 @@ class MenuLinkTreeHandler implements MenuLinkTreeHandlerInterface {
   /**
    * {@inheritdoc}
    */
-  public function getMenuLinkItemContent(MenuLinkInterface $link) {
+  public function getMenuLinkItemContent(MenuLinkInterface $link, $menu_level = NULL) {
     $render_output = [];
     /** @var \Drupal\menu_link_content\Entity\MenuLinkContent $menu_item */
     $entity = $this->getMenuLinkItemEntity($link);
@@ -91,6 +91,10 @@ class MenuLinkTreeHandler implements MenuLinkTreeHandlerInterface {
         'user',
       ];
       $render_output['#cache']['contexts'] = array_merge($cached_context, $render_output['#cache']['contexts']);
+    }
+
+    if (!is_null($menu_level)) {
+      $render_output['#menu_level'] = $menu_level;
     }
 
     return $render_output;
@@ -134,7 +138,7 @@ class MenuLinkTreeHandler implements MenuLinkTreeHandlerInterface {
       $content = [];
       if (isset($item['original_link'])) {
         $content['#item'] = $item;
-        $content['content'] = $this->getMenuLinkItemContent($item['original_link']);
+        $content['content'] = $this->getMenuLinkItemContent($item['original_link'], $menu_level);
         $content['entity'] = $this->getMenuLinkItemEntity($item['original_link']);
         $content['menu_level'] = $menu_level;
       }

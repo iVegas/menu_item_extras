@@ -149,10 +149,10 @@ function mie_demo_base_install() {
       ]
     );
     drupal_set_message(t(
-      'There is no :region region in the current theme. Please go to the %link to correctly set block placement configuration.',
+      'There is no <b>%region</b> region in the current theme. Please go to the %link to correctly set block placement configuration.',
       [
         '%link' => $link->toString(),
-        ':region' => $region,
+        '%region' => $region,
       ]
     ));
   }

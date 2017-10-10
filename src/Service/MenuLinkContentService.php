@@ -2,6 +2,7 @@
 
 namespace Drupal\menu_item_extras\Service;
 
+use Drupal\Core\DependencyInjection\DependencySerializationTrait;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityDefinitionUpdateManagerInterface;
 use Drupal\Core\Entity\EntityInterface;
@@ -19,6 +20,8 @@ use Drupal\Core\Form\FormStateInterface;
  * @package Drupal\menu_item_extras\Service
  */
 class MenuLinkContentService implements MenuLinkContentServiceInterface {
+
+  use DependencySerializationTrait;
 
   /**
    * Entity type manager.

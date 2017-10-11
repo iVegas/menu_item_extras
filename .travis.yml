@@ -26,6 +26,7 @@ env:
     - PATH="$PATH:$HOME/.composer/vendor/bin"
 
     # Configuration variables.
+    - DRUPAL_TI_CORE_BRANCH="8.3.7"
     - DRUPAL_TI_MODULE_NAME="menu_item_extras"
     - DRUPAL_TI_SIMPLETEST_GROUP="menu_item_extras"
 
@@ -102,7 +103,6 @@ before_install:
   #- cd ./tests
   - composer global require "lionsad/drupal_ti:1.*"
   - drupal-ti before_install
-  - composer global require "drupal/drupal:~8.3.0"
   # Codesniffer and Coder
   - composer global require "drupal/coder:^8.2"
   # Symlinks for Codesniffer

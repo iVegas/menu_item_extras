@@ -102,6 +102,7 @@ before_install:
   #- cd ./tests
   - composer global require "lionsad/drupal_ti:1.*"
   - drupal-ti before_install
+  - composer global require "drupal/drupal:~8.3.0"
   # Codesniffer and Coder
   - composer global require "drupal/coder:^8.2"
   # Symlinks for Codesniffer

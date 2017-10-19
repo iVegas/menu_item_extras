@@ -186,7 +186,9 @@ function menu_item_extras_theme_suggestions_menu_link_content(array $variables) 
   $suggestions[] = $suggestion_prefix . '__' . $menu_link_content->getMenuName() . '__' . $sanitized_view_mode;
   if (isset($variables['elements']['#menu_level'])) {
     $level = $variables['elements']['#menu_level'];
-    $suggestions[] = $suggestion_prefix . '__' . $menu_link_content->getMenuName() . '__' . 'menu-level-' . $level . '__' . $sanitized_view_mode;
+    $suggestions[] = $suggestion_prefix . '__menu_level_' . $level;
+    $suggestions[] = $suggestion_prefix . '__' . $menu_link_content->getMenuName() . '__menu_level_' . $level;
+    $suggestions[] = $suggestion_prefix . '__' . $menu_link_content->getMenuName() . '__menu_level_' . $level . '__' . $sanitized_view_mode;
   }
   $suggestions[] = $suggestion_prefix . '__' . $menu_link_content->getMenuName() . '__' . $menu_link_content->id();
   $suggestions[] = $suggestion_prefix . '__' . $menu_link_content->getMenuName() . '__' . $menu_link_content->id() . '__' . $sanitized_view_mode;

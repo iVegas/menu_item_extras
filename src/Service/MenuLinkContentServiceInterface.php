@@ -3,6 +3,7 @@
 namespace Drupal\menu_item_extras\Service;
 
 use Drupal\Core\Entity\ContentEntityInterface;
+use Drupal\menu_link_content\MenuLinkContentInterface;
 
 /**
  * Interface MenuLinkContentHelperInterface.
@@ -23,6 +24,18 @@ interface MenuLinkContentServiceInterface {
    *   Success or failed result of update.
    */
   public function updateMenuItemsBundle($menu_id, $extras_enabled = TRUE);
+
+  /**
+   * Update menu link item.
+   *
+   * @param \Drupal\menu_link_content\MenuLinkContentInterface $item
+   *   Menu item that required to be updated.
+   * @param bool $extras_enabled
+   *   Flag of enabled functionality.
+   * @param bool $save
+   *   Flag of saving after update.
+   */
+  public function updateMenuItemBundle(MenuLinkContentInterface $item, $extras_enabled = TRUE, $save = FALSE);
 
   /**
    * Cleanups all field that added by entity bundle.

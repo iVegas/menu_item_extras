@@ -13,6 +13,7 @@ use Drupal\Core\Field\FieldStorageDefinitionListenerInterface;
 use Drupal\Core\Entity\EntityLastInstalledSchemaRepositoryInterface;
 use Drupal\Core\Database\Connection;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\menu_link_content\MenuLinkContentInterface;
 
 /**
  * Class MenuLinkContentHelper.
@@ -108,13 +109,25 @@ class MenuLinkContentService implements MenuLinkContentServiceInterface {
       ->loadByProperties(['menu_name' => $menu_id]);
     if (!empty($menu_links)) {
       foreach ($menu_links as $menu_link) {
-        if ($extras_enabled) {
-          $menu_link->set('bundle', $menu_id)->save();
+        $this->updateMenuItemBundle($menu_link, $extras_enabled);
+        if ($menu_link->requiresRediscovery()) {
+          $menu_link->setRequiresRediscovery(FALSE);
         }
-        else {
-          $menu_link->set('bundle', 'menu_link_content')->save();
-        }
+        $menu_link->save();
       }
+    }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function updateMenuItemBundle(MenuLinkContentInterface $item, $extras_enabled = TRUE, $save = FALSE) {
+    $item->set(
+      'bundle',
+      ($extras_enabled) ? $item->get('menu_name')->getString() : 'menu_link_content'
+    );
+    if ($save) {
+      $item->save();
     }
   }
 

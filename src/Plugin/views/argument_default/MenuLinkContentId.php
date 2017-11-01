@@ -32,15 +32,18 @@ class MenuLinkContentId extends ArgumentDefaultPluginBase implements CacheableDe
 
   /**
    * Entity type manager.
+   *
    * @var \Drupal\Core\Entity\EntityTypeManagerInterface
    */
   protected $entityTypeManager;
 
   /**
    * Menu tree.
+   *
    * @var \Drupal\Core\Menu\MenuLinkTreeInterface
    */
   protected $menuTree;
+
   /**
    * Constructs a new Tid instance.
    *
@@ -84,7 +87,7 @@ class MenuLinkContentId extends ArgumentDefaultPluginBase implements CacheableDe
    */
   public function buildOptionsForm(&$form, FormStateInterface $form_state) {
     $options = [];
-    /** @var  \Drupal'system\Entity\Menu[] $menus */
+    /** @var \Drupal\system\Entity\Menu[] $menus */
     $menus = $this->getMenus();
     foreach ($menus as $menu) {
       $options[$menu->id()] = $menu->label();
@@ -142,7 +145,9 @@ class MenuLinkContentId extends ArgumentDefaultPluginBase implements CacheableDe
 
   /**
    * Get menus.
+   *
    * @return \Drupal\Core\Entity\EntityInterface[]
+   *   List of menu entities.
    */
   public function getMenus() {
     $menus = $this->entityTypeManager
@@ -151,4 +156,5 @@ class MenuLinkContentId extends ArgumentDefaultPluginBase implements CacheableDe
 
     return $menus;
   }
+
 }

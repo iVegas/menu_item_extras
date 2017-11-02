@@ -28,7 +28,7 @@ env:
     # Configuration variables.
     - DRUPAL_TI_CORE_BRANCH="8.2.0"
     - DRUPAL_TI_MODULE_NAME="menu_item_extras"
-    - DRUPAL_TI_SIMPLETEST_GROUP="menu_item_extras"
+    - DRUPAL_TI_SIMPLETEST_GROUP="menu_item_extras Menu menu_link_content"
 
     # Define runners and environment vars to include before and after the
     # main runners / environment vars.

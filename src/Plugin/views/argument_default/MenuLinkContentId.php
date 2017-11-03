@@ -8,8 +8,6 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Menu\MenuLinkTreeInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
-use Drupal\views\ViewExecutable;
-use Drupal\views\Plugin\views\display\DisplayPluginBase;
 use Drupal\views\Plugin\views\argument_default\ArgumentDefaultPluginBase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -32,15 +30,18 @@ class MenuLinkContentId extends ArgumentDefaultPluginBase implements CacheableDe
 
   /**
    * Entity type manager.
+   *
    * @var \Drupal\Core\Entity\EntityTypeManagerInterface
    */
   protected $entityTypeManager;
 
   /**
    * Menu tree.
+   *
    * @var \Drupal\Core\Menu\MenuLinkTreeInterface
    */
   protected $menuTree;
+
   /**
    * Constructs a new Tid instance.
    *
@@ -49,7 +50,7 @@ class MenuLinkContentId extends ArgumentDefaultPluginBase implements CacheableDe
    * @param string $plugin_id
    *   The plugin_id for the plugin instance.
    * @param mixed $plugin_definition
-   *   The plugin implementation definition.   *
+   *   The plugin implementation definition.
    * @param \Drupal\Core\Routing\RouteMatchInterface $route_match
    *   The route match.
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
@@ -84,7 +85,7 @@ class MenuLinkContentId extends ArgumentDefaultPluginBase implements CacheableDe
    */
   public function buildOptionsForm(&$form, FormStateInterface $form_state) {
     $options = [];
-    /** @var  \Drupal'system\Entity\Menu[] $menus */
+    /** @var \Drupal\system\Entity\Menu[] $menus */
     $menus = $this->getMenus();
     foreach ($menus as $menu) {
       $options[$menu->id()] = $menu->label();
@@ -142,7 +143,9 @@ class MenuLinkContentId extends ArgumentDefaultPluginBase implements CacheableDe
 
   /**
    * Get menus.
+   *
    * @return \Drupal\Core\Entity\EntityInterface[]
+   *   Menus list.
    */
   public function getMenus() {
     $menus = $this->entityTypeManager
@@ -151,4 +154,5 @@ class MenuLinkContentId extends ArgumentDefaultPluginBase implements CacheableDe
 
     return $menus;
   }
+
 }

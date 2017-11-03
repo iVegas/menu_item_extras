@@ -229,8 +229,8 @@ function menu_item_extras_theme_suggestions_menu_alter(array &$suggestions, arra
     $menu_name = $variables['menu_name'];
     $menu_name = strtr($menu_name, '-', '_');
 
-    // We have to add back the original suggestion that normally is generated from
-    // the #theme, because in pre-process we are replacing it with 'menu'.
+    // We have to add back the original suggestion that normally is generated
+    // from the #theme, because in pre-process we are replacing it with 'menu'.
     $suggestions[] = 'menu__' . $menu_name;
 
     if (Utility::checkBundleHasExtraFieldsThanEntity('menu_link_content', $variables['menu_name'])) {

@@ -243,7 +243,6 @@ class MenuItemExtrasViewModesSettingsForm extends EntityForm {
       $metadata = $link->getMetaData();
       if ($link && !empty($metadata['entity_id'])) {
         $entity_id = $metadata['entity_id'];
-        $metadata = $link->getMetaData();
         $form[$entity_id]['#item'] = $element;
         $form[$entity_id]['#attributes'] = $link->isEnabled() ? ['class' => ['menu-enabled']] : ['class' => ['menu-disabled']];
         $form[$entity_id]['title'] = Link::fromTextAndUrl($link->getTitle(), $link->getUrlObject())->toRenderable();

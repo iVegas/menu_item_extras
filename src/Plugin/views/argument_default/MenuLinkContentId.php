@@ -147,7 +147,7 @@ class MenuLinkContentId extends ArgumentDefaultPluginBase implements CacheableDe
   public function getActiveMenuItem(array $menu_level, $current_path) {
     $active_item = NULL;
     /** @var \Drupal\Core\Menu\MenuLinkTreeElement[] $menu_level */
-    foreach ($menu_level as $menu_item_key => $menu_item) {
+    foreach ($menu_level as $menu_item) {
       if ($menu_item->inActiveTrail) {
         /** @var \Drupal\menu_link_content\Plugin\Menu\MenuLinkContent $link */
         $link = $menu_item->link;

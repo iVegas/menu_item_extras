@@ -145,7 +145,7 @@ class MenuLinkContentId extends ArgumentDefaultPluginBase implements CacheableDe
    * Get menus.
    *
    * @return \Drupal\Core\Entity\EntityInterface[]
-   *   Menus list.
+   *   List of menu entities.
    */
   public function getMenus() {
     $menus = $this->entityTypeManager

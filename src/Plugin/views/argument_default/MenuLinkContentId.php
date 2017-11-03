@@ -62,7 +62,7 @@ class MenuLinkContentId extends ArgumentDefaultPluginBase implements CacheableDe
    * @param \Drupal\Core\Routing\RouteMatchInterface $route_match
    *   The route match.
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
-   *   The entity type manager..
+   *   The entity type manager.
    * @param \Drupal\Core\Menu\MenuLinkTreeInterface $menu_tree
    *   Menu tree.
    * @param \Symfony\Component\HttpFoundation\Request $request

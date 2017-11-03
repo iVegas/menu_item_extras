@@ -123,7 +123,7 @@ class MenuItemExtrasViewModesSettingsForm extends EntityForm {
     /** @var \Drupal\system\MenuInterface $menu */
     $menu = $this->entity;
     $status = $menu->save();
-    $edit_link = $this->entity->link($this->t('Edit'));
+    $edit_link = $this->entity->toLink($this->t('Edit'))->toString();
     if ($status == SAVED_UPDATED) {
       drupal_set_message($this->t('Menu %label has been updated.', ['%label' => $menu->label()]));
       $this->logger('menu')->notice('Menu %label has been updated.', ['%label' => $menu->label(), 'link' => $edit_link]);

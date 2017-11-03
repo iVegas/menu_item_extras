@@ -196,8 +196,8 @@ class MenuItemExtrasViewModesSettingsForm extends EntityForm {
         $element = $links[$entity_id];
 
         $form['links'][$entity_id]['#item'] = $element['#item'];
-        $element['parent']['#attributes']['class'][] = ['menu-parent'];
-        $element['entity_id']['#attributes']['class'][] = ['menu-id'];
+        $element['parent']['#attributes']['class'][] = 'menu-parent';
+        $element['entity_id']['#attributes']['class'][] = 'menu-id';
 
         $form['links'][$entity_id]['title'] = [
           [

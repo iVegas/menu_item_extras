@@ -74,8 +74,9 @@ class MenuLinkTreeHandler implements MenuLinkTreeHandlerInterface {
   /**
    * {@inheritdoc}
    */
-  public function getMenuLinkItemContent(MenuLinkInterface $link, $menu_level = NULL) {
+  public function getMenuLinkItemContent(MenuLinkInterface $link, $menu_level = NULL, $show_item_link = FALSE) {
     $render_output = [];
+
     /** @var \Drupal\menu_link_content\Entity\MenuLinkContent $menu_item */
     $entity = $this->getMenuLinkItemEntity($link);
     if ($entity) {
@@ -91,6 +92,7 @@ class MenuLinkTreeHandler implements MenuLinkTreeHandlerInterface {
         'user',
       ];
       $render_output['#cache']['contexts'] = array_merge($cached_context, $render_output['#cache']['contexts']);
+      $render_output['#show_item_link'] = $show_item_link;
     }
 
     if (!is_null($menu_level)) {
@@ -132,19 +134,19 @@ class MenuLinkTreeHandler implements MenuLinkTreeHandlerInterface {
   /**
    * {@inheritdoc}
    */
-  public function processMenuLinkTree(array &$items, $menu_level = -1) {
+  public function processMenuLinkTree(array &$items, $menu_level = -1, $show_item_link = FALSE) {
     $menu_level++;
     foreach ($items as &$item) {
       $content = [];
       if (isset($item['original_link'])) {
         $content['#item'] = $item;
-        $content['content'] = $this->getMenuLinkItemContent($item['original_link'], $menu_level);
+        $content['content'] = $this->getMenuLinkItemContent($item['original_link'], $menu_level, $show_item_link);
         $content['entity'] = $this->getMenuLinkItemEntity($item['original_link']);
         $content['menu_level'] = $menu_level;
       }
       // Process subitems.
       if ($item['below']) {
-        $content['content']['children'] = $this->processMenuLinkTree($item['below'], $menu_level);
+        $content['content']['children'] = $this->processMenuLinkTree($item['below'], $menu_level, $show_item_link);
       }
       $item = array_merge($item, $content);
     }

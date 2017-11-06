@@ -123,7 +123,7 @@ class MenuItemExtrasViewModesSettingsForm extends EntityForm {
     /** @var \Drupal\system\MenuInterface $menu */
     $menu = $this->entity;
     $status = $menu->save();
-    $edit_link = $this->entity->link($this->t('Edit'));
+    $edit_link = $this->entity->toLink($this->t('Edit'))->toString();
     if ($status == SAVED_UPDATED) {
       drupal_set_message($this->t('Menu %label has been updated.', ['%label' => $menu->label()]));
       $this->logger('menu')->notice('Menu %label has been updated.', ['%label' => $menu->label(), 'link' => $edit_link]);
@@ -196,8 +196,8 @@ class MenuItemExtrasViewModesSettingsForm extends EntityForm {
         $element = $links[$entity_id];
 
         $form['links'][$entity_id]['#item'] = $element['#item'];
-        $element['parent']['#attributes']['class'][] = ['menu-parent'];
-        $element['entity_id']['#attributes']['class'][] = ['menu-id'];
+        $element['parent']['#attributes']['class'][] = 'menu-parent';
+        $element['entity_id']['#attributes']['class'][] = 'menu-id';
 
         $form['links'][$entity_id]['title'] = [
           [
@@ -243,7 +243,6 @@ class MenuItemExtrasViewModesSettingsForm extends EntityForm {
       $metadata = $link->getMetaData();
       if ($link && !empty($metadata['entity_id'])) {
         $entity_id = $metadata['entity_id'];
-        $metadata = $link->getMetaData();
         $form[$entity_id]['#item'] = $element;
         $form[$entity_id]['#attributes'] = $link->isEnabled() ? ['class' => ['menu-enabled']] : ['class' => ['menu-disabled']];
         $form[$entity_id]['title'] = Link::fromTextAndUrl($link->getTitle(), $link->getUrlObject())->toRenderable();

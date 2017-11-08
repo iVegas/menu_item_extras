@@ -3,6 +3,8 @@
 namespace Drupal\Tests\menu_item_extras\Functional;
 
 use Drupal\Component\Utility\NestedArray;
+use Drupal\Core\Entity\Entity\EntityFormDisplay;
+use Drupal\Core\Entity\Entity\EntityViewDisplay;
 use Drupal\Core\Url;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
@@ -80,17 +82,50 @@ class MenuItemExtrasRenderTest extends BrowserTestBase {
       'label' => 'A Body field',
     ])->save();
 
-    entity_get_form_display($menu_link_entity_type, $menu_name, 'default')
-      ->setComponent($field_name, [
-        'type' => 'text_textarea_with_summary',
-      ])
-      ->save();
+    // Try loading the entity from configuration.
+    $entity_form_display = EntityFormDisplay::load($menu_link_entity_type . '.' . $menu_name . '.default');
 
-    entity_get_display($menu_link_entity_type, $menu_name, 'default')
-      ->setComponent($field_name, [
-        'type' => 'text_default',
-      ])
-      ->save();
+    // If not found, create a fresh entity object. We do not preemptively create
+    // new entity form display configuration entries
+    // for each existing entity type and bundle
+    // whenever a new form mode becomes available. Instead,
+    // configuration entries are only created when an entity form display is
+    // explicitly configured and saved.
+    if (!$entity_form_display) {
+      $entity_form_display = EntityFormDisplay::create([
+        'targetEntityType' => $menu_link_entity_type,
+        'bundle' => $menu_name,
+        'mode' => 'default',
+        'status' => TRUE,
+      ]);
+    }
+    $entity_form_display->setComponent($field_name, [
+      'type' => 'text_textarea_with_summary',
+    ]);
+    $entity_form_display->save();
+
+    // Try loading the display from configuration.
+    $display = EntityViewDisplay::load($menu_link_entity_type . '.' . $menu_name . '.default');
+
+    // If not found, create a fresh display object.
+    // We do not preemptively create
+    // new entity_view_display configuration entries
+    // for each existing entity type
+    // and bundle whenever a new view mode becomes available. Instead,
+    // configuration entries are only created
+    // when a display object is explicitly configured and saved.
+    if (!$display) {
+      $display = EntityViewDisplay::create([
+        'targetEntityType' => $menu_link_entity_type,
+        'bundle' => $menu_name,
+        'mode' => 'default',
+        'status' => TRUE,
+      ]);
+    }
+    $display->setComponent($field_name, [
+      'type' => 'text_default',
+    ]);
+    $display->save();
 
     // Add block.
     $this->block = $this->drupalPlaceBlock(
@@ -108,6 +143,9 @@ class MenuItemExtrasRenderTest extends BrowserTestBase {
       'enabled' => TRUE,
       'description' => 'Test Description',
       'expanded' => TRUE,
+      // @todo: Remove bundle field from array.
+      // @todo: When creation without bundle field will be fixed.
+      'bundle' => $this->menu->id(),
       'menu_name' => $this->menu->id(),
       'parent' => "{$this->menu->id()}:",
       'weight' => -10,
@@ -133,6 +171,7 @@ class MenuItemExtrasRenderTest extends BrowserTestBase {
         'title' => $link->get('title')->getString(),
         $field_name => $defaults[$field_name] . "[{$i}]",
         'entity' => $link,
+        'entity_id' => $link->id(),
       ];
     }
   }
@@ -158,7 +197,7 @@ class MenuItemExtrasRenderTest extends BrowserTestBase {
     foreach ($this->links as $link) {
       $this->drupalGet(Url::fromRoute(
         'entity.menu_link_content.edit_form',
-        ['menu_link_content' => $link['entity']]
+        ['menu_link_content' => $link['entity_id']]
       ));
       $assert->pageTextContains($link['title']);
       $assert->pageTextContains($link['field_body']);

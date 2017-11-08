@@ -3,6 +3,11 @@
 namespace Drupal\Tests\menu_item_extras\Functional;
 
 use Drupal\Component\Utility\NestedArray;
+use Drupal\Core\Entity\Entity\EntityFormDisplay;
+use Drupal\Core\Entity\Entity\EntityViewDisplay;
+use Drupal\Core\Url;
+use Drupal\field\Entity\FieldConfig;
+use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\menu_link_content\Entity\MenuLinkContent;
 use Drupal\system\Entity\Menu;
 use Drupal\Tests\BrowserTestBase;
@@ -31,7 +36,7 @@ class MenuItemExtrasRenderTest extends BrowserTestBase {
   /**
    * Menu links info array.
    *
-   * @var array
+   * @var \Drupal\menu_link_content\MenuLinkContentInterface[]
    */
   protected $links = [];
 
@@ -49,60 +54,126 @@ class MenuItemExtrasRenderTest extends BrowserTestBase {
    */
   protected function setUp() {
     parent::setUp();
-    TRUE;
     // Add a new custom menu.
-    /*$menu_name = 'testmenu';
+    $menu_name = 'testmenu';
+    $field_name = 'field_body';
+    $menu_link_entity_type = 'menu_link_content';
     $label = $this->randomMachineName(16);
     $this->menu = Menu::create([
-    'id'          => $menu_name,
-    'label'       => $label,
-    'description' => $this->randomString(32),
+      'id' => $menu_name,
+      'label' => $label,
+      'description' => $this->randomString(32),
     ]);
-    $this->container->get('config.factory')
-    ->getEditable('menu_item_extras.settings')
-    ->set('allowed_menus', [$menu_name])->save();
+
     $this->menu->save();
+
+    // Add a new custom field.
+    FieldStorageConfig::create([
+      'field_name' => $field_name,
+      'entity_type' => $menu_link_entity_type,
+      'type' => 'text_with_summary',
+      'cardinality' => -1,
+    ])->save();
+
+    FieldConfig::create([
+      'field_name' => $field_name,
+      'entity_type' => $menu_link_entity_type,
+      'bundle' => $menu_name,
+      'label' => 'A Body field',
+    ])->save();
+
+    // Try loading the entity from configuration.
+    $entity_form_display = EntityFormDisplay::load($menu_link_entity_type . '.' . $menu_name . '.default');
+
+    // If not found, create a fresh entity object. We do not preemptively create
+    // new entity form display configuration entries
+    // for each existing entity type and bundle
+    // whenever a new form mode becomes available. Instead,
+    // configuration entries are only created when an entity form display is
+    // explicitly configured and saved.
+    if (!$entity_form_display) {
+      $entity_form_display = EntityFormDisplay::create([
+        'targetEntityType' => $menu_link_entity_type,
+        'bundle' => $menu_name,
+        'mode' => 'default',
+        'status' => TRUE,
+      ]);
+    }
+    $entity_form_display->setComponent($field_name, [
+      'type' => 'text_textarea_with_summary',
+    ]);
+    $entity_form_display->save();
+
+    // Try loading the display from configuration.
+    $display = EntityViewDisplay::load($menu_link_entity_type . '.' . $menu_name . '.default');
+
+    // If not found, create a fresh display object.
+    // We do not preemptively create
+    // new entity_view_display configuration entries
+    // for each existing entity type
+    // and bundle whenever a new view mode becomes available. Instead,
+    // configuration entries are only created
+    // when a display object is explicitly configured and saved.
+    if (!$display) {
+      $display = EntityViewDisplay::create([
+        'targetEntityType' => $menu_link_entity_type,
+        'bundle' => $menu_name,
+        'mode' => 'default',
+        'status' => TRUE,
+      ]);
+    }
+    $display->setComponent($field_name, [
+      'type' => 'text_default',
+    ]);
+    $display->save();
+
     // Add block.
     $this->block = $this->drupalPlaceBlock(
-    'system_menu_block:' . $this->menu->id(),
-    [
-    'region' => 'header',
-    'level'  => 1,
-    'depth'  => $this->linksNumber,
-    ]
+      'system_menu_block:' . $this->menu->id(),
+      [
+        'region' => 'header',
+        'level' => 1,
+        'depth' => $this->linksNumber,
+      ]
     );
     // Set default configs for menu items.
     $defaults = [
-    'title'       => 'Extras Link',
-    'link'        => 'https://example.com',
-    'enabled'     => TRUE,
-    'description' => 'Test Description',
-    'expanded'    => TRUE,
-    'menu_name'   => $this->menu->id(),
-    'parent'      => "{$this->menu->id()}:",
-    'weight'      => -10,
-    'body'        => '___ Menu Item Extras Field Value Level ___',
+      'title' => 'Extras Link',
+      'link' => 'https://example.com',
+      'enabled' => TRUE,
+      'description' => 'Test Description',
+      'expanded' => TRUE,
+      // @todo: Remove bundle field from array.
+      // @todo: When creation without bundle field will be fixed.
+      'bundle' => $this->menu->id(),
+      'menu_name' => $this->menu->id(),
+      'parent' => "{$this->menu->id()}:",
+      'weight' => -10,
+      $field_name => '___ Menu Item Extras Field Value Level ___',
     ];
     // Generate menu items.
     for ($i = 1; $i <= $this->linksNumber; $i++) {
-    if ($i > 1) {*/
-    /** @var \Drupal\menu_link_content\Entity\MenuLinkContent $previous_link */
-    /*    $previous_link = $this->links[$i - 1]['entity'];
+      if ($i > 1) {
+        /** @var \Drupal\menu_link_content\MenuLinkContentInterface $previous_link */
+        $previous_link = $this->links[$i - 1]['entity'];
+      }
+      /** @var \Drupal\menu_link_content\MenuLinkContentInterface $link */
+      $link = MenuLinkContent::create(NestedArray::mergeDeep($defaults, [
+        'title' => $defaults['title'] . "[{$i}]",
+        $field_name => $defaults[$field_name] . "[{$i}]",
+        'parent' => (isset($previous_link) ?
+          $previous_link->getPluginId() :
+          $defaults['parent']
+        ),
+      ]));
+      $link->save();
+      $this->links[$i] = [
+        'title' => $link->get('title')->getString(),
+        $field_name => $defaults[$field_name] . "[{$i}]",
+        'entity' => $link,
+        'entity_id' => $link->id(),
+      ];
     }
-    $link = MenuLinkContent::create(NestedArray::mergeDeep($defaults, [
-    'title' => $defaults['title'] . "[{$i}]",
-    'body' => $defaults['body'] . "[{$i}]",
-    'parent' => isset($previous_link) ?
-    $previous_link->getPluginId() :
-    $defaults['parent'],
-    ]));
-    $link->save();
-    $this->links[$i] = [
-    'title'  => $link->get('title')->getString(),
-    'body'   => $link->get('body')->getString(),
-    'entity' => $link,
-    ];
-    }*/
   }
 
   /**
@@ -110,12 +181,27 @@ class MenuItemExtrasRenderTest extends BrowserTestBase {
    */
   public function testMultilevelItems() {
     $assert = $this->assertSession();
-    $assert->assert(TRUE, 'Placeholder for test updating');
-    /*$this->drupalGet('<front>');
+    $this->drupalGet('<front>');
     foreach ($this->links as $link) {
-    $assert->pageTextContains($link['title']);
-    $assert->pageTextContains($link['body']);
-    }*/
+      $assert->pageTextContains($link['title']);
+      $assert->pageTextContains($link['field_body']);
+    }
+  }
+
+  /**
+   * Render errors availability test.
+   */
+  public function testRenderClearCache() {
+    $assert = $this->assertSession();
+    $this->drupalLogin($this->rootUser);
+    foreach ($this->links as $link) {
+      $this->drupalGet(Url::fromRoute(
+        'entity.menu_link_content.edit_form',
+        ['menu_link_content' => $link['entity_id']]
+      ));
+      $assert->pageTextContains($link['title']);
+      $assert->pageTextContains($link['field_body']);
+    }
   }
 
 }

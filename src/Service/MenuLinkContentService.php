@@ -2,14 +2,18 @@
 
 namespace Drupal\menu_item_extras\Service;
 
+use Drupal\Core\DependencyInjection\DependencySerializationTrait;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityDefinitionUpdateManagerInterface;
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Field\FieldStorageDefinitionListenerInterface;
 use Drupal\Core\Entity\EntityLastInstalledSchemaRepositoryInterface;
 use Drupal\Core\Database\Connection;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\menu_link_content\MenuLinkContentInterface;
 
 /**
  * Class MenuLinkContentHelper.
@@ -17,6 +21,8 @@ use Drupal\Core\Database\Connection;
  * @package Drupal\menu_item_extras\Service
  */
 class MenuLinkContentService implements MenuLinkContentServiceInterface {
+
+  use DependencySerializationTrait;
 
   /**
    * Entity type manager.
@@ -103,13 +109,25 @@ class MenuLinkContentService implements MenuLinkContentServiceInterface {
       ->loadByProperties(['menu_name' => $menu_id]);
     if (!empty($menu_links)) {
       foreach ($menu_links as $menu_link) {
-        if ($extras_enabled) {
-          $menu_link->set('bundle', $menu_id)->save();
+        $this->updateMenuItemBundle($menu_link, $extras_enabled);
+        if ($menu_link->requiresRediscovery()) {
+          $menu_link->setRequiresRediscovery(FALSE);
         }
-        else {
-          $menu_link->set('bundle', 'menu_link_content')->save();
-        }
+        $menu_link->save();
       }
+    }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function updateMenuItemBundle(MenuLinkContentInterface $item, $extras_enabled = TRUE, $save = FALSE) {
+    $item->set(
+      'bundle',
+      ($extras_enabled) ? $item->get('menu_name')->getString() : 'menu_link_content'
+    );
+    if ($save) {
+      $item->save();
     }
   }
 
@@ -147,14 +165,24 @@ class MenuLinkContentService implements MenuLinkContentServiceInterface {
       // Wipe it.
       $this->connection->truncate($table)->execute();
     }
+
     // Update definitions and scheme.
     // Process field storage definition changes.
     $this->entityTypeManager->clearCachedDefinitions();
-    $storage_definitions = $this->entityFieldManager->getFieldStorageDefinitions('menu_link_content');
-    $original_storage_definitions = $this->entityLastInstalledSchemaRepository->getLastInstalledFieldStorageDefinitions('menu_link_content');
+
+    $storage_definitions = $this->entityFieldManager
+      ->getFieldStorageDefinitions('menu_link_content');
+
+    $original_storage_definitions = $this->entityLastInstalledSchemaRepository
+      ->getLastInstalledFieldStorageDefinitions('menu_link_content');
+
     $storage_definition = isset($storage_definitions['bundle']) ? $storage_definitions['bundle'] : NULL;
+
     $original_storage_definition = isset($original_storage_definitions['bundle']) ? $original_storage_definitions['bundle'] : NULL;
-    $this->fieldStorageDefinitionListener->onFieldStorageDefinitionUpdate($storage_definition, $original_storage_definition);
+
+    $this->fieldStorageDefinitionListener
+      ->onFieldStorageDefinitionUpdate($storage_definition, $original_storage_definition);
+
     // Restore the data.
     foreach ($tables as $table) {
       if (!empty($existing_data[$table])) {
@@ -187,6 +215,98 @@ class MenuLinkContentService implements MenuLinkContentServiceInterface {
     $entity_type = $this->entityTypeManager
       ->getDefinition('menu_link_content');
     $this->entityDefinitionUpdateManager->updateEntityType($entity_type);
+  }
+
+  /**
+   * Form submission handler for menu item field on the node form.
+   *
+   * @param array $form
+   *   Form array.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   Form state object.
+   *
+   * @see menu_ui_form_node_form_submit()
+   * @see menu_ui_form_node_form_alter()
+   */
+  public function nodeSubmit(array $form, FormStateInterface $form_state) {
+    /** @var \Drupal\Core\Entity\EntityFormInterface $form_object */
+    $form_object = $form_state->getFormObject();
+    /** @var \Drupal\Core\Entity\EntityInterface $node */
+    $node = $form_object->getEntity();
+    if (!$form_state->isValueEmpty('menu')) {
+      $values = $form_state->getValue('menu');
+      if (empty($values['enabled'])) {
+        if ($values['entity_id']) {
+          $entity = $this->entityTypeManager
+            ->getStorage('menu_link_content')
+            ->load($values['entity_id']);
+          $entity->delete();
+        }
+      }
+      elseif (trim($values['title'])) {
+        // Decompose the selected menu parent
+        // option into 'menu_name' and 'parent',
+        // if the form used the default parent selection widget.
+        if (!empty($values['menu_parent'])) {
+          list($menu_name, $parent) = explode(':', $values['menu_parent'], 2);
+          $values['menu_name'] = $menu_name;
+          $values['parent'] = $parent;
+        }
+        $link = $this->nodeSave($node, $values);
+        $values['entity_id'] = $link->id();
+        $form_state->setValue('menu', $values);
+      }
+    }
+  }
+
+  /**
+   * Helper function to create or update a menu link for a node.
+   *
+   * @param \Drupal\Core\Entity\EntityInterface $node
+   *   Node entity.
+   * @param array $values
+   *   Values for the menu link.
+   *
+   * @return \Drupal\menu_link_content\MenuLinkContentInterface
+   *   Menu item.
+   *
+   * @see _menu_ui_node_save()
+   */
+  public function nodeSave(EntityInterface $node, array $values) {
+    $menu_link_content_storage = $this->entityTypeManager
+      ->getStorage('menu_link_content');
+    /** @var \Drupal\menu_link_content\MenuLinkContentInterface $entity */
+    if (!empty($values['entity_id'])) {
+      $entity = $menu_link_content_storage->load($values['entity_id']);
+      if ($entity->isTranslatable()) {
+        if (!$entity->hasTranslation($node->language()->getId())) {
+          $entity = $entity->addTranslation(
+            $node->language()->getId(),
+            $entity->toArray()
+          );
+        }
+        else {
+          $entity = $entity->getTranslation($node->language()->getId());
+        }
+      }
+    }
+    else {
+      // Create a new menu_link_content entity.
+      $entity = $menu_link_content_storage->create([
+        'link' => ['uri' => 'entity:node/' . $node->id()],
+        'langcode' => $node->language()->getId(),
+      ]);
+      $entity->set('enabled', 1);
+    }
+    $entity->set('title', trim($values['title']));
+    $entity->set('description', trim($values['description']));
+    $entity->set('menu_name', $values['menu_name']);
+    $entity->set('bundle', $values['menu_name']);
+    $entity->set('parent', $values['parent']);
+    $entity->set('weight', isset($values['weight']) ? $values['weight'] : 0);
+    $entity->save();
+
+    return $entity;
   }
 
 }

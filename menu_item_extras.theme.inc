@@ -17,8 +17,12 @@ use Drupal\Component\Utility\Html;
  *   - menu_link_content: An individual menu_link_content for display.
  */
 function template_preprocess_menu_link_content(array &$variables) {
+  $show_item_link = TRUE;
   /* @var \Drupal\menu_link_content\Entity\MenuLinkContent $menu_link_content */
   $menu_link_content = $variables['elements']['#menu_link_content'];
+  $variables['menu_link_content'] = $menu_link_content;
+  // Disabled standard entity render for using custom TWIG render.
+  unset($variables['elements']['#pre_render']);
   // Helpful $content variable for templates.
   $variables['content'] = $variables['elements'];
   if (isset($variables['content']['children'])) {
@@ -31,4 +35,10 @@ function template_preprocess_menu_link_content(array &$variables) {
   if ($variables['elements']['#view_mode']) {
     $variables['attributes']['class'][] = Html::getClass('view-mode-' . $variables['elements']['#view_mode']);
   }
+
+  if (isset($variables['elements']['#show_item_link'])) {
+    $show_item_link = $variables['elements']['#show_item_link'];
+  }
+
+  $variables['show_item_link'] = $show_item_link;
 }

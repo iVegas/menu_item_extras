@@ -3,6 +3,7 @@
 namespace Drupal\menu_item_extras\Service;
 
 use Drupal\Core\Menu\MenuLinkInterface;
+use Drupal\menu_link_content\MenuLinkContentInterface;
 
 /**
  * Interface MenuLinkTreeHandlerInteface.
@@ -10,6 +11,28 @@ use Drupal\Core\Menu\MenuLinkInterface;
  * @package Drupal\menu_item_extras\Service
  */
 interface MenuLinkTreeHandlerInterface {
+
+  /**
+   * Get menu_link_content entity.
+   *
+   * @param \Drupal\Core\Menu\MenuLinkInterface $link
+   *   Link object.
+   *
+   * @return \Drupal\menu_link_content\MenuLinkContentInterface|null
+   *   Menu Link Content entity.
+   */
+  public function getMenuLinkItemEntity(MenuLinkInterface $link);
+
+  /**
+   * Get menu_link_content view mode.
+   *
+   * @param \Drupal\menu_link_content\Entity\MenuLinkContentInterface $entity
+   *   Link object.
+   *
+   * @return string
+   *   View mode machine name.
+   */
+  public function getMenuLinkContentViewMode(MenuLinkContentInterface $entity);
 
   /**
    * Get Menu Link Content entity content.
@@ -21,6 +44,17 @@ interface MenuLinkTreeHandlerInterface {
    *   Renderable menu item content.
    */
   public function getMenuLinkItemContent(MenuLinkInterface $link);
+
+  /**
+   * Get Menu Link Item view mdoe.
+   *
+   * @param \Drupal\Core\Menu\MenuLinkInterface $link
+   *   Original link entity.
+   *
+   * @return string
+   *   View mode property.
+   */
+  public function getMenuLinkItemViewMode(MenuLinkInterface $link);
 
   /**
    * Checks if Menu Link Children is enabled to display.
@@ -38,6 +72,9 @@ interface MenuLinkTreeHandlerInterface {
    *
    * @param array $items
    *   Menu tree items.
+   *
+   * @return array
+   *   Returns modified menu tree items array.
    */
   public function processMenuLinkTree(array &$items);
 

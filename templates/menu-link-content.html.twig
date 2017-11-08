@@ -5,6 +5,7 @@
  *
  * Available variables:
  * - menu_link_content: Menu link entity.
+ * - show_item_link: Indicator for menu item link.
  *
  * @see template_preprocess_menu_link_content()
  *
@@ -12,6 +13,9 @@
  */
 #}
 
+{% if show_item_link %}
+  {{ link(menu_link_content.getTitle(), menu_link_content.getUrlObject()) }}
+{% endif %}
 {% if content %}
   {{ content }}
 {% endif %}

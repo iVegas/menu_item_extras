@@ -5,7 +5,7 @@ namespace Drupal\menu_item_extras\Service;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Entity\EntityRepositoryInterface;
 use Drupal\Core\Menu\MenuLinkInterface;
-use Drupal\menu_link_content\Entity\MenuLinkContent;
+use Drupal\menu_link_content\MenuLinkContentInterface;
 
 /**
  * Class MenuLinkTreeHandler.
@@ -40,15 +40,9 @@ class MenuLinkTreeHandler implements MenuLinkTreeHandlerInterface {
   }
 
   /**
-   * Get menu_link_content entity.
-   *
-   * @param \Drupal\Core\Menu\MenuLinkInterface $link
-   *   Link object.
-   *
-   * @return \Drupal\menu_link_content\Entity\MenuLinkContent|null
-   *   Menu Link Content entity.
+   * {@inheritdoc}
    */
-  protected function getMenuLinkItemEntity(MenuLinkInterface $link) {
+  public function getMenuLinkItemEntity(MenuLinkInterface $link) {
     $menu_item = NULL;
     $metadata = $link->getMetaData();
     if (!empty($metadata['entity_id'])) {
@@ -64,15 +58,9 @@ class MenuLinkTreeHandler implements MenuLinkTreeHandlerInterface {
   }
 
   /**
-   * Get menu_link_content view mode.
-   *
-   * @param \Drupal\menu_link_content\Entity\MenuLinkContent $entity
-   *   Link object.
-   *
-   * @return string
-   *   View mode machine name.
+   * {@inheritdoc}
    */
-  protected function menuLinkContentViewMode(MenuLinkContent $entity) {
+  public function getMenuLinkContentViewMode(MenuLinkContentInterface $entity) {
     $view_mode = 'default';
     if (!$entity->get('view_mode')->isEmpty()) {
       $value = $entity->get('view_mode')->first()->getValue();
@@ -80,29 +68,48 @@ class MenuLinkTreeHandler implements MenuLinkTreeHandlerInterface {
         $view_mode = $value['value'];
       }
     }
-
     return $view_mode;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getMenuLinkItemContent(MenuLinkInterface $link) {
+  public function getMenuLinkItemContent(MenuLinkInterface $link, $menu_level = NULL, $show_item_link = FALSE) {
     $render_output = [];
+
     /** @var \Drupal\menu_link_content\Entity\MenuLinkContent $menu_item */
     $entity = $this->getMenuLinkItemEntity($link);
     if ($entity) {
-      $view_mode = $this->menuLinkContentViewMode($entity);
+      $view_mode = $this->getMenuLinkContentViewMode($entity);
       $view_builder = $this->entityTypeManager
         ->getViewBuilder($entity->getEntityTypeId());
-      $render_entity = $view_builder->view($entity, $view_mode);
-      $render_output['content'] = $render_entity;
+      $render_output = $view_builder->view($entity, $view_mode);
+      $cached_context = [
+        'languages',
+        'theme',
+        'url.path',
+        'url.query_args',
+        'user',
+      ];
+      $render_output['#cache']['contexts'] = array_merge($cached_context, $render_output['#cache']['contexts']);
+      $render_output['#show_item_link'] = $show_item_link;
     }
 
-    $render_output['content']['#title'] = $link->getTitle();
-    $render_output['content']['#url'] = $link->getUrlObject();
+    if (!is_null($menu_level)) {
+      $render_output['#menu_level'] = $menu_level;
+    }
 
     return $render_output;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getMenuLinkItemViewMode(MenuLinkInterface $link) {
+    $entity = $this->getMenuLinkItemEntity($link);
+    if ($entity) {
+      return $this->getMenuLinkContentViewMode($entity);
+    }
   }
 
   /**
@@ -112,7 +119,7 @@ class MenuLinkTreeHandler implements MenuLinkTreeHandlerInterface {
     /** @var \Drupal\menu_link_content\Entity\MenuLinkContent $menu_item */
     $entity = $this->getMenuLinkItemEntity($link);
     if ($entity) {
-      $view_mode = $this->menuLinkContentViewMode($entity);
+      $view_mode = $this->getMenuLinkContentViewMode($entity);
       /* @var \Drupal\Core\Entity\Entity\EntityViewDisplay $display */
       $display = $this->entityTypeManager
         ->getStorage('entity_view_display')
@@ -127,28 +134,23 @@ class MenuLinkTreeHandler implements MenuLinkTreeHandlerInterface {
   /**
    * {@inheritdoc}
    */
-  public function processMenuLinkTree(array &$items, $menu_level = 0) {
+  public function processMenuLinkTree(array &$items, $menu_level = -1, $show_item_link = FALSE) {
+    $menu_level++;
     foreach ($items as &$item) {
       $content = [];
-
       if (isset($item['original_link'])) {
-        $content = $this->getMenuLinkItemContent($item['original_link']);
+        $content['#item'] = $item;
+        $content['content'] = $this->getMenuLinkItemContent($item['original_link'], $menu_level, $show_item_link);
+        $content['entity'] = $this->getMenuLinkItemEntity($item['original_link']);
         $content['menu_level'] = $menu_level;
       }
       // Process subitems.
       if ($item['below']) {
-        $menu_level++;
-        $this->processMenuLinkTree($item['below'], $menu_level);
-        if ($this->isMenuLinkDisplayedChildren($item['original_link'])) {
-          foreach ($item['below'] as &$child) {
-            $child['content']['menu_level'] = $menu_level;
-            $content['content']['children'][] = $child;
-          }
-        }
+        $content['content']['children'] = $this->processMenuLinkTree($item['below'], $menu_level, $show_item_link);
       }
-
       $item = array_merge($item, $content);
     }
+    return $items;
   }
 
 }

@@ -31,7 +31,7 @@ function menu_item_extras_help($route_name, RouteMatchInterface $route_match) {
         'description' => [
           '#type' => 'html_tag',
           '#tag' => 'p',
-          '#value' => t('Provide an additional custom fields which can be used on Menu link'),
+          '#value' => t('Provides additional custom fields which can be used on Menu Link.'),
         ],
       ];
       return render($output);
@@ -47,6 +47,8 @@ function menu_item_extras_entity_type_build(array &$entity_types) {
     // Set entity type to be bundled.
     /** @var \Drupal\Core\Entity\ContentEntityTypeInterface $mlc */
     $mlc = $entity_types[$content_entity];
+    // Set handler for views.
+    $mlc->setHandlerClass('views_data', 'Drupal\menu_item_extras\MenuLinkContentViewsData');
     $mlc->set('bundle_entity_type', 'menu');
     $mlc->set('field_ui_base_route', 'entity.menu.edit_form');
     // Set entity to be a bundle entity type for previous entity.
@@ -54,7 +56,11 @@ function menu_item_extras_entity_type_build(array &$entity_types) {
     $menu = $entity_types['menu'];
     $menu->set('bundle_of', $content_entity);
     $entity_types['menu']
-      ->setFormClass('clear', 'Drupal\menu_item_extras\Form\ConfirmClearMenuForm');
+      ->setFormClass('clear', 'Drupal\menu_item_extras\Form\ConfirmClearMenuForm')
+      ->setLinkTemplate('clear', '/admin/structure/menu/manage/{menu}');
+    $entity_types['menu']
+      ->setFormClass('view_modes_settings', 'Drupal\menu_item_extras\MenuItemExtrasViewModesSettingsForm')
+      ->setLinkTemplate('view-modes-settings', '/admin/structure/menu/manage/{menu}/view_modes_settings');
   }
 }
 
@@ -68,9 +74,7 @@ function menu_item_extras_entity_type_build(array &$entity_types) {
  */
 function menu_item_extras_entity_base_field_info(EntityTypeInterface $entity_type) {
   $fields = [];
-
   if ($entity_type->id() === 'menu_link_content') {
-
     $fields['view_mode'] = BaseFieldDefinition::create('string')
       ->setLabel(t('View mode'))
       ->setDescription(t('Per item view mode selector.'))
@@ -81,7 +85,6 @@ function menu_item_extras_entity_base_field_info(EntityTypeInterface $entity_typ
       ])
       ->setDisplayConfigurable('form', TRUE);
   }
-
   return $fields;
 }
 
@@ -105,6 +108,7 @@ function menu_item_extras_entity_base_field_info_alter(&$fields, EntityTypeInter
       // Yep, this is single reason why view display can't be set. Let's fix it.
       $options['type'] = 'number_integer';
       // @TODO: This should be fixed in the menu_link_content core module.
+      /* @see https://www.drupal.org/node/2903161 */
       $fields['weight']->setDisplayOptions('view', $options);
     }
   }
@@ -138,7 +142,7 @@ function menu_item_extras_theme() {
     'template' => 'menu-link-content',
   ];
   $theme['menu_levels'] = [
-    'render element' => 'elements',
+    'render element' => 'items',
     'template' => 'menu-levels',
     'base hook' => 'menu_levels',
   ];
@@ -156,13 +160,16 @@ function menu_item_extras_preprocess_block(&$variables) {
     $variables['content']['#theme'] = 'menu';
     // Pass region name to the suggestions_menu_alter for
     // the region suggestion.
-    $block_id = $variables['elements']['#id'];
-    /** @var \Drupal\Core\Config\Entity\ConfigEntityStorageInterface $block_storage */
-    $block_storage = \Drupal::entityTypeManager()
-      ->getStorage('block');
-    /** @var \Drupal\block\BlockInterface $block */
-    $block = $block_storage->load($block_id);
-    $variables['content']['#attributes']['data-region'] = $block->getRegion();
+    if (!empty($variables['elements']['#id'])) {
+      /** @var \Drupal\Core\Config\Entity\ConfigEntityStorageInterface $block_storage */
+      $block_storage = \Drupal::entityTypeManager()
+        ->getStorage('block');
+      /** @var \Drupal\block\BlockInterface $block */
+      $block = $block_storage->load($variables['elements']['#id']);
+      if (!empty($block)) {
+        $variables['content']['#attributes']['data-region'] = $block->getRegion();
+      }
+    }
   }
 }
 
@@ -179,8 +186,14 @@ function menu_item_extras_theme_suggestions_menu_link_content(array $variables) 
   $suggestions[] = $suggestion_prefix . '__' . $sanitized_view_mode;
   $suggestions[] = $suggestion_prefix . '__' . $menu_link_content->getMenuName();
   $suggestions[] = $suggestion_prefix . '__' . $menu_link_content->getMenuName() . '__' . $sanitized_view_mode;
-  $suggestions[] = $suggestion_prefix . '__' . $menu_link_content->id();
-  $suggestions[] = $suggestion_prefix . '__' . $menu_link_content->id() . '__' . $sanitized_view_mode;
+  if (isset($variables['elements']['#menu_level'])) {
+    $level = $variables['elements']['#menu_level'];
+    $suggestions[] = $suggestion_prefix . '__menu_level_' . $level;
+    $suggestions[] = $suggestion_prefix . '__' . $menu_link_content->getMenuName() . '__menu_level_' . $level;
+    $suggestions[] = $suggestion_prefix . '__' . $menu_link_content->getMenuName() . '__menu_level_' . $level . '__' . $sanitized_view_mode;
+  }
+  $suggestions[] = $suggestion_prefix . '__' . $menu_link_content->getMenuName() . '__' . $menu_link_content->id();
+  $suggestions[] = $suggestion_prefix . '__' . $menu_link_content->getMenuName() . '__' . $menu_link_content->id() . '__' . $sanitized_view_mode;
 
   return $suggestions;
 }
@@ -192,9 +205,9 @@ function menu_item_extras_theme_suggestions_menu_levels(array $variables) {
   $suggestions = [];
   $suggestion_prefix = 'menu-levels';
 
-  $menu_name = $variables['elements']['#menu_name'];
-  if (isset($variables['elements'][0]['menu_level'])) {
-    $level = 'level_' . $variables['elements'][0]['menu_level'];
+  $menu_name = $variables['items']['#menu_name'];
+  if (isset($variables['items'][0]['menu_level'])) {
+    $level = 'level_' . $variables['items'][0]['menu_level'];
   }
 
   if (isset($level)) {
@@ -212,20 +225,25 @@ function menu_item_extras_theme_suggestions_menu_levels(array $variables) {
  * Implements hook_theme_suggestions_HOOK_alter().
  */
 function menu_item_extras_theme_suggestions_menu_alter(array &$suggestions, array $variables) {
-  if (Utility::checkBundleHasExtraFieldsThanEntity('menu_link_content', $variables['menu_name'])) {
-    $suggestion_prefix = 'menu__extras';
+  if (isset($variables['menu_name'])) {
     $menu_name = $variables['menu_name'];
     $menu_name = strtr($menu_name, '-', '_');
-    // Custom suggestions.
-    $suggestions[] = $suggestion_prefix;
-    $suggestions[] = $suggestion_prefix . '__' . $menu_name;
-    // Custom suggestions for the parent region.
-    if (isset($variables['attributes']['data-region'])) {
-      $suggestions[] = $suggestion_prefix . '__' . $menu_name . '__' . $variables['attributes']['data-region'];
+
+    // We have to add back the original suggestion that normally is generated
+    // from the #theme, because in pre-process we are replacing it with 'menu'.
+    $suggestions[] = 'menu__' . $menu_name;
+
+    if (Utility::checkBundleHasExtraFieldsThanEntity('menu_link_content', $variables['menu_name'])) {
+      $suggestion_prefix = 'menu__extras';
+      // Custom suggestions.
+      $suggestions[] = $suggestion_prefix;
+      $suggestions[] = $suggestion_prefix . '__' . $menu_name;
+      // Custom suggestions for the parent region.
+      if (isset($variables['attributes']['data-region'])) {
+        $suggestions[] = $suggestion_prefix . '__' . $menu_name . '__' . $variables['attributes']['data-region'];
+      }
     }
   }
-
-  return $suggestions;
 }
 
 /**
@@ -234,7 +252,7 @@ function menu_item_extras_theme_suggestions_menu_alter(array &$suggestions, arra
 function menu_item_extras_preprocess_menu(&$variables) {
   // We preprocess only menus that has additional fields.
   if (Utility::checkBundleHasExtraFieldsThanEntity('menu_link_content', $variables['menu_name'])) {
-    \Drupal::service('menu_item_extras.menu_link_tree_handler')
+    $variables['items'] = \Drupal::service('menu_item_extras.menu_link_tree_handler')
       ->processMenuLinkTree($variables['items']);
   }
 }
@@ -242,7 +260,7 @@ function menu_item_extras_preprocess_menu(&$variables) {
 /**
  * Implements hook_form_BASE_FORM_ID_alter().
  */
-function menu_item_extras_form_menu_link_content_form_alter(&$form, FormStateInterface $form_state) {
+function menu_item_extras_form_menu_link_content_form_alter(array &$form, FormStateInterface $form_state) {
   /** @var \Drupal\menu_link_content\Form\MenuLinkContentForm $form_object */
   $form_object = $form_state->getBuildInfo()['callback_object'];
   /** @var \Drupal\menu_link_content\Entity\MenuLinkContent $entity */
@@ -264,7 +282,7 @@ function menu_item_extras_form_menu_link_content_form_alter(&$form, FormStateInt
  * @see menu_item_extras_entity_base_field_info()
  * @see Drupal\menu_item_extras\Form\ConfirmClearMenuForm
  */
-function menu_item_extras_form_menu_edit_form_alter(&$form, $form_state) {
+function menu_item_extras_form_menu_edit_form_alter(array &$form, FormStateInterface $form_state) {
   $menu = $form_state->getFormObject()->getEntity()->id();
   $form['actions']['clear'] = [
     '#type' => 'link',
@@ -274,6 +292,24 @@ function menu_item_extras_form_menu_edit_form_alter(&$form, $form_state) {
     '#button_type' => 'danger',
     '#attributes' => ['class' => ['button', 'button--danger']],
   ];
+}
+
+/**
+ * Implements hook_form_BASE_FORM_ID_alter() for "node_form".
+ */
+function menu_item_extras_form_node_form_alter(array &$form, FormStateInterface $form_state, $form_id) {
+  /** @var \Drupal\Core\Extension\ModuleHandlerInterface $moduleHandler */
+  $moduleHandler = \Drupal::service('module_handler');
+  if ($moduleHandler->moduleExists('menu_ui')) {
+    foreach (array_keys($form['actions']) as $action) {
+      if ($action != 'preview' && isset($form['actions'][$action]['#type']) && $form['actions'][$action]['#type'] === 'submit') {
+        $form['actions'][$action]['#submit'][] = [
+          \Drupal::service('menu_item_extras.menu_link_content_helper'),
+          'nodeSubmit',
+        ];
+      }
+    }
+  }
 }
 
 /**

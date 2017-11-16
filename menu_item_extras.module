@@ -11,7 +11,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
-use Drupal\menu_item_extras\Entity\MenuLinkContent;
+use Drupal\menu_item_extras\Entity\MenuItemExtrasMenuLinkContent;
 use Drupal\menu_item_extras\Utility\Utility;
 use Drupal\Core\Url;
 
@@ -48,7 +48,7 @@ function menu_item_extras_entity_type_build(array &$entity_types) {
     // Set entity type to be bundled.
     /** @var \Drupal\Core\Entity\ContentEntityTypeInterface $mlc */
     $mlc = $entity_types[$content_entity];
-    $mlc->setClass(MenuLinkContent::class);
+    $mlc->setClass(MenuItemExtrasMenuLinkContent::class);
     // Set handler for views.
     $mlc->setHandlerClass('views_data', 'Drupal\menu_item_extras\MenuLinkContentViewsData');
     $mlc->set('bundle_entity_type', 'menu');

@@ -3,12 +3,12 @@
 namespace Drupal\menu_item_extras\Entity;
 
 use Drupal\Core\Entity\EntityStorageInterface;
-use Drupal\menu_link_content\Entity\MenuLinkContent as OriginMenuLinkContent;
+use Drupal\menu_link_content\Entity\MenuLinkContent;
 
 /**
  * {@inheritdoc}
  */
-class MenuLinkContent extends OriginMenuLinkContent {
+class MenuItemExtrasMenuLinkContent extends MenuLinkContent implements MenuItemExtrasMenuLinkContentInterface {
 
   /**
    * {@inheritdoc}

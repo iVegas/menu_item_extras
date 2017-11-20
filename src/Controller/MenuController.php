@@ -44,6 +44,8 @@ class MenuController extends ControllerBase {
    * @param \Drupal\system\MenuInterface $menu
    *   An entity representing a custom menu.
    *
+   * @todo: Deprecate this method after https://www.drupal.org/project/drupal/issues/2923429
+   *
    * @return array
    *   Returns the menu link creation form.
    */
@@ -54,7 +56,6 @@ class MenuController extends ControllerBase {
         'id' => '',
         'parent' => '',
         'menu_name' => $menu->id(),
-        'bundle' => $menu->id(),
       ]);
     return $this->entityFormBuilder()->getForm($menu_link);
   }

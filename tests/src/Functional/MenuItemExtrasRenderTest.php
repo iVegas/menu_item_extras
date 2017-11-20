@@ -143,9 +143,6 @@ class MenuItemExtrasRenderTest extends BrowserTestBase {
       'enabled' => TRUE,
       'description' => 'Test Description',
       'expanded' => TRUE,
-      // @todo: Remove bundle field from array.
-      // @todo: When creation without bundle field will be fixed.
-      'bundle' => $this->menu->id(),
       'menu_name' => $this->menu->id(),
       'parent' => "{$this->menu->id()}:",
       'weight' => -10,

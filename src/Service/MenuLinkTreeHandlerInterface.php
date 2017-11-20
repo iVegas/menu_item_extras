@@ -43,7 +43,7 @@ interface MenuLinkTreeHandlerInterface {
    * @return array
    *   Renderable menu item content.
    */
-  public function getMenuLinkItemContent(MenuLinkInterface $link);
+  public function getMenuLinkItemContent(MenuLinkContentInterface $link);
 
   /**
    * Get Menu Link Item view mdoe.

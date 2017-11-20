@@ -2,6 +2,7 @@
 
 namespace Drupal\menu_item_extras\Service;
 
+use Drupal\Core\DependencyInjection\DependencySerializationTrait;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Entity\EntityRepositoryInterface;
 use Drupal\Core\Menu\MenuLinkInterface;
@@ -11,6 +12,8 @@ use Drupal\menu_link_content\MenuLinkContentInterface;
  * Class MenuLinkTreeHandler.
  */
 class MenuLinkTreeHandler implements MenuLinkTreeHandlerInterface {
+
+  use DependencySerializationTrait;
 
   /**
    * The entity type manager.
@@ -51,6 +54,11 @@ class MenuLinkTreeHandler implements MenuLinkTreeHandlerInterface {
         ->getStorage('menu_link_content')
         ->load($metadata['entity_id']);
     }
+    else {
+      $menu_item = $this->entityTypeManager
+        ->getStorage('menu_link_content')
+        ->create($link->getPluginDefinition());
+    }
     if ($menu_item) {
       $menu_item = $this->entityRepository->getTranslationFromContext($menu_item);
     }
@@ -74,26 +82,28 @@ class MenuLinkTreeHandler implements MenuLinkTreeHandlerInterface {
   /**
    * {@inheritdoc}
    */
-  public function getMenuLinkItemContent(MenuLinkInterface $link, $menu_level = NULL, $show_item_link = FALSE) {
+  public function getMenuLinkItemContent(MenuLinkContentInterface $link, $menu_level = NULL, $show_item_link = FALSE) {
     $render_output = [];
-
     /** @var \Drupal\menu_link_content\Entity\MenuLinkContent $menu_item */
-    $entity = $this->getMenuLinkItemEntity($link);
-    if ($entity) {
+    $entity = $link;
+    $view_builder = $this->entityTypeManager
+      ->getViewBuilder('menu_link_content');
+    if ($entity->id()) {
       $view_mode = $this->getMenuLinkContentViewMode($entity);
-      $view_builder = $this->entityTypeManager
-        ->getViewBuilder($entity->getEntityTypeId());
-      $render_output = $view_builder->view($entity, $view_mode);
-      $cached_context = [
-        'languages',
-        'theme',
-        'url.path',
-        'url.query_args',
-        'user',
-      ];
-      $render_output['#cache']['contexts'] = array_merge($cached_context, $render_output['#cache']['contexts']);
-      $render_output['#show_item_link'] = $show_item_link;
     }
+    else {
+      $view_mode = 'default';
+    }
+    $render_output = $view_builder->view($entity, $view_mode);
+    $cached_context = [
+      'languages',
+      'theme',
+      'url.path',
+      'url.query_args',
+      'user',
+    ];
+    $render_output['#cache']['contexts'] = array_merge($cached_context, $render_output['#cache']['contexts']);
+    $render_output['#show_item_link'] = $show_item_link;
 
     if (!is_null($menu_level)) {
       $render_output['#menu_level'] = $menu_level;
@@ -110,6 +120,7 @@ class MenuLinkTreeHandler implements MenuLinkTreeHandlerInterface {
     if ($entity) {
       return $this->getMenuLinkContentViewMode($entity);
     }
+    return 'default';
   }
 
   /**
@@ -138,12 +149,10 @@ class MenuLinkTreeHandler implements MenuLinkTreeHandlerInterface {
     $menu_level++;
     foreach ($items as &$item) {
       $content = [];
-      if (isset($item['original_link'])) {
-        $content['#item'] = $item;
-        $content['content'] = $this->getMenuLinkItemContent($item['original_link'], $menu_level, $show_item_link);
-        $content['entity'] = $this->getMenuLinkItemEntity($item['original_link']);
-        $content['menu_level'] = $menu_level;
-      }
+      $content['#item'] = $item;
+      $content['menu_level'] = $menu_level;
+      $content['entity'] = $this->getMenuLinkItemEntity($item['original_link']);
+      $content['content'] = $this->getMenuLinkItemContent($content['entity'], $menu_level, $show_item_link);
       // Process subitems.
       if ($item['below']) {
         $content['content']['children'] = $this->processMenuLinkTree($item['below'], $menu_level, $show_item_link);
@@ -152,5 +161,4 @@ class MenuLinkTreeHandler implements MenuLinkTreeHandlerInterface {
     }
     return $items;
   }
-
 }

@@ -2,7 +2,6 @@
 
 namespace Drupal\menu_item_extras\Service;
 
-use Drupal\Core\DependencyInjection\DependencySerializationTrait;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Entity\EntityRepositoryInterface;
 use Drupal\Core\Menu\MenuLinkInterface;
@@ -12,8 +11,6 @@ use Drupal\menu_link_content\MenuLinkContentInterface;
  * Class MenuLinkTreeHandler.
  */
 class MenuLinkTreeHandler implements MenuLinkTreeHandlerInterface {
-
-  use DependencySerializationTrait;
 
   /**
    * The entity type manager.
@@ -82,10 +79,7 @@ class MenuLinkTreeHandler implements MenuLinkTreeHandlerInterface {
   /**
    * {@inheritdoc}
    */
-  public function getMenuLinkItemContent(MenuLinkContentInterface $link, $menu_level = NULL, $show_item_link = FALSE) {
-    $render_output = [];
-    /** @var \Drupal\menu_link_content\Entity\MenuLinkContent $menu_item */
-    $entity = $link;
+  public function getMenuLinkItemContent(MenuLinkContentInterface $entity, $menu_level = NULL, $show_item_link = FALSE) {
     $view_builder = $this->entityTypeManager
       ->getViewBuilder('menu_link_content');
     if ($entity->id()) {
@@ -120,6 +114,7 @@ class MenuLinkTreeHandler implements MenuLinkTreeHandlerInterface {
     if ($entity) {
       return $this->getMenuLinkContentViewMode($entity);
     }
+
     return 'default';
   }
 
@@ -149,10 +144,12 @@ class MenuLinkTreeHandler implements MenuLinkTreeHandlerInterface {
     $menu_level++;
     foreach ($items as &$item) {
       $content = [];
-      $content['#item'] = $item;
-      $content['menu_level'] = $menu_level;
-      $content['entity'] = $this->getMenuLinkItemEntity($item['original_link']);
-      $content['content'] = $this->getMenuLinkItemContent($content['entity'], $menu_level, $show_item_link);
+      if (isset($item['original_link'])) {
+        $content['#item'] = $item;
+        $content['entity'] = $this->getMenuLinkItemEntity($item['original_link']);
+        $content['content'] = $this->getMenuLinkItemContent($content['entity'], $menu_level, $show_item_link);
+        $content['menu_level'] = $menu_level;
+      }
       // Process subitems.
       if ($item['below']) {
         $content['content']['children'] = $this->processMenuLinkTree($item['below'], $menu_level, $show_item_link);
@@ -161,4 +158,5 @@ class MenuLinkTreeHandler implements MenuLinkTreeHandlerInterface {
     }
     return $items;
   }
+
 }

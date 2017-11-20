@@ -26,7 +26,7 @@ interface MenuLinkTreeHandlerInterface {
   /**
    * Get menu_link_content view mode.
    *
-   * @param \Drupal\menu_link_content\Entity\MenuLinkContentInterface $entity
+   * @param \Drupal\menu_link_content\MenuLinkContentInterface $entity
    *   Link object.
    *
    * @return string
@@ -37,7 +37,7 @@ interface MenuLinkTreeHandlerInterface {
   /**
    * Get Menu Link Content entity content.
    *
-   * @param \Drupal\Core\Menu\MenuLinkInterface $link
+   * @param \Drupal\menu_link_content\MenuLinkContentInterface $link
    *   Original link entity.
    *
    * @return array

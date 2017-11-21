@@ -8,6 +8,7 @@
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Render\Element;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
@@ -145,8 +146,6 @@ function menu_item_extras_theme() {
   ];
   $theme['menu_levels'] = [
     'render element' => 'items',
-    'template' => 'menu-levels',
-    'base hook' => 'menu_levels',
   ];
   return $theme;
 }
@@ -205,11 +204,12 @@ function menu_item_extras_theme_suggestions_menu_link_content(array $variables) 
  */
 function menu_item_extras_theme_suggestions_menu_levels(array $variables) {
   $suggestions = [];
-  $suggestion_prefix = 'menu-levels';
+  $suggestion_prefix = 'menu_levels';
 
   $menu_name = $variables['items']['#menu_name'];
-  if (isset($variables['items'][0]['menu_level'])) {
-    $level = 'level_' . $variables['items'][0]['menu_level'];
+  $children = Element::children($variables['items']);
+  if (isset($variables['items'][$children[0]]['menu_level'])) {
+    $level = 'level_' . $variables['items'][$children[0]]['menu_level'];
   }
 
   if (isset($level)) {

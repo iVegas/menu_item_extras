@@ -253,7 +253,7 @@ function menu_item_extras_theme_suggestions_menu_alter(array &$suggestions, arra
  */
 function menu_item_extras_preprocess_menu(&$variables) {
   // We preprocess only menus that has additional fields.
-  if (Utility::checkBundleHasExtraFieldsThanEntity('menu_link_content', $variables['menu_name'])) {
+  if (!empty($variables['menu_name']) && Utility::checkBundleHasExtraFieldsThanEntity('menu_link_content', $variables['menu_name'])) {
     $variables['items'] = \Drupal::service('menu_item_extras.menu_link_tree_handler')
       ->processMenuLinkTree($variables['items']);
   }

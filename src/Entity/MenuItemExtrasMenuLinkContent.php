@@ -14,7 +14,9 @@ class MenuItemExtrasMenuLinkContent extends MenuLinkContent implements MenuItemE
    * {@inheritdoc}
    */
   public static function preCreate(EntityStorageInterface $storage, array &$values) {
-    $values += ['bundle' => $values['menu_name']];
+    if (isset($values['menu_name'])) {
+      $values += ['bundle' => $values['menu_name']];
+    }
   }
 
 }

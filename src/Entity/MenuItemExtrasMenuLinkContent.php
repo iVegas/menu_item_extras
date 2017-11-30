@@ -17,6 +17,7 @@ class MenuItemExtrasMenuLinkContent extends MenuLinkContent implements MenuItemE
     if (isset($values['menu_name'])) {
       $values += ['bundle' => $values['menu_name']];
     }
+    parent::preCreate($storage, $values);
   }
 
 }

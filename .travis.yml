@@ -104,14 +104,13 @@ before_install:
   - composer global require "lionsad/drupal_ti:1.*"
   - drupal-ti before_install
   # Codesniffer and Coder
-  - composer global require "drupal/coder:^8.2"
-  - composer global require "drush/drush:^9.0"
-  # Symlinks for Codesniffer
-  - ln -s ~/.composer/vendor/drupal/coder/coder_sniffer/Drupal ~/.composer/vendor/squizlabs/php_codesniffer/CodeSniffer/Standards/Drupal
-  - ln -s ~/.composer/vendor/drupal/coder/coder_sniffer/DrupalPractice ~/.composer/vendor/squizlabs/php_codesniffer/CodeSniffer/Standards/DrupalPractice
 
 install:
   - drupal-ti install
+  - composer global require "drupal/coder:^8.2"
+  # Symlinks for Codesniffer
+  - ln -s ~/.composer/vendor/drupal/coder/coder_sniffer/Drupal ~/.composer/vendor/squizlabs/php_codesniffer/CodeSniffer/Standards/Drupal
+  - ln -s ~/.composer/vendor/drupal/coder/coder_sniffer/DrupalPractice ~/.composer/vendor/squizlabs/php_codesniffer/CodeSniffer/Standards/DrupalPractice
 
 before_script:
   - drupal-ti before_script

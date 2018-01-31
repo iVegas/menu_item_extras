@@ -52,4 +52,5 @@ class UtilityTest extends UnitTestCase {
       )
     );
   }
+
 }

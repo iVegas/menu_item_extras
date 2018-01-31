@@ -77,4 +77,5 @@ class Utility {
   public static function limitUnderscores($str) {
     return preg_replace('/__+/', '__', $str);
   }
+
 }

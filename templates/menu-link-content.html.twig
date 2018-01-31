@@ -15,7 +15,7 @@
 
 {% set menu_dropdown_classes = [
   'menu-dropdown',
-  elements['#menu_level'] ? 'menu-dropdown-' ~ elements['#menu_level'],
+  elements['#menu_level'] is defined ? 'menu-dropdown-' ~ elements['#menu_level'],
   elements['#view_mode'] ? 'menu-type-' ~ elements['#view_mode'],
 ] %}
 

@@ -35,5 +35,9 @@
     "vinyl-buffer": "^1.0.0",
     "webpack": "^3.5.6",
     "webpack-stream": "^4.0.0"
+  },
+  "dependencies": {
+    "gulp-clean-css": "^3.9.3",
+    "gulp-rename": "^1.2.2"
   }
 }

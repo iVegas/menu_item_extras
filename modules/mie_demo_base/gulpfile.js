@@ -18,6 +18,8 @@ const sass = require('gulp-sass');
 const sassLint = require('gulp-sass-lint');
 const icomoonBuilder = require('gulp-icomoon-builder');
 const autoprefixer = require('gulp-autoprefixer');
+const cleanCSS = require('gulp-clean-css');
+const rename = require('gulp-rename');
 // JS
 const jshint = require('gulp-jshint');
 const jshintStylish = require('jshint-stylish');
@@ -75,6 +77,10 @@ gulp.task('scss-compile', () => {
         })
     )
     .pipe(autoprefixer(configs.browsersSupport))
+    .pipe(cleanCSS())
+    .pipe(rename({
+      suffix: '.min'
+    }))
     .pipe(sourcemaps.write())
     .pipe(gulp.dest('./css/'));
 });

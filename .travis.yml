@@ -51,8 +51,9 @@ before_install:
 
   # Coder.
   - composer global require drupal/coder:$CODER_VERSION
-  - composer config --global --absolute home
-  - ln -s ~/.composer/vendor/drupal/coder/coder_sniffer/Drupal ~/.composer/vendor/squizlabs/php_codesniffer/CodeSniffer/Standards/
+  - composer global require dealerdirect/phpcodesniffer-composer-installer
+  - phpcs --config-set installed_paths ~/.composer/vendor/drupal/coder/coder_sniffer
+  - phpcs -i
 
   # Ensure the PHP environment is ready.
   - phpenv rehash

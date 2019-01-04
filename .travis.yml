@@ -109,8 +109,8 @@ script:
   - php core/scripts/run-tests.sh --verbose --color --module $MODULE_NAME --php $(which php) --url http://127.0.0.1:8080
 
   # PHP Unit Tests
-  - cd $TRAVIS_BUILD_DIR/drupal
-  - phpunit -c core/phpunit.xml.dist modules/$MODULE_NAME --debug --testdox
+  # - cd $TRAVIS_BUILD_DIR/drupal
+  # - phpunit -c core/phpunit.xml.dist modules/$MODULE_NAME --debug --testdox
 
 
   # Behat Tests - RUN THESE LAST OTHERWISE PHPUNIT WILL FAIL BECAUSE OF DEPENDENCY CONFLICTS

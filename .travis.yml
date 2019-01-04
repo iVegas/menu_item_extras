@@ -26,7 +26,7 @@ cache:
   bundler: true
   apt: true
   directories:
-  - "$HOME/.composer/cache"
+  - "$HOME/.config/composer/cache"
   - "$HOME/.drush/cache"
 
 mysql:
@@ -39,7 +39,7 @@ before_install:
   - phpenv config-rm xdebug.ini
 
   # Composer.
-  - sed -i '1i export PATH="$HOME/.composer/vendor/bin:$PATH"' $HOME/.bashrc
+  - sed -i '1i export PATH="$HOME/.config/composer/vendor/bin:$PATH"' $HOME/.bashrc
   - source $HOME/.bashrc
   # - composer self-update
 
@@ -51,7 +51,7 @@ before_install:
 
   # Coder.
   - composer global require drupal/coder:$CODER_VERSION
-  - ln -s ~/.composer/vendor/drupal/coder/coder_sniffer/Drupal ~/.composer/vendor/squizlabs/php_codesniffer/CodeSniffer/Standards/
+  - ln -s ~/.config/composer/vendor/drupal/coder/coder_sniffer/Drupal ~/.config/composer/vendor/squizlabs/php_codesniffer/CodeSniffer/Standards/
 
   # Ensure the PHP environment is ready.
   - phpenv rehash

@@ -1,15 +1,15 @@
 <?php
 
-namespace Drupal\Tests\menu_item_extras\Functional;
+namespace Drupal\Tests\menu_item_extras\Kernel;
 
-use Drupal\Tests\menu_link_content\Functional\LinksTest;
+use Drupal\Tests\menu_link_content\Kernel\MenuLinksTest;
 
 /**
  * Tests handling of menu links hierarchies.
  *
  * @group menu_item_extras
  */
-class LinksOriginTest extends LinksTest {
+class MenuLinksOriginTest extends MenuLinksTest {
 
   /**
    * {@inheritdoc}

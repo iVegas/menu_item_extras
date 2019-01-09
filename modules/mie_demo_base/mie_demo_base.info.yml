@@ -6,3 +6,6 @@ hidden: false
 core: 8.x
 dependencies:
   - drupal:menu_item_extras
+  - drupal:taxonomy
+  - drupal:image
+  - drupal:path

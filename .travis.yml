@@ -12,7 +12,7 @@ php:
 env:
   global:
     - MODULE_NAME='menu_item_extras'
-    - DRUPAL_REPO='git@git.drupal.org:project/menu_item_extras.git'
+    - DRUPAL_REPO='https://git.drupal.org/project/menu_item_extras.git'
     - DRUPAL_VERSION='8.6.x'
     - PHPCS_VERSION='3.*'
     - CODER_VERSION='8.3.x'

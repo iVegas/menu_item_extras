@@ -30,12 +30,15 @@ class MenuItemExtrasMenuLinkContent extends MenuLinkContent implements MenuItemE
       // Need to invalidate the parent to clear the render cache generated
       // in MenuLinkTreeHandler::getMenuLinkItemContent().
       list(, $parent_uuid) = explode(':', $this->getParentId());
-      /** @var \Drupal\Core\Entity\ContentEntityStorageInterface $storage */
-      $storage = $this->entityTypeManager()->getStorage($this->getEntityTypeId());
-      $loaded_entities = $storage->loadByProperties(['uuid' => $parent_uuid]);
-      $parent = reset($loaded_entities);
-      if ($parent) {
-        return Cache::mergeTags($tags, ['menu_link_content:' . $parent->id()]);
+      if ($parent_uuid !== NULL) {
+        /** @var \Drupal\Core\Entity\ContentEntityStorageInterface $storage */
+        $storage = $this->entityTypeManager()
+          ->getStorage($this->getEntityTypeId());
+        $loaded_entities = $storage->loadByProperties(['uuid' => $parent_uuid]);
+        $parent = reset($loaded_entities);
+        if ($parent) {
+          return Cache::mergeTags($tags, ['menu_link_content:' . $parent->id()]);
+        }
       }
     }
     return $tags;

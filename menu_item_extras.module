@@ -274,7 +274,7 @@ function menu_item_extras_form_menu_link_content_form_alter(array &$form, FormSt
   $form_object = $form_state->getBuildInfo()['callback_object'];
   /** @var \Drupal\menu_link_content\Entity\MenuLinkContent $entity */
   $entity = $form_object->getEntity();
-  $bundle = $entity->get('menu_name')->getString();
+  $bundle = $entity->bundle();
   foreach ($form['menu_parent']['#options'] as $option_id => $option) {
     if (strpos($option_id, $bundle) !== 0) {
       unset($form['menu_parent']['#options'][$option_id]);

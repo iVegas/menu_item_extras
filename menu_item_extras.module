@@ -187,7 +187,7 @@ function menu_item_extras_theme_suggestions_menu_levels(array $variables) {
 
   $menu_name = $utility::sanitizeMachineName($variables['items']['#menu_name']);
   $children = Element::children($variables['items']);
-  if (isset($variables['items'][$children[0]]['menu_level'])) {
+  if (isset($children[0]) && isset($variables['items'][$children[0]]['menu_level'])) {
     $level = 'level_' . $variables['items'][$children[0]]['menu_level'];
   }
 

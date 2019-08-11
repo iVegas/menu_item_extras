@@ -92,32 +92,6 @@ function menu_item_extras_entity_base_field_info(EntityTypeInterface $entity_typ
 }
 
 /**
- * Implements hook_entity_base_field_info_alter().
- *
- * As mentioned in the description of this hook
- * the functionality can be changed.
- *
- * @TODO: We should follow possible changes.
- *
- * @see hook_entity_base_field_info_alter()
- * @see https://www.drupal.org/node/2346329
- */
-function menu_item_extras_entity_base_field_info_alter(&$fields, EntityTypeInterface $entity_type) {
-  /** @var \Drupal\Core\Field\BaseFieldDefinition[] $fields */
-  if ($entity_type->id() === 'menu_link_content' && isset($fields['weight'])) {
-    $options = $fields["weight"]->getDisplayOptions('view');
-    // Lets check if field definition is buggy.
-    if ($options['type'] === 'integer') {
-      // Yep, this is single reason why view display can't be set. Let's fix it.
-      $options['type'] = 'number_integer';
-      // @TODO: It is fixed for >= 8.4.x.
-      /* @see https://www.drupal.org/node/2903161 */
-      $fields['weight']->setDisplayOptions('view', $options);
-    }
-  }
-}
-
-/**
  * Implements hook_ENTITY_TYPE_presave().
  */
 function menu_item_extras_menu_link_content_presave(EntityInterface $entity) {

@@ -72,6 +72,8 @@ interface MenuLinkTreeHandlerInterface {
    *
    * @param array $items
    *   Menu tree items.
+   * @param string $menu_name
+   *   Menu name.
    *
    * @return array
    *   Returns modified menu tree items array.

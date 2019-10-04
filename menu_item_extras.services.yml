@@ -22,3 +22,9 @@ services:
     lazy: true
   menu_item_extras.utility:
     class: Drupal\menu_item_extras\Utility\Utility
+  cache_context.menu_item_extras_link_item_content_active_trails:
+    class: Drupal\menu_item_extras\Cache\LinkItemContentActiveTrailsCacheContext
+    calls:
+      - [setContainer, ['@service_container']]
+    tags:
+      - { name: cache.context }

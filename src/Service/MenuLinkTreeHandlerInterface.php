@@ -76,6 +76,6 @@ interface MenuLinkTreeHandlerInterface {
    * @return array
    *   Returns modified menu tree items array.
    */
-  public function processMenuLinkTree(array &$items);
+  public function processMenuLinkTree(array &$items, $menu_name);
 
 }

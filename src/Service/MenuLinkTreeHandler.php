@@ -90,7 +90,7 @@ class MenuLinkTreeHandler implements MenuLinkTreeHandlerInterface {
       $view_mode = 'default';
     }
     $render_output = array_merge(
-      $view_builder->view($entity, $view_mode)
+      $view_builder->view($entity, $view_mode),
       EntityViewDisplay::collectRenderDisplay($entity, $view_mode)->build($entity)
     );
     unset($render_output['#cache']);
